@@ -1,64 +1,64 @@
-"use client"
+'use client';
 
-import { useState, useRef, useEffect } from "react"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useCart } from "@/context/cart-context"
-import { useOnClickOutside } from "@/hooks/use-click-outside"
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/context/cart-context';
+import { useOnClickOutside } from '@/hooks/use-click-outside';
 
 export default function CartDropdown() {
-  const [isOpen, setIsOpen] = useState(false)
-  const { items, itemCount, subtotal, removeItem, updateQuantity } = useCart()
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const { items, itemCount, subtotal, removeItem, updateQuantity } = useCart();
+  const dropdownRef = useRef<HTMLDivElement>(null!);
 
   // Close dropdown when clicking outside
-  useOnClickOutside(dropdownRef, () => setIsOpen(false))
+  useOnClickOutside(dropdownRef, () => setIsOpen(false));
 
   // Close dropdown when pressing escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpen(false)
+      if (e.key === 'Escape') {
+        setIsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [])
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
 
   // Prevent scrolling when dropdown is open on mobile
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = ""
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isOpen])
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const toggleDropdown = () => {
-    setIsOpen(!isOpen)
-  }
+    setIsOpen(!isOpen);
+  };
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
-    updateQuantity(productId, newQuantity)
-  }
+    updateQuantity(productId, newQuantity);
+  };
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-  }
+  };
 
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.2 } },
     exit: { opacity: 0, transition: { duration: 0.2 } },
-  }
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -77,7 +77,7 @@ export default function CartDropdown() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{
-              type: "spring",
+              type: 'spring',
               stiffness: 500,
               damping: 15,
             }}
@@ -106,7 +106,7 @@ export default function CartDropdown() {
         {isOpen && (
           <motion.div
             id="cart-dropdown"
-            className="absolute right-0 mt-2 w-screen max-w-[400px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
+            className="absolute right-0 mt-2 w-auto md:w-screen max-w-[400px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
@@ -127,7 +127,11 @@ export default function CartDropdown() {
               <div className="p-6 text-center">
                 <ShoppingBag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-600 mb-4">Your cart is empty</p>
-                <Button asChild className="bg-black text-white hover:bg-gray-800" onClick={() => setIsOpen(false)}>
+                <Button
+                  asChild
+                  className="bg-black text-white hover:bg-gray-800"
+                  onClick={() => setIsOpen(false)}
+                >
                   <Link href="/">Continue Shopping</Link>
                 </Button>
               </div>
@@ -135,10 +139,13 @@ export default function CartDropdown() {
               <>
                 <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4">
                   {items.map((item) => (
-                    <div key={`${item.product.id}-${item.color}`} className="flex gap-4 py-2 border-b last:border-0">
+                    <div
+                      key={`${item.product.id}-${item.color}`}
+                      className="flex gap-4 py-2 border-b last:border-0"
+                    >
                       <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                         <img
-                          src={item.product.imageUrl || "/placeholder.svg"}
+                          src={item.product.imageUrl || '/placeholder.svg'}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />
@@ -146,24 +153,42 @@ export default function CartDropdown() {
                       <div className="flex-grow">
                         <div className="flex justify-between">
                           <h3 className="font-medium">{item.product.name}</h3>
-                          <p className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-medium">
+                            ${(item.product.price * item.quantity).toFixed(2)}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-500">Color: {item.color}</p>
-                        <p className="text-sm text-gray-500">${item.product.price.toFixed(2)} each</p>
+                        <p className="text-sm text-gray-500">
+                          Color: {item.color}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ${item.product.price.toFixed(2)} each
+                        </p>
 
                         <div className="flex justify-between items-center mt-2">
                           <div className="flex items-center border rounded-md">
                             <button
-                              onClick={() => handleQuantityChange(item.product.id, item.quantity - 1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.product.id,
+                                  item.quantity - 1
+                                )
+                              }
                               className="p-1 hover:bg-gray-100"
                               aria-label="Decrease quantity"
                               disabled={item.quantity <= 1}
                             >
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="px-2 text-sm">{item.quantity}</span>
+                            <span className="px-2 text-sm">
+                              {item.quantity}
+                            </span>
                             <button
-                              onClick={() => handleQuantityChange(item.product.id, item.quantity + 1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.product.id,
+                                  item.quantity + 1
+                                )
+                              }
                               className="p-1 hover:bg-gray-100"
                               aria-label="Increase quantity"
                             >
@@ -188,7 +213,9 @@ export default function CartDropdown() {
                     <span className="font-medium">Subtotal</span>
                     <span className="font-medium">${subtotal.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mb-4">Shipping and taxes calculated at checkout</p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Shipping and taxes calculated at checkout
+                  </p>
                   <div className="space-y-2">
                     <Button
                       asChild
@@ -200,7 +227,12 @@ export default function CartDropdown() {
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button asChild variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Link href="/cart">View Cart</Link>
                     </Button>
                   </div>
@@ -211,5 +243,5 @@ export default function CartDropdown() {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
