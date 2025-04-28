@@ -1,60 +1,71 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ShoppingBag, Check } from "lucide-react"
-import type { Product } from "@/types/product"
-import { useCart } from "@/context/cart-context"
-import { useToast } from "@/hooks/use-toast"
-
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ShoppingBag, Check } from 'lucide-react';
+import type { ProductFormValues as Product } from '@/lib/api/validation';
+import { useCart } from '@/context/cart-context';
+import { toast } from 'sonner';
 interface AddToCartButtonProps {
-  product: Product
-  selectedColor?: string
+  product: Product;
+  selectedColor?: string;
 }
 
-export default function AddToCartButton({ product, selectedColor }: AddToCartButtonProps) {
-  const [isAdding, setIsAdding] = useState(false)
-  const [isAdded, setIsAdded] = useState(false)
-  const { addItem } = useCart()
-  const { toast } = useToast()
+export default function AddToCartButton({
+  product,
+  selectedColor,
+}: AddToCartButtonProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const { addItem } = useCart();
 
-  const handleAddToCart = async () => {
-    setIsAdding(true)
+  const handleAddToCart = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+
+    setIsAdding(true);
 
     // Use the first color if none is selected
-    const color = selectedColor || product.colors[0]
+    const color = selectedColor || product.colors[0];
 
     // Add item to cart
-    addItem(product, 1, color)
+    addItem(product, 1, color);
 
     // Show success state
-    setIsAdded(true)
+    setIsAdded(true);
 
     // Show toast notification
-    toast({
-      title: "Added to cart",
+    toast.success('Added to cart', {
       description: `${product.name} has been added to your cart.`,
-    })
+      style: {
+        background: 'green',
+      },
+    });
 
     // Reset button state after delay
     setTimeout(() => {
-      setIsAdding(false)
-      setIsAdded(false)
-    }, 2000)
-  }
+      setIsAdding(false);
+      setIsAdded(false);
+    }, 2000);
+  };
 
   return (
     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
       <Button
         onClick={handleAddToCart}
-        disabled={isAdding || !product.inStock}
+        disabled={isAdding || product.stockQuantity <= 0}
         className={`w-full h-12 text-lg ${
-          isAdded ? "bg-green-600 hover:bg-green-700 text-white" : "bg-black text-white hover:bg-gray-800"
+          isAdded
+            ? 'bg-green-600 hover:bg-green-700 text-white'
+            : 'bg-black text-white hover:bg-gray-800'
         }`}
       >
         {isAdding ? (
-          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             Adding to Cart...
           </motion.span>
         ) : isAdded ? (
@@ -62,13 +73,13 @@ export default function AddToCartButton({ product, selectedColor }: AddToCartBut
             className="flex items-center justify-center"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 15 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 15 }}
           >
             <Check className="mr-2 h-5 w-5" />
             Added to Cart
           </motion.div>
-        ) : !product.inStock ? (
-          "Out of Stock"
+        ) : product.stockQuantity <= 0 ? (
+          'Out of Stock'
         ) : (
           <>
             <ShoppingBag className="mr-2 h-5 w-5" />
@@ -77,5 +88,5 @@ export default function AddToCartButton({ product, selectedColor }: AddToCartBut
         )}
       </Button>
     </motion.div>
-  )
+  );
 }

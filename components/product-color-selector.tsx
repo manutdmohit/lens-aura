@@ -1,64 +1,48 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { cn } from "@/lib/utils"
+import { useState } from 'react';
 
 interface ProductColorSelectorProps {
-  productId: string
-  colors: string[]
-  onColorChange?: (color: string) => void
+  colors: string[];
+  selectedColor?: string;
+  onSelectColor?: (color: string) => void;
 }
 
-export default function ProductColorSelector({ productId, colors, onColorChange }: ProductColorSelectorProps) {
-  const [selectedColor, setSelectedColor] = useState(colors[0])
+export default function ProductColorSelector({
+  colors,
+  selectedColor,
+  onSelectColor,
+}: ProductColorSelectorProps) {
+  const [internalSelectedColor, setInternalSelectedColor] = useState<string>(
+    selectedColor || (colors.length > 0 ? colors[0] : '')
+  );
 
-  const handleColorChange = (color: string) => {
-    setSelectedColor(color)
-    if (onColorChange) {
-      onColorChange(color)
+  const handleColorSelect = (color: string) => {
+    setInternalSelectedColor(color);
+    if (onSelectColor) {
+      onSelectColor(color);
     }
-  }
+  };
 
-  const getColorClass = (color: string) => {
-    switch (color.toLowerCase()) {
-      case "black":
-        return "bg-black"
-      case "tortoise":
-        return "bg-amber-700"
-      case "crystal":
-        return "bg-gray-200"
-      case "navy":
-        return "bg-blue-900"
-      case "green":
-        return "bg-green-700"
-      case "gold":
-        return "bg-yellow-600"
-      case "silver":
-        return "bg-gray-400"
-      case "red":
-        return "bg-red-600"
-      case "blue":
-        return "bg-blue-600"
-      default:
-        return "bg-gray-500"
-    }
-  }
+  // Use either the controlled (from props) or uncontrolled (internal) state
+  const currentSelectedColor = selectedColor || internalSelectedColor;
 
   return (
-    <div className="flex space-x-3">
+    <div className="flex flex-wrap gap-2">
       {colors.map((color) => (
         <button
-          key={`${productId}-${color}`}
-          className={cn(
-            "w-8 h-8 rounded-full border-2 transition-all",
-            getColorClass(color),
-            selectedColor === color ? "border-black scale-110" : "border-transparent hover:scale-105",
-          )}
-          onClick={() => handleColorChange(color)}
+          key={color}
+          className={`w-10 h-10 rounded-full border-2 ${
+            currentSelectedColor === color
+              ? 'border-indigo-600 ring-2 ring-indigo-200'
+              : 'border-gray-300'
+          } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+          style={{ backgroundColor: color }}
+          onClick={() => handleColorSelect(color)}
           aria-label={`Select ${color} color`}
           title={color}
         />
       ))}
     </div>
-  )
+  );
 }

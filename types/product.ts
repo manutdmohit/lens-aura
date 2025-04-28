@@ -9,14 +9,15 @@ export interface Product {
   inStock: boolean;
   category: string;
   colors: string[];
-  productType: 'Glasses' | 'Sunglasses' | 'ContactLenses';
+  productType: 'glasses' | 'sunglasses' | 'contactLenses';
+  status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
 }
 
 // Glasses specific interface
 export interface GlassesProduct extends Product {
-  productType: 'Glasses';
+  productType: 'glasses';
   frameType: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth: 'narrow' | 'medium' | 'wide';
@@ -33,7 +34,7 @@ export interface GlassesProduct extends Product {
 
 // Sunglasses specific interface
 export interface SunglassesProduct extends Product {
-  productType: 'Sunglasses';
+  productType: 'sunglasses';
   frameType: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth: 'narrow' | 'medium' | 'wide';
@@ -55,7 +56,7 @@ export interface SunglassesProduct extends Product {
 
 // Contact Lenses specific interface
 export interface ContactLensesProduct extends Product {
-  productType: 'ContactLenses';
+  productType: 'contactLenses';
   brand: string;
   packagingType: 'box' | 'vial' | 'blister-pack';
   wearDuration:
@@ -83,17 +84,17 @@ export interface ContactLensesProduct extends Product {
 
 // Type guard functions to check product types
 export function isGlassesProduct(product: Product): product is GlassesProduct {
-  return product.productType === 'Glasses';
+  return product.productType === 'glasses';
 }
 
 export function isSunglassesProduct(
   product: Product
 ): product is SunglassesProduct {
-  return product.productType === 'Sunglasses';
+  return product.productType === 'sunglasses';
 }
 
 export function isContactLensesProduct(
   product: Product
 ): product is ContactLensesProduct {
-  return product.productType === 'ContactLenses';
+  return product.productType === 'contactLenses';
 }

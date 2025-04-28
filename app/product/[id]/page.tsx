@@ -1,48 +1,48 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { notFound, useRouter } from "next/navigation"
-import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
-import { getProductById } from "@/lib/db"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import AddToCartButton from "@/components/add-to-cart-button"
-import ProductColorSelector from "@/components/product-color-selector"
-import ProductDetailImages from "@/components/product-detail-images"
-import type { Product } from "@/types/product"
+import { useState, useEffect } from 'react';
+import { notFound, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+import { getProductById } from '@/lib/db';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
+import AddToCartButton from '@/components/add-to-cart-button';
+import ProductColorSelector from '@/components/product-color-selector';
+import ProductDetailImages from '@/components/product-detail-images';
+import type { ProductFormValues as Product } from '@/lib/api/validation';
 
 interface ProductPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedColor, setSelectedColor] = useState<string>("")
-  const router = useRouter()
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const productData = await getProductById(params.id)
+        const productData = await getProductById(params.id);
         if (!productData) {
-          notFound()
+          notFound();
         }
-        setProduct(productData)
-        setSelectedColor(productData.colors[0])
+        setProduct(productData);
+        setSelectedColor(productData.colors[0]);
       } catch (error) {
-        console.error("Failed to fetch product:", error)
-        notFound()
+        console.error('Failed to fetch product:', error);
+        notFound();
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchProduct()
-  }, [params.id])
+    fetchProduct();
+  }, [params.id]);
 
   if (loading) {
     return (
@@ -66,25 +66,32 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
         <Footer />
       </main>
-    )
+    );
   }
 
   if (!product) {
-    return notFound()
+    return notFound();
   }
 
   return (
     <main className="flex flex-col min-h-screen">
       <Navbar />
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
+        >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back to products
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
           {/* Product Images */}
-          <ProductDetailImages productId={product.id} mainImage={product.imageUrl} productName={product.name} />
+          <ProductDetailImages
+            productId={product.id}
+            mainImage={product.imageUrl}
+            productName={product.name}
+          />
 
           {/* Product Details */}
           <div>
@@ -98,11 +105,18 @@ export default function ProductPage({ params }: ProductPageProps) {
 
             <div className="mt-6">
               <h2 className="text-lg font-medium mb-2">Color</h2>
-              <ProductColorSelector productId={product.id} colors={product.colors} onColorChange={setSelectedColor} />
+              <ProductColorSelector
+                productId={product.id}
+                colors={product.colors}
+                onColorChange={setSelectedColor}
+              />
             </div>
 
             <div className="mt-8">
-              <AddToCartButton product={product} selectedColor={selectedColor} />
+              <AddToCartButton
+                product={product}
+                selectedColor={selectedColor}
+              />
             </div>
 
             <div className="mt-8 border-t pt-6">
@@ -118,5 +132,5 @@ export default function ProductPage({ params }: ProductPageProps) {
       </div>
       <Footer />
     </main>
-  )
+  );
 }

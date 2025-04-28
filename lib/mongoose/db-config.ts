@@ -1,27 +1,18 @@
 import mongoose from 'mongoose';
 
-let connected = false;
+// This file just contains configuration, not the actual connection
+// The connection would be established in a separate file when integrating
 
-const connectDB = async () => {
-  mongoose.set('strictQuery', true);
+// Define a function to format MongoDB connection string
+export const getConnectionString = () => {
+  const uri = process.env.MONGODB_URI!;
 
-  // If the database is already connected, don't connect again
-  if (connected) {
-    console.log('Mongodb is already connected');
-
-    return;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI environment variable');
   }
 
-  // Connect to MongoDB
-
-  try {
-    await mongoose.connect(process.env.MONGODB_URI as string);
-    connected = true;
-
-    console.log('MongoDB connected...');
-  } catch (error) {
-    console.log(error);
-  }
+  return uri;
 };
 
-export default connectDB;
+// Export mongoose for use in model files
+export { mongoose };

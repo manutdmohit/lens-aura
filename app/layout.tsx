@@ -4,6 +4,9 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CartProvider } from '@/context/cart-context';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,7 +30,12 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         {/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange> */}
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+          <Toaster />
+        </CartProvider>
         {/* </ThemeProvider> */}
       </body>
     </html>

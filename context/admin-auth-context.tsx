@@ -1,99 +1,88 @@
-"use client"
+'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import type { AdminSession } from "@/types/admin"
-import { mockAdminUsers } from "@/lib/admin-data"
+import {
+  useSession,
+  signIn as nextAuthSignIn,
+  signOut as nextAuthSignOut,
+} from 'next-auth/react';
+import { createContext, useContext, type ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
-interface AdminAuthContextType {
-  session: AdminSession | null
-  status: "loading" | "authenticated" | "unauthenticated"
-  signIn: (email: string, password: string) => Promise<boolean>
-  signOut: () => void
+interface AdminSession {
+  user: {
+    id: string;
+    email: string | null;
+    name: string;
+    role: string;
+    avatar: string;
+    createdAt: Date;
+    lastLogin: Date;
+  };
+  expires: Date;
 }
 
-const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined)
+interface AdminAuthContextType {
+  session: AdminSession | null;
+  status: 'loading' | 'authenticated' | 'unauthenticated';
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signOut: () => void;
+}
+
+const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
+  undefined
+);
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<AdminSession | null>(null)
-  const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading")
-  const router = useRouter()
-  const pathname = usePathname()
+  const { data: sessionData, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const storedSession = localStorage.getItem("adminSession")
-    if (storedSession) {
-      try {
-        const parsedSession = JSON.parse(storedSession)
-        // Check if session is expired
-        if (new Date(parsedSession.expires) > new Date()) {
-          setSession(parsedSession)
-          setStatus("authenticated")
-        } else {
-          localStorage.removeItem("adminSession")
-          setStatus("unauthenticated")
-        }
-      } catch (error) {
-        console.error("Failed to parse stored session:", error)
-        localStorage.removeItem("adminSession")
-        setStatus("unauthenticated")
+  const session: AdminSession | null = sessionData
+    ? {
+        user: {
+          id: sessionData.user.id!,
+          email: sessionData.user.email ?? '',
+          name: sessionData.user.name ?? '',
+          role: sessionData.user.role ?? 'admin',
+          avatar:
+            sessionData.user.image ??
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
+          createdAt: new Date(), // Can be replaced with actual if needed
+          lastLogin: new Date(),
+        },
+        expires: new Date(sessionData.expires),
       }
-    } else {
-      setStatus("unauthenticated")
-    }
-  }, [])
+    : null;
 
-  // Redirect to login if not authenticated and not already on login page
-  useEffect(() => {
-    if (status === "unauthenticated" && pathname !== "/admin/login") {
-      router.push("/admin/login")
-    }
-  }, [status, pathname, router])
+  if (status === 'unauthenticated' && pathname !== '/admin/login') {
+    router.push('/admin/login');
+  }
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
-    // In a real app, you would validate credentials against your backend
-    // For this demo, we'll use mock data and accept any password
-    try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    const result = await nextAuthSignIn('credentials', {
+      redirect: false,
+      email,
+      password,
+    });
 
-      const user = mockAdminUsers.find((u) => u.email === email)
-      if (!user) {
-        return false
-      }
-
-      // Create session with expiry 24 hours from now
-      const newSession: AdminSession = {
-        user,
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      }
-
-      // Store session in localStorage
-      localStorage.setItem("adminSession", JSON.stringify(newSession))
-      setSession(newSession)
-      setStatus("authenticated")
-      return true
-    } catch (error) {
-      console.error("Sign in error:", error)
-      return false
-    }
-  }
+    return result?.ok ?? false;
+  };
 
   const signOut = () => {
-    localStorage.removeItem("adminSession")
-    setSession(null)
-    setStatus("unauthenticated")
-    router.push("/admin/login")
-  }
+    nextAuthSignOut({ callbackUrl: '/admin/login' });
+  };
 
-  return <AdminAuthContext.Provider value={{ session, status, signIn, signOut }}>{children}</AdminAuthContext.Provider>
+  return (
+    <AdminAuthContext.Provider value={{ session, status, signIn, signOut }}>
+      {children}
+    </AdminAuthContext.Provider>
+  );
 }
 
 export function useAdminAuth() {
-  const context = useContext(AdminAuthContext)
+  const context = useContext(AdminAuthContext);
   if (context === undefined) {
-    throw new Error("useAdminAuth must be used within an AdminAuthProvider")
+    throw new Error('useAdminAuth must be used within an AdminAuthProvider');
   }
-  return context
+  return context;
 }
