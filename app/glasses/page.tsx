@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/navbar';
 import ProductGrid from '@/components/product-grid';
-import Footer from '@/components/footer';
 import { ProductFormValues as Product } from '@/lib/api/validation';
 import { toast } from 'sonner';
 
@@ -32,7 +30,6 @@ export default function GlassesPage() {
 
   return (
     <main className="flex flex-col min-h-screen">
-      <Navbar />
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Glasses</h1>
@@ -46,7 +43,6 @@ export default function GlassesPage() {
 
         <ProductGrid products={products} />
       </div>
-      <Footer />
     </main>
   );
 }

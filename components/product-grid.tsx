@@ -30,8 +30,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
   return (
     <StaggeredList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => (
-        // /glasses/${slug}
-        <Link key={product.id} href={`/glasses/${product.slug}`}>
+        <Link key={product.id} href={`/${product.productType}/${product.slug}`}>
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">
               <motion.img

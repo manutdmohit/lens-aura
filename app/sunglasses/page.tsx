@@ -1,26 +1,48 @@
-import Navbar from "@/components/navbar"
-import ProductGrid from "@/components/product-grid"
-import Footer from "@/components/footer"
-import { getProductsByCategory } from "@/lib/db"
+'use client';
 
-export default async function SunglassesPage() {
-  const products = await getProductsByCategory("sunglasses")
+import { useEffect, useState } from 'react';
+import ProductGrid from '@/components/product-grid';
+import { ProductFormValues as Product } from '@/lib/api/validation';
+import { toast } from 'sonner';
+
+export default function SunGlassesPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch('/api/sunglasses');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error: any) {
+        console.error('Error fetching products:', error);
+        toast.error(`{error.message} || "Failed to fetch products"`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <main className="flex flex-col min-h-screen">
-      <Navbar />
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Sunglasses</h1>
+          <h1 className="text-4xl font-bold mb-4">Glasses</h1>
+          {/* Calculate lowest price for glasses */}
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Our sunglasses start from just $125, including polarized lenses with UV protection. Explore our collection
-            of stylish frames for every occasion.
+            Our prescription glasses start from just $95, including standard
+            single-vision lenses. Choose from our wide range of styles and
+            colors.
           </p>
         </div>
 
         <ProductGrid products={products} />
       </div>
-      <Footer />
     </main>
-  )
+  );
 }

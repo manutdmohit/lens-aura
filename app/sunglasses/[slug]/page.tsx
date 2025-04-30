@@ -22,7 +22,11 @@ import {
   ShieldCheck,
   Truck,
 } from 'lucide-react';
+import { TiTick } from 'react-icons/ti';
+import { TbXboxXFilled } from 'react-icons/tb';
 import type { ProductFormValues } from '@/lib/api/validation';
+import { Metadata } from 'next';
+import { Span } from 'next/dist/trace';
 
 // Animation variants
 const fadeIn = {
@@ -53,7 +57,7 @@ const formatText = (text: string) => {
     .join(' ');
 };
 
-export default function GlassesProductPage() {
+export default function SunGlassesProductPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
@@ -64,12 +68,6 @@ export default function GlassesProductPage() {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
-
-  // Generate dynamic SEO metadata
-  const pageTitle = `${product?.name} - Lens Aura`;
-  const pageDescription = `${product?.description} - Lens Aura`;
-  // const pageUrl = `https://lensaura.com/glasses/${slug}`;
-
   interface RelatedProduct {
     id: string;
     name: string;
@@ -86,7 +84,7 @@ export default function GlassesProductPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/glasses/${slug}`);
+        const response = await fetch(`/api/sunglasses/${slug}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -381,6 +379,76 @@ export default function GlassesProductPage() {
                     <span className="text-gray-500">Prescription Type</span>
                     <span className="font-medium">
                       {formatText(product.prescriptionType)}
+                    </span>
+                  </>
+                )}
+                {product.uvProtection ? (
+                  <>
+                    <span className="text-gray-500">UV Protection</span>
+                    <span className="font-medium">
+                      <TiTick size={20} color="green" />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-gray-500">UV Protection</span>
+                    <span className="font-medium">
+                      <TbXboxXFilled size={20} color="red" />
+                    </span>
+                  </>
+                )}
+                {product.polarized ? (
+                  <>
+                    <span className="text-gray-500">Polarized</span>
+                    <span className="font-medium">
+                      <TiTick size={20} color="green" />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-gray-500">Polarized</span>
+                    <span className="font-medium">
+                      <TbXboxXFilled size={20} color="red" />
+                    </span>
+                  </>
+                )}
+                {product.style && (
+                  <>
+                    <span className="text-gray-500">Style</span>
+                    <span className="font-medium">
+                      {formatText(product.style)}
+                    </span>
+                  </>
+                )}
+
+                {product.forAstigmatism ? (
+                  <>
+                    <span className="text-gray-500">For Astigmatism</span>
+                    <span className="font-medium">
+                      <TiTick size={20} color="green" />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-gray-500">For Astigmatism</span>
+                    <span className="font-medium">
+                      <TbXboxXFilled size={20} color="red" />
+                    </span>
+                  </>
+                )}
+
+                {product.uvBlocking ? (
+                  <>
+                    <span className="text-gray-500">UV Blocking</span>
+                    <span className="font-medium">
+                      <TiTick size={20} color="green" />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-gray-500">UV Blocking</span>
+                    <span className="font-medium">
+                      <TbXboxXFilled size={20} color="red" />
                     </span>
                   </>
                 )}
@@ -689,40 +757,6 @@ export default function GlassesProductPage() {
             </TabsContent>
           </Tabs>
         </motion.div>
-
-        {/* Related Products Section */}
-        {/* <motion.div
-          className="pt-8"
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.5 }}
-        >
-          <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <div key={relatedProduct.id} className="group cursor-pointer">
-                <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden mb-4">
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={relatedProduct.imageUrl || '/placeholder.svg'}
-                      alt={relatedProduct.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                </div>
-                <h3 className="font-medium text-gray-900 group-hover:text-black transition-colors">
-                  {relatedProduct.name}
-                </h3>
-                <p className="text-gray-500">
-                  {formatCurrency(relatedProduct.price)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </motion.div> */}
       </div>
     </motion.div>
   );

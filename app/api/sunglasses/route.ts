@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     // Add pagination later
     const products = await Product.find({
       status: 'active',
-      productType: 'glasses',
+      productType: 'sunglasses',
     })
       .sort({ createdAt: -1 })
       .select('name slug productType price imageUrl')
