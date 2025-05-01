@@ -423,7 +423,7 @@ export default function GlassesProductPage() {
                   !isInStock ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isInStock &&
+                {/* {isInStock &&
                 quantityInCart + quantityToAdd <= product.stockQuantity ? (
                   <>
                     <AddToCartButton product={product} />
@@ -436,10 +436,30 @@ export default function GlassesProductPage() {
                   </>
                 ) : (
                   <button
-                    className="w-full bg-gray-300 text-gray-500 py-4 md:py-5 cursor-not-allowed"
+                    className="w-full bg-red-600 text-white font-bold py-4 md:py-5 cursor-not-allowed"
+                    disabled
+                 1 >
+                    Max Stock Limit Reached
+                  </button>
+                )} */}
+
+                {!isInStock ? (
+                  <button
+                    className="w-full bg-red-600 text-white font-bold py-4 md:py-5 cursor-not-allowed"
                     disabled
                   >
                     Out of Stock
+                  </button>
+                ) : quantityInCart + quantityToAdd <= product.stockQuantity ? (
+                  <>
+                    <AddToCartButton product={product} />
+                  </>
+                ) : (
+                  <button
+                    className="w-full bg-red-600 text-white font-bold py-4  cursor-not-allowed"
+                    disabled
+                  >
+                    Max Stock Limit Reached
                   </button>
                 )}
               </div>

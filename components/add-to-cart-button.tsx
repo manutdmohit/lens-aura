@@ -26,7 +26,7 @@ export default function AddToCartButton({
 
   // Determine if product is out of stock or has insufficient quantity
   const isOutOfStock = !product.inStock || product.stockQuantity <= 0;
-  const hasInsufficientStock = product.stockQuantity < quantity;
+  // const hasInsufficientStock = product.stockQuantity < quantity;
   const cartQuantity =
     items.find((item) => item.product.slug === product.slug)?.quantity || 0;
 
@@ -36,7 +36,7 @@ export default function AddToCartButton({
   const buttonDisabled =
     isAdding ||
     isOutOfStock ||
-    hasInsufficientStock ||
+    // hasInsufficientStock ||
     isCartQuanitityGreaterThanProductStockQuantity;
 
   const handleAddToCart = async () => {
@@ -64,8 +64,8 @@ export default function AddToCartButton({
   const getButtonText = () => {
     if (isAdding) return 'Adding to Cart...';
     if (isAdded) return 'Added to Cart';
-    if (isOutOfStock) return 'Out of Stock';
-    if (hasInsufficientStock) return `Only ${product.stockQuantity} Available`;
+    // if (isOutOfStock) return 'Out of Stock';
+    // if (hasInsufficientStock) return `Only ${product.stockQuantity} Available`;
     if (cartQuantity + quantity > product.stockQuantity)
       return 'Max Stock Reached';
     return 'Add to Cart';

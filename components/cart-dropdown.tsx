@@ -183,7 +183,7 @@ export default function CartDropdown() {
                             <button
                               onClick={() =>
                                 handleQuantityChange(
-                                  item.product.id,
+                                  item.product.id!,
                                   item.quantity - 1
                                 )
                               }
@@ -202,7 +202,7 @@ export default function CartDropdown() {
                                   <button
                                     onClick={() =>
                                       handleQuantityChange(
-                                        item.product.id,
+                                        item.product.id!,
                                         item.quantity + 1
                                       )
                                     }
@@ -231,7 +231,7 @@ export default function CartDropdown() {
                             </TooltipProvider>
                           </div>
                           <button
-                            onClick={() => removeItem(item.product.id)}
+                            onClick={() => removeItem(item.product.id!)}
                             className="text-gray-500 hover:text-red-600 p-1"
                             aria-label="Remove item"
                           >

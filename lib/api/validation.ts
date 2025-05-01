@@ -160,7 +160,7 @@ import { z } from 'zod';
 
 // Consolidated product schema
 export const productSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   slug: z.string().optional(),
   name: z
     .string()
