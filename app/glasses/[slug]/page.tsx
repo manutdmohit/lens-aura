@@ -23,6 +23,7 @@ import {
   Truck,
 } from 'lucide-react';
 import type { ProductFormValues } from '@/lib/api/validation';
+import { useCart } from '@/context/cart-context';
 
 // Animation variants
 const fadeIn = {
@@ -64,6 +65,17 @@ export default function GlassesProductPage() {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const { itemCount, items } = useCart();
+
+  let quantityToAdd = 1;
+
+  let quantityInCart = 0;
+
+  const getItemFromCart = items.find((item) => item.product.slug === slug);
+
+  if (getItemFromCart) {
+    quantityInCart = getItemFromCart.quantity;
+  }
 
   // Generate dynamic SEO metadata
   const pageTitle = `${product?.name} - Lens Aura`;
@@ -411,7 +423,8 @@ export default function GlassesProductPage() {
                   !isInStock ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isInStock ? (
+                {isInStock &&
+                quantityInCart + quantityToAdd <= product.stockQuantity ? (
                   <>
                     <AddToCartButton product={product} />
 

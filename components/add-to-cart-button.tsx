@@ -1,27 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Check } from 'lucide-react';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import { useCart } from '@/context/cart-context';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+
 interface AddToCartButtonProps {
   product: Product;
   selectedColor?: string;
+  quantity?: number;
 }
 
 export default function AddToCartButton({
   product,
   selectedColor,
+  quantity = 1,
 }: AddToCartButtonProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, itemCount, items } = useCart();
+  const { toast } = useToast();
 
-  const handleAddToCart = async (event: React.MouseEvent) => {
-    event.stopPropagation();
+  // Determine if product is out of stock or has insufficient quantity
+  const isOutOfStock = !product.inStock || product.stockQuantity <= 0;
+  const hasInsufficientStock = product.stockQuantity < quantity;
+  const buttonDisabled = isAdding || isOutOfStock || hasInsufficientStock;
+
+  const handleAddToCart = async () => {
+    if (buttonDisabled) return;
 
     setIsAdding(true);
 
@@ -29,18 +38,10 @@ export default function AddToCartButton({
     const color = selectedColor || product.colors[0];
 
     // Add item to cart
-    addItem(product, 1, color);
+    addItem(product, quantity, color);
 
     // Show success state
     setIsAdded(true);
-
-    // Show toast notification
-    toast.success('Added to cart', {
-      description: `${product.name} has been added to your cart.`,
-      style: {
-        background: 'green',
-      },
-    });
 
     // Reset button state after delay
     setTimeout(() => {
@@ -49,44 +50,72 @@ export default function AddToCartButton({
     }, 2000);
   };
 
+  // Determine button text based on stock status
+  const getButtonText = () => {
+    if (isAdding) return 'Adding to Cart...';
+    if (isAdded) return 'Added to Cart';
+    if (isOutOfStock) return 'Out of Stock';
+    if (hasInsufficientStock) return `Only ${product.stockQuantity} Available`;
+    return 'Add to Cart';
+  };
+
+  const getItemFromCart = items.find(
+    (item) => item.product.slug === product.slug
+  );
+
+  let productQuantityInStock = 0;
+
+  if (getItemFromCart) {
+    productQuantityInStock = getItemFromCart.quantity;
+  }
+
   return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-      <Button
-        onClick={handleAddToCart}
-        disabled={isAdding || product.stockQuantity <= 0}
-        className={`w-full h-12 text-lg ${
-          isAdded
-            ? 'bg-green-600 hover:bg-green-700 text-white'
-            : 'bg-black text-white hover:bg-gray-800'
-        }`}
-      >
-        {isAdding ? (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <motion.div
+      whileHover={{ scale: buttonDisabled ? 1 : 1.02 }}
+      whileTap={{ scale: buttonDisabled ? 1 : 0.98 }}
+    >
+      {productQuantityInStock + quantity > product.stockQuantity ? (
+        <span>Error</span>
+      ) : (
+        <>
+          <Button
+            onClick={handleAddToCart}
+            disabled={buttonDisabled}
+            className={`w-full h-12 text-lg ${
+              isAdded
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-black text-white hover:bg-gray-800'
+            } ${
+              buttonDisabled && !isAdded ? 'opacity-60 cursor-not-allowed' : ''
+            }`}
           >
-            Adding to Cart...
-          </motion.span>
-        ) : isAdded ? (
-          <motion.div
-            className="flex items-center justify-center"
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-          >
-            <Check className="mr-2 h-5 w-5" />
-            Added to Cart
-          </motion.div>
-        ) : product.stockQuantity <= 0 ? (
-          'Out of Stock'
-        ) : (
-          <>
-            <ShoppingBag className="mr-2 h-5 w-5" />
-            Add to Cart
-          </>
-        )}
-      </Button>
+            {isAdding ? (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                Adding to Cart...
+              </motion.span>
+            ) : isAdded ? (
+              <motion.div
+                className="flex items-center justify-center"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+              >
+                <Check className="mr-2 h-5 w-5" />
+                Added to Cart
+              </motion.div>
+            ) : (
+              <>
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                {getButtonText()}
+              </>
+            )}
+          </Button>
+        </>
+      )}
     </motion.div>
   );
 }

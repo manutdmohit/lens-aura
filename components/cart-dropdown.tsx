@@ -3,10 +3,24 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
+import {
+  ShoppingBag,
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  ArrowRight,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { useOnClickOutside } from '@/hooks/use-click-outside';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +120,7 @@ export default function CartDropdown() {
         {isOpen && (
           <motion.div
             id="cart-dropdown"
-            className="absolute right-0 mt-2 w-auto md:w-screen max-w-[400px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
+            className="absolute right-0 mt-2 w-screen max-w-[400px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
@@ -182,18 +196,39 @@ export default function CartDropdown() {
                             <span className="px-2 text-sm">
                               {item.quantity}
                             </span>
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(
-                                  item.product.id,
-                                  item.quantity + 1
-                                )
-                              }
-                              className="p-1 hover:bg-gray-100"
-                              aria-label="Increase quantity"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() =>
+                                      handleQuantityChange(
+                                        item.product.id,
+                                        item.quantity + 1
+                                      )
+                                    }
+                                    className={`p-1 ${
+                                      item.quantity >=
+                                      item.product.stockQuantity
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'hover:bg-gray-100'
+                                    }`}
+                                    aria-label="Increase quantity"
+                                    disabled={
+                                      item.quantity >=
+                                      item.product.stockQuantity
+                                    }
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </button>
+                                </TooltipTrigger>
+                                {item.quantity >=
+                                  item.product.stockQuantity && (
+                                  <TooltipContent>
+                                    <p>Maximum stock reached</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                           <button
                             onClick={() => removeItem(item.product.id)}
@@ -203,6 +238,14 @@ export default function CartDropdown() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
+
+                        {/* Stock warning */}
+                        {item.quantity === item.product.stockQuantity && (
+                          <div className="mt-2 text-xs flex items-center text-amber-600">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            <span>Maximum stock reached</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

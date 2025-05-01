@@ -160,7 +160,7 @@ import { z } from 'zod';
 
 // Consolidated product schema
 export const productSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   slug: z.string().optional(),
   name: z
     .string()
@@ -180,6 +180,7 @@ export const productSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid product type' }),
   }),
   colors: z.array(z.string()).optional().default([]),
+  inStock: z.boolean().default(true),
   status: z.enum(['active', 'inactive'], {
     errorMap: () => ({ message: 'Invalid status' }),
   }),
