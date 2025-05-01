@@ -27,7 +27,17 @@ export default function AddToCartButton({
   // Determine if product is out of stock or has insufficient quantity
   const isOutOfStock = !product.inStock || product.stockQuantity <= 0;
   const hasInsufficientStock = product.stockQuantity < quantity;
-  const buttonDisabled = isAdding || isOutOfStock || hasInsufficientStock;
+  const cartQuantity =
+    items.find((item) => item.product.slug === product.slug)?.quantity || 0;
+
+  const isCartQuanitityGreaterThanProductStockQuantity =
+    cartQuantity + quantity > product.stockQuantity;
+
+  const buttonDisabled =
+    isAdding ||
+    isOutOfStock ||
+    hasInsufficientStock ||
+    isCartQuanitityGreaterThanProductStockQuantity;
 
   const handleAddToCart = async () => {
     if (buttonDisabled) return;
@@ -56,6 +66,8 @@ export default function AddToCartButton({
     if (isAdded) return 'Added to Cart';
     if (isOutOfStock) return 'Out of Stock';
     if (hasInsufficientStock) return `Only ${product.stockQuantity} Available`;
+    if (cartQuantity + quantity > product.stockQuantity)
+      return 'Max Stock Reached';
     return 'Add to Cart';
   };
 
@@ -74,48 +86,40 @@ export default function AddToCartButton({
       whileHover={{ scale: buttonDisabled ? 1 : 1.02 }}
       whileTap={{ scale: buttonDisabled ? 1 : 0.98 }}
     >
-      {productQuantityInStock + quantity > product.stockQuantity ? (
-        <span>Error</span>
-      ) : (
-        <>
-          <Button
-            onClick={handleAddToCart}
-            disabled={buttonDisabled}
-            className={`w-full h-12 text-lg ${
-              isAdded
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-black text-white hover:bg-gray-800'
-            } ${
-              buttonDisabled && !isAdded ? 'opacity-60 cursor-not-allowed' : ''
-            }`}
+      <Button
+        onClick={handleAddToCart}
+        disabled={buttonDisabled}
+        className={`w-full h-12 text-lg ${
+          isAdded
+            ? 'bg-green-600 hover:bg-green-700 text-white'
+            : 'bg-black text-white hover:bg-gray-800'
+        } ${buttonDisabled && !isAdded ? 'opacity-60 cursor-not-allowed' : ''}`}
+      >
+        {isAdding ? (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            {isAdding ? (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                Adding to Cart...
-              </motion.span>
-            ) : isAdded ? (
-              <motion.div
-                className="flex items-center justify-center"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-              >
-                <Check className="mr-2 h-5 w-5" />
-                Added to Cart
-              </motion.div>
-            ) : (
-              <>
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                {getButtonText()}
-              </>
-            )}
-          </Button>
-        </>
-      )}
+            Adding to Cart...
+          </motion.span>
+        ) : isAdded ? (
+          <motion.div
+            className="flex items-center justify-center"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+          >
+            <Check className="mr-2 h-5 w-5" />
+            Added to Cart
+          </motion.div>
+        ) : (
+          <>
+            <ShoppingBag className="mr-2 h-5 w-5" />
+            {getButtonText()}
+          </>
+        )}
+      </Button>
     </motion.div>
   );
 }
