@@ -412,7 +412,15 @@ export default function GlassesProductPage() {
                 }`}
               >
                 {isInStock ? (
-                  <AddToCartButton product={product} />
+                  <>
+                    <AddToCartButton product={product} />
+
+                    {product.stockQuantity && product.stockQuantity < 15 && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        Only {product.stockQuantity} left
+                      </span>
+                    )}
+                  </>
                 ) : (
                   <button
                     className="w-full bg-gray-300 text-gray-500 py-4 md:py-5 cursor-not-allowed"
