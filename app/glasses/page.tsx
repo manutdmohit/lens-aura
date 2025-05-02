@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import ProductGrid from '@/components/product-grid';
 import { ProductFormValues as Product } from '@/lib/api/validation';
 import { toast } from 'sonner';
+import LoadingPage from '@/components/loading';
 
 export default function GlassesPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,6 +41,15 @@ export default function GlassesPage() {
             colors.
           </p>
         </div>
+
+        {loading && <LoadingPage loading={loading} />}
+        {!loading && products.length === 0 && (
+          <div className="text-center">
+            <p className="text-lg text-gray-600">
+              No products found. Try a different search.
+            </p>
+          </div>
+        )}
 
         <ProductGrid products={products} />
       </div>

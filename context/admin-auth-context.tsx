@@ -5,7 +5,13 @@ import {
   signIn as nextAuthSignIn,
   signOut as nextAuthSignOut,
 } from 'next-auth/react';
-import { createContext, useContext, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  type ReactNode,
+  useMemo,
+} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 interface AdminSession {
@@ -37,26 +43,34 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const session: AdminSession | null = sessionData
-    ? {
-        user: {
-          id: sessionData.user.id!,
-          email: sessionData.user.email ?? '',
-          name: sessionData.user.name ?? '',
-          role: sessionData.user.role ?? 'admin',
-          avatar:
-            sessionData.user.image ??
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
-          createdAt: new Date(), // Can be replaced with actual if needed
-          lastLogin: new Date(),
-        },
-        expires: new Date(sessionData.expires),
-      }
-    : null;
+  const session: AdminSession | null = useMemo(() => {
+    if (!sessionData) return null;
 
-  if (status === 'unauthenticated' && pathname !== '/admin/login') {
-    router.push('/admin/login');
-  }
+    return {
+      user: {
+        id: sessionData.user.id ?? '',
+        email: sessionData.user.email ?? '',
+        name: sessionData.user.name ?? '',
+        role: sessionData.user.role ?? 'admin',
+        avatar:
+          sessionData.user.image ??
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
+        createdAt: new Date(),
+        lastLogin: new Date(),
+      },
+      expires: new Date(sessionData.expires),
+    };
+  }, [sessionData]);
+
+  // 👇 Safer redirection
+  useEffect(() => {
+    if (status === 'unauthenticated' && pathname !== '/admin/login') {
+      router.push('/admin/login');
+    }
+    if (status === 'authenticated' && pathname === '/admin/login') {
+      router.push('/admin');
+    }
+  }, [status, pathname, router]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     const result = await nextAuthSignIn('credentials', {
@@ -81,7 +95,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
 export function useAdminAuth() {
   const context = useContext(AdminAuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAdminAuth must be used within an AdminAuthProvider');
   }
   return context;

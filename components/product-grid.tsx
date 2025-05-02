@@ -11,22 +11,6 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products }: ProductGridProps) {
-  if (products.length === 0) {
-    return (
-      <motion.div
-        className="text-center py-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="text-xl font-medium">No products found</h2>
-        <p className="text-gray-600 mt-2">
-          Try adjusting your filters or check back later.
-        </p>
-      </motion.div>
-    );
-  }
-
   return (
     <StaggeredList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => (

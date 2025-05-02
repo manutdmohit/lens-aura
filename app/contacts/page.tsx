@@ -1,73 +1,95 @@
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import ContactLensHero from "@/components/contact-lens-hero"
-import ContactLensTypes from "@/components/contact-lens-types"
-import ContactLensCare from "@/components/contact-lens-care"
-import ContactLensBrands from "@/components/contact-lens-brands"
-import ContactLensProducts from "@/components/contact-lens-products"
-import ContactForm from "@/components/contact-form"
-import PageTransition from "@/components/page-transition"
-import AnimatedSection from "@/components/animated-section"
+import ContactLensHero from '@/components/contact-lens-hero';
+import ContactLensTypes from '@/components/contact-lens-types';
+import ContactLensCare from '@/components/contact-lens-care';
+import ContactLensBrands from '@/components/contact-lens-brands';
+import ContactLensProducts from '@/components/contact-lens-products';
+import ContactForm from '@/components/contact-form';
+import PageTransition from '@/components/page-transition';
+import AnimatedSection from '@/components/animated-section';
 
 export default function ContactsPage() {
   return (
     <PageTransition>
       <main className="flex flex-col min-h-screen">
-        <Navbar />
         <div className="flex-grow">
           {/* Hero Section */}
           <ContactLensHero />
 
           {/* Types of Contact Lenses */}
           <AnimatedSection className="py-16 px-4 max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Types of Contact Lenses</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+              Types of Contact Lenses
+            </h2>
             <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Contact lenses come in various types to suit different needs and lifestyles. Explore our range to find the
-              perfect fit for you.
+              Contact lenses come in various types to suit different needs and
+              lifestyles. Explore our range to find the perfect fit for you.
             </p>
             <ContactLensTypes />
           </AnimatedSection>
 
           {/* Contact Lens Care */}
-          <AnimatedSection direction="up" className="py-16 px-4 max-w-7xl mx-auto bg-gray-50">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Contact Lens Care</h2>
+          <AnimatedSection
+            direction="up"
+            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+              Contact Lens Care
+            </h2>
             <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Proper care and maintenance of your contact lenses is essential for eye health and comfort. Follow these
-              guidelines to keep your lenses clean and your eyes healthy.
+              Proper care and maintenance of your contact lenses is essential
+              for eye health and comfort. Follow these guidelines to keep your
+              lenses clean and your eyes healthy.
             </p>
             <ContactLensCare />
           </AnimatedSection>
 
           {/* Our Brands */}
           <AnimatedSection className="py-16 px-4 max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Our Contact Lens Brands</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+              Our Contact Lens Brands
+            </h2>
             <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              We offer a wide selection of premium contact lens brands to ensure you find the perfect match for your
-              vision needs and lifestyle.
+              We offer a wide selection of premium contact lens brands to ensure
+              you find the perfect match for your vision needs and lifestyle.
             </p>
             <ContactLensBrands />
           </AnimatedSection>
 
           {/* Featured Products */}
-          <AnimatedSection direction="up" className="py-16 px-4 max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Featured Contact Lenses</h2>
+          <AnimatedSection
+            direction="up"
+            className="py-16 px-4 max-w-7xl mx-auto"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+              Featured Contact Lenses
+            </h2>
             <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Browse our selection of popular contact lenses, available for purchase online or in-store.
+              Browse our selection of popular contact lenses, available for
+              purchase online or in-store.
             </p>
             <ContactLensProducts />
           </AnimatedSection>
 
           {/* Benefits and Risks */}
-          <AnimatedSection direction="up" className="py-16 px-4 max-w-7xl mx-auto bg-gray-50">
+          <AnimatedSection
+            direction="up"
+            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
+          >
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Benefits and Considerations</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+                Benefits and Considerations
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-4">Benefits of Contact Lenses</h3>
+                  <h3 className="text-xl font-bold mb-4">
+                    Benefits of Contact Lenses
+                  </h3>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
                       <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>Natural field of vision without frame obstruction</span>
+                      <span>
+                        Natural field of vision without frame obstruction
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-green-500 font-bold mr-2">✓</span>
@@ -88,7 +110,9 @@ export default function ContactsPage() {
                   </ul>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-4">Important Considerations</h3>
+                  <h3 className="text-xl font-bold mb-4">
+                    Important Considerations
+                  </h3>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
                       <span className="text-amber-500 font-bold mr-2">!</span>
@@ -100,11 +124,16 @@ export default function ContactsPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>Increased risk of eye infections if not properly cared for</span>
+                      <span>
+                        Increased risk of eye infections if not properly cared
+                        for
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>May cause dryness or discomfort for some wearers</span>
+                      <span>
+                        May cause dryness or discomfort for some wearers
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-amber-500 font-bold mr-2">!</span>
@@ -117,69 +146,98 @@ export default function ContactsPage() {
           </AnimatedSection>
 
           {/* Contact Form */}
-          <AnimatedSection direction="up" className="py-16 px-4 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">Contact Us</h2>
+          <AnimatedSection
+            direction="up"
+            className="py-16 px-4 max-w-3xl mx-auto"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
+              Contact Us
+            </h2>
             <p className="text-lg text-gray-600 text-center mb-8">
-              Have questions about our contact lenses? Get in touch with our team.
+              Have questions about our contact lenses? Get in touch with our
+              team.
             </p>
             <ContactForm />
           </AnimatedSection>
 
           {/* FAQs */}
-          <AnimatedSection direction="up" className="py-16 px-4 max-w-7xl mx-auto bg-gray-50">
+          <AnimatedSection
+            direction="up"
+            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
+          >
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+                Frequently Asked Questions
+              </h2>
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">How do I know which contact lenses are right for me?</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    How do I know which contact lenses are right for me?
+                  </h3>
                   <p className="text-gray-600">
-                    The best way to determine the right contact lenses for you is to schedule an eye examination with
-                    one of our optometrists. They will assess your vision needs, eye health, and lifestyle to recommend
-                    the most suitable options.
+                    The best way to determine the right contact lenses for you
+                    is to schedule an eye examination with one of our
+                    optometrists. They will assess your vision needs, eye
+                    health, and lifestyle to recommend the most suitable
+                    options.
                   </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">Can I sleep in my contact lenses?</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    Can I sleep in my contact lenses?
+                  </h3>
                   <p className="text-gray-600">
-                    Some contact lenses are approved for extended wear, including while sleeping, but this increases the
-                    risk of eye infections. We generally recommend removing your contact lenses before sleeping, even if
-                    they are extended wear lenses.
+                    Some contact lenses are approved for extended wear,
+                    including while sleeping, but this increases the risk of eye
+                    infections. We generally recommend removing your contact
+                    lenses before sleeping, even if they are extended wear
+                    lenses.
                   </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">How often should I replace my contact lenses?</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    How often should I replace my contact lenses?
+                  </h3>
                   <p className="text-gray-600">
-                    Replacement schedules vary depending on the type of lenses. Daily disposables should be discarded
-                    after each use, bi-weekly lenses every two weeks, and monthly lenses every month. Always follow the
-                    replacement schedule recommended by your eye care professional.
+                    Replacement schedules vary depending on the type of lenses.
+                    Daily disposables should be discarded after each use,
+                    bi-weekly lenses every two weeks, and monthly lenses every
+                    month. Always follow the replacement schedule recommended by
+                    your eye care professional.
                   </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">Can I wear contact lenses if I have astigmatism?</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    Can I wear contact lenses if I have astigmatism?
+                  </h3>
                   <p className="text-gray-600">
-                    Yes, toric contact lenses are specifically designed for people with astigmatism. These lenses have
-                    different powers in different meridians of the lens to correct the uneven curvature of the eye that
-                    causes astigmatism.
+                    Yes, toric contact lenses are specifically designed for
+                    people with astigmatism. These lenses have different powers
+                    in different meridians of the lens to correct the uneven
+                    curvature of the eye that causes astigmatism.
                   </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">Do you offer colored contact lenses?</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    Do you offer colored contact lenses?
+                  </h3>
                   <p className="text-gray-600">
-                    Yes, we offer a variety of colored contact lenses that can enhance your natural eye color or
-                    completely change it. These are available with or without vision correction. All colored contacts
-                    require a prescription, even if they're just for cosmetic purposes.
+                    Yes, we offer a variety of colored contact lenses that can
+                    enhance your natural eye color or completely change it.
+                    These are available with or without vision correction. All
+                    colored contacts require a prescription, even if they're
+                    just for cosmetic purposes.
                   </p>
                 </div>
               </div>
             </div>
           </AnimatedSection>
         </div>
-        <Footer />
       </main>
     </PageTransition>
-  )
+  );
 }

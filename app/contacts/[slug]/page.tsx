@@ -22,11 +22,8 @@ import {
   ShieldCheck,
   Truck,
 } from 'lucide-react';
-import { TiTick } from 'react-icons/ti';
-import { TbXboxXFilled } from 'react-icons/tb';
 import type { ProductFormValues } from '@/lib/api/validation';
-import { Metadata } from 'next';
-import { Span } from 'next/dist/trace';
+import { useCart } from '@/context/cart-context';
 import LoadingPage from '@/components/loading';
 
 // Animation variants
@@ -58,7 +55,7 @@ const formatText = (text: string) => {
     .join(' ');
 };
 
-export default function SunGlassesProductPage() {
+export default function ContactsProductPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
@@ -69,6 +66,23 @@ export default function SunGlassesProductPage() {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const { itemCount, items } = useCart();
+
+  let quantityToAdd = 1;
+
+  let quantityInCart = 0;
+
+  const getItemFromCart = items.find((item) => item.product.slug === slug);
+
+  if (getItemFromCart) {
+    quantityInCart = getItemFromCart.quantity;
+  }
+
+  // Generate dynamic SEO metadata
+  const pageTitle = `${product?.name} - Lens Aura`;
+  const pageDescription = `${product?.description} - Lens Aura`;
+  // const pageUrl = `https://lensaura.com/glasses/${slug}`;
+
   interface RelatedProduct {
     id: string;
     name: string;
@@ -85,7 +99,7 @@ export default function SunGlassesProductPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/sunglasses/${slug}`);
+        const response = await fetch(`/api/contacts/${slug}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -218,7 +232,7 @@ export default function SunGlassesProductPage() {
             className="hover:underline cursor-pointer"
             onClick={() => router.push('/glasses')}
           >
-            Sun Glasses
+            Contact Lenses
           </span>
           <ChevronRight className="h-4 w-4" />
           <span className="font-medium text-black">{product.name}</span>
@@ -330,7 +344,61 @@ export default function SunGlassesProductPage() {
             <motion.div variants={slideUp} className="space-y-4">
               <h3 className="font-medium text-gray-900">Specifications</h3>
               <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
-                {product.frameType && (
+                {product.packagingType && (
+                  <>
+                    <span className="text-gray-500">Packaging Type</span>
+                    <span className="font-medium">
+                      {formatText(product.packagingType)}
+                    </span>
+                  </>
+                )}
+
+                {product.wearDuration && (
+                  <>
+                    <span className="text-gray-500">Wear Duration</span>
+                    <span className="font-medium">
+                      {formatText(product.wearDuration)}
+                    </span>
+                  </>
+                )}
+
+                {product.replacementFrequency && (
+                  <>
+                    <span className="text-gray-500">Replacement Frequency</span>
+                    <span className="font-medium">
+                      {formatText(product.replacementFrequency)}
+                    </span>
+                  </>
+                )}
+
+                {product.waterContent && (
+                  <>
+                    <span className="text-gray-500">Water Content</span>
+                    <span className="font-medium">{product.waterContent}%</span>
+                  </>
+                )}
+
+                {product.diameter && (
+                  <>
+                    <span className="text-gray-500">Diameter</span>
+                    <span className="font-medium">{product.diameter} mm</span>
+                  </>
+                )}
+
+                {product.baseCurve && (
+                  <>
+                    <span className="text-gray-500">Base Curve</span>
+                    <span className="font-medium">{product.baseCurve} mm</span>
+                  </>
+                )}
+
+                {product.quantity && (
+                  <>
+                    <span className="text-gray-500">Quantity Per Package</span>
+                    <span className="font-medium">{product.quantity}</span>
+                  </>
+                )}
+                {/* {product.frameType && (
                   <>
                     <span className="text-gray-500">Frame Type</span>
                     <span className="font-medium">
@@ -377,74 +445,38 @@ export default function SunGlassesProductPage() {
                       {formatText(product.prescriptionType)}
                     </span>
                   </>
-                )}
-                {product.uvProtection ? (
+                )} */}
+              </div>
+            </motion.div>
+
+            {/* Features */}
+            <motion.div variants={slideUp} className="space-y-4">
+              <h3 className="font-medium text-gray-900">Features</h3>
+
+              <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                {product.forAstigmatism && (
                   <>
-                    <span className="text-gray-500">UV Protection</span>
+                    <span className="text-gray-500">For Astigmatism</span>
                     <span className="font-medium">
-                      <TiTick size={20} color="green" />
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gray-500">UV Protection</span>
-                    <span className="font-medium">
-                      <TbXboxXFilled size={20} color="red" />
-                    </span>
-                  </>
-                )}
-                {product.polarized ? (
-                  <>
-                    <span className="text-gray-500">Polarized</span>
-                    <span className="font-medium">
-                      <TiTick size={20} color="green" />
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gray-500">Polarized</span>
-                    <span className="font-medium">
-                      <TbXboxXFilled size={20} color="red" />
-                    </span>
-                  </>
-                )}
-                {product.style && (
-                  <>
-                    <span className="text-gray-500">Style</span>
-                    <span className="font-medium">
-                      {formatText(product.style)}
+                      {product.forAstigmatism ? 'Yes' : 'No'}
                     </span>
                   </>
                 )}
 
-                {product.forAstigmatism ? (
+                {product.forPresbyopia && (
                   <>
-                    <span className="text-gray-500">For Astigmatism</span>
+                    <span className="text-gray-500">For Presbyopia</span>
                     <span className="font-medium">
-                      <TiTick size={20} color="green" />
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gray-500">For Astigmatism</span>
-                    <span className="font-medium">
-                      <TbXboxXFilled size={20} color="red" />
+                      {product.forPresbyopia ? 'Yes' : 'No'}
                     </span>
                   </>
                 )}
 
-                {product.uvBlocking ? (
+                {product.uvBlocking && (
                   <>
                     <span className="text-gray-500">UV Blocking</span>
                     <span className="font-medium">
-                      <TiTick size={20} color="green" />
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gray-500">UV Blocking</span>
-                    <span className="font-medium">
-                      <TbXboxXFilled size={20} color="red" />
+                      {product.uvBlocking ? 'Yes' : 'No'}
                     </span>
                   </>
                 )}
@@ -475,7 +507,8 @@ export default function SunGlassesProductPage() {
                   !isInStock ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isInStock ? (
+                {/* {isInStock &&
+                quantityInCart + quantityToAdd <= product.stockQuantity ? (
                   <>
                     <AddToCartButton product={product} />
 
@@ -487,10 +520,30 @@ export default function SunGlassesProductPage() {
                   </>
                 ) : (
                   <button
-                    className="w-full bg-gray-300 text-gray-500 py-4 md:py-5 cursor-not-allowed"
+                    className="w-full bg-red-600 text-white font-bold py-4 md:py-5 cursor-not-allowed"
+                    disabled
+                 1 >
+                    Max Stock Limit Reached
+                  </button>
+                )} */}
+
+                {!isInStock ? (
+                  <button
+                    className="w-full bg-red-600 text-white font-bold py-4 md:py-5 cursor-not-allowed"
                     disabled
                   >
                     Out of Stock
+                  </button>
+                ) : quantityInCart + quantityToAdd <= product.stockQuantity ? (
+                  <>
+                    <AddToCartButton product={product} />
+                  </>
+                ) : (
+                  <button
+                    className="w-full bg-red-600 text-white font-bold py-4  cursor-not-allowed"
+                    disabled
+                  >
+                    Max Stock Limit Reached
                   </button>
                 )}
               </div>
@@ -761,6 +814,40 @@ export default function SunGlassesProductPage() {
             </TabsContent>
           </Tabs>
         </motion.div>
+
+        {/* Related Products Section */}
+        {/* <motion.div
+          className="pt-8"
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.5 }}
+        >
+          <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {relatedProducts.map((relatedProduct) => (
+              <div key={relatedProduct.id} className="group cursor-pointer">
+                <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden mb-4">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={relatedProduct.imageUrl || '/placeholder.svg'}
+                      alt={relatedProduct.name}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                <h3 className="font-medium text-gray-900 group-hover:text-black transition-colors">
+                  {relatedProduct.name}
+                </h3>
+                <p className="text-gray-500">
+                  {formatCurrency(relatedProduct.price)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </motion.div> */}
       </div>
     </motion.div>
   );
