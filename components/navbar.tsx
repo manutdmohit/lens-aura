@@ -163,14 +163,17 @@ export default function Navbar() {
   const handleMenuMouseEnter = (menuId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveMenu(menuId);
+    setIsHoveringMegaMenu(true);
   };
 
   // Update the handleMenuMouseLeave function to check if we're hovering the mega menu
   const handleMenuMouseLeave = () => {
     // Only close the menu if we're not hovering the mega menu content
-    if (!isHoveringMegaMenu) {
-      setActiveMenu(null);
-    }
+    setTimeout(() => {
+      if (!isHoveringMegaMenu) {
+        setActiveMenu(null);
+      }
+    }, 100);
   };
 
   // Add handlers for the mega menu mouse events
@@ -180,10 +183,12 @@ export default function Navbar() {
 
   const handleMegaMenuMouseLeave = () => {
     setIsHoveringMegaMenu(false);
-    setActiveMenu(null);
+    setTimeout(() => {
+      setActiveMenu(null);
+    }, 150);
   };
 
-  // Update the renderNavItem function to use our new hover logic
+  // Update renderNavItem with improved style and animation
   const renderNavItem = (title: string, href: string, menuId: string) => (
     <div
       className="h-full"
@@ -192,26 +197,28 @@ export default function Navbar() {
     >
       <Link
         href={href}
-        className="flex items-center h-full px-4 text-base text-gray-700 hover:text-black"
+        className="flex items-center h-full px-3 text-base text-gray-700 hover:text-indigo-600 relative group"
       >
         <span>{title}</span>
         <ChevronDown
           className={`ml-1 h-4 w-4 transition-transform ${
-            activeMenu === menuId ? 'rotate-180' : ''
-          }`}
+            activeMenu === menuId ? 'rotate-180 text-indigo-600' : ''
+          } group-hover:text-indigo-600`}
           aria-hidden="true"
         />
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
 
-  // Function to render a simple nav link
+  // Function to render a simple nav link with improved styling
   const renderNavLink = (title: string, href: string) => (
     <Link
       href={href}
-      className="flex items-center h-full px-4 text-base text-gray-700 hover:text-black"
+      className="flex items-center h-full px-3 text-base text-gray-700 hover:text-indigo-600 relative group"
     >
       {title}
+      <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
     </Link>
   );
 
@@ -239,15 +246,20 @@ export default function Navbar() {
       opacity: 1,
       height: 'auto',
       transition: {
-        duration: 0.3,
-        staggerChildren: 0.05,
+        duration: 0.4,
+        staggerChildren: 0.07,
         delayChildren: 0.1,
       },
     },
     exit: {
       opacity: 0,
       height: 0,
-      transition: { duration: 0.3 },
+      transition: { 
+        duration: 0.3,
+        when: "afterChildren",
+        staggerChildren: 0.05,
+        staggerDirection: -1
+      },
     },
   };
 
@@ -267,49 +279,78 @@ export default function Navbar() {
     },
   };
 
-  // Function to render the mega menu content
+  // Update mega menu render function for better visual style
   const renderMegaMenu = (data: typeof glassesMenuData) => (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ 
+        duration: 0.3,
+        staggerChildren: 0.05
+      }}
+      className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8"
+    >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Featured Categories with Images */}
         <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6">
           {data.featuredLinks.map((link, index) => (
-            <Link key={index} href={link.href} className="group">
-              <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-                {link.image ? (
-                  <img
-                    src={link.image || '/placeholder.svg'}
-                    alt={link.title}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-gray-200">
-                    <span className="text-gray-500">{link.title}</span>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.3, 
+                delay: index * 0.1 
+              }}
+            >
+              <Link href={link.href} className="group transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg overflow-hidden">
+                <div className="aspect-square overflow-hidden rounded-lg bg-gray-100 relative">
+                  {link.image ? (
+                    <img
+                      src={link.image || '/placeholder.svg'}
+                      alt={link.title}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-500">{link.title}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                    <h3 className="text-lg font-medium text-white p-4">{link.title}</h3>
                   </div>
-                )}
-              </div>
-              <h3 className="mt-3 text-lg font-medium">{link.title}</h3>
-              {/* {link.description && (
-                <p className="mt-1 text-sm text-gray-500">{link.description}</p>
-              )} */}
-            </Link>
+                </div>
+                <h3 className="mt-3 text-lg font-medium group-hover:text-indigo-600 transition-colors duration-200">{link.title}</h3>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
         {/* Additional Links */}
         <div className="space-y-4">
+          <h3 className="font-medium text-lg text-gray-900 mb-4">Quick Links</h3>
           {data.additionalLinks.map((link, index) => (
-            <Link
+            <motion.div
               key={index}
-              href={link.href}
-              className="block text-base hover:text-black hover:underline underline-offset-4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ 
+                duration: 0.3, 
+                delay: 0.2 + (index * 0.05) 
+              }}
             >
-              {link.title}
-            </Link>
+              <Link
+                href={link.href}
+                className="block text-base text-gray-700 hover:text-indigo-600 transition-colors duration-200 py-1 border-b border-gray-100 hover:border-indigo-200"
+              >
+                {link.title}
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 
   // Function to render mobile menu item with submenu
@@ -343,33 +384,58 @@ export default function Navbar() {
             aria-expanded={isExpanded}
             aria-label={`Toggle ${menuData.title} submenu`}
           >
-            <ChevronDown
-              className={`h-5 w-5 transition-transform ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
-              aria-hidden="true"
-            />
+            <motion.div 
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+            </motion.div>
           </button>
         </div>
 
         <AnimatePresence>
           {isExpanded && (
             <motion.div
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={mobileSubmenuVariants}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ 
+                opacity: 1, 
+                height: 'auto',
+                transition: {
+                  height: { duration: 0.4 },
+                  opacity: { duration: 0.3, delay: 0.1 }
+                }
+              }}
+              exit={{ 
+                opacity: 0, 
+                height: 0,
+                transition: {
+                  height: { duration: 0.3 },
+                  opacity: { duration: 0.2 }
+                }
+              }}
               className="bg-gray-50 overflow-hidden"
             >
               <div className="px-4 py-3 space-y-4">
                 {/* Featured Categories */}
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                >
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     Featured Categories
                   </h4>
                   <ul className="space-y-2">
                     {menuData.featuredLinks.map((link, index) => (
-                      <li key={index}>
+                      <motion.li 
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 + (index * 0.05), duration: 0.3 }}
+                      >
                         <Link
                           href={link.href}
                           className="flex items-center py-2 text-base text-gray-700 hover:text-black"
@@ -378,19 +444,28 @@ export default function Navbar() {
                           <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
                           {link.title}
                         </Link>
-                      </li>
+                      </motion.li>
                     ))}
                   </ul>
-                </div>
+                </motion.div>
 
                 {/* Additional Links */}
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                >
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     More Options
                   </h4>
                   <ul className="space-y-2">
                     {menuData.additionalLinks.map((link, index) => (
-                      <li key={index}>
+                      <motion.li 
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + (index * 0.05), duration: 0.3 }}
+                      >
                         <Link
                           href={link.href}
                           className="flex items-center py-2 text-base text-gray-700 hover:text-black"
@@ -399,10 +474,10 @@ export default function Navbar() {
                           <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
                           {link.title}
                         </Link>
-                      </li>
+                      </motion.li>
                     ))}
                   </ul>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           )}
@@ -412,116 +487,143 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-
-          <Link href="/">
-            <Image
-              src="/images/logo2.png"
-              alt="logo"
-              width={150}
-              height={100}
-              priority
-            />
-          </Link>
-
-          <motion.div
-            className="flex-shrink-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Link
-              href="/"
-              className="text-2xl md:text-3xl font-serif font-bold"
-            >
-              Lens Aura
-            </Link>
-
-            {/* <div className="px-3 py-3 border-b border-gray-200"> */}
-            {/* </div> */}
-          </motion.div>
-          <div className="md:hidden">
-            <CartDropdown />
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700"
-              onClick={toggleMobileMenu}
-              aria-expanded={mobileMenuOpen}
-              aria-label="Toggle menu"
-            >
-              <motion.div
-                initial={{ rotate: 0 }}
-                animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </motion.div>
-            </button>
-          </div>
-
-          {/* Desktop navigation */}
-          <motion.nav
-            className="hidden md:flex h-full items-center relative"
-            initial="hidden"
-            animate="visible"
-            variants={navVariants}
-          >
-            <div className="flex h-full" onClick={(e) => e.stopPropagation()}>
-              <motion.div variants={itemVariants} className="h-full">
-                {renderNavItem('Glasses', '/glasses', 'glasses')}
-              </motion.div>
-              <motion.div variants={itemVariants} className="h-full">
-                {renderNavItem('Sunglasses', '/sunglasses', 'sunglasses')}
-              </motion.div>
-              <motion.div variants={itemVariants} className="h-full">
-                {renderNavItem('Contacts', '/contacts', 'contacts')}
-              </motion.div>
-              <motion.div variants={itemVariants} className="h-full">
-                {renderNavLink('Health Funds', '/health-funds')}
-              </motion.div>
-              <motion.div variants={itemVariants} className="h-full">
-                {renderNavLink('Stores', '/stores')}
-              </motion.div>
+    <header className="sticky top-0 z-50 bg-white">
+      {/* Top Bar */}
+      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-sm py-1.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <span className="flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Free shipping on orders over $50
+              </span>
+              <span className="hidden sm:inline">|</span>
+              <span className="hidden sm:inline flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                30-day returns
+              </span>
             </div>
-          </motion.nav>
-
-          {/* Cart and Book button */}
-          <motion.div
-            className="hidden md:flex items-center space-x-4"
-            initial="hidden"
-            animate="visible"
-            variants={navVariants}
-          >
-            <motion.div variants={itemVariants}>
-              <CartDropdown />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <AnimatedButton className="bg-black text-white hover:bg-gray-800">
-                Book An Eye Test
-              </AnimatedButton>
-            </motion.div>
-          </motion.div>
+            <div className="flex items-center space-x-4">
+              <Link href="/stores" className="hover:underline flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Find a Store
+              </Link>
+              <Link href="/contact" className="hover:underline flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Contact Us
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mega Menu - Positioned from the leftmost side of the navigation */}
+      {/* Main Navigation */}
+      <div className="border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center min-h-[5rem] sm:min-h-[6rem]">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-4">
+              <Image
+                src="/images/logo2.png"
+                alt="Lens Aura Logo"
+                width={120}
+                height={120}
+                // className="w-22 h-22 sm:w-24 sm:h-24 object-contain"
+                priority
+              />
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                  Lens Aura
+                </span>
+                <span className="text-sm sm:text-base text-gray-700 font-medium hidden sm:inline">Vision Perfected</span>
+              </div>
+            </Link>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center space-x-4">
+              <CartDropdown />
+              <button
+                type="button"
+                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                onClick={toggleMobileMenu}
+                aria-expanded={mobileMenuOpen}
+                aria-label="Toggle menu"
+              >
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </motion.div>
+              </button>
+            </div>
+
+            {/* Desktop navigation */}
+            <motion.nav
+              className="hidden md:flex h-full items-center"
+              initial="hidden"
+              animate="visible"
+              variants={navVariants}
+            >
+              <div className="flex h-full space-x-3 lg:space-x-6" onClick={(e) => e.stopPropagation()}>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavItem('Glasses', '/glasses', 'glasses')}
+                </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavItem('Sunglasses', '/sunglasses', 'sunglasses')}
+                </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavItem('Contacts', '/contacts', 'contacts')}
+                </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavLink('Health Funds', '/health-funds')}
+                </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavLink('Stores', '/stores')}
+                </motion.div>
+              </div>
+            </motion.nav>
+
+            {/* Desktop Cart */}
+            <motion.div
+              className="hidden md:flex items-center"
+              initial="hidden"
+              animate="visible"
+              variants={navVariants}
+            >
+              <motion.div variants={itemVariants}>
+                <CartDropdown />
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mega Menu */}
       <AnimatePresence>
         {activeMenu && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-0 w-full z-50 bg-white shadow-lg border-t border-gray-200"
+            transition={{ 
+              duration: 0.3,
+              ease: "easeOut" 
+            }}
+            className="absolute left-0 w-full z-50 bg-white shadow-lg border-t border-gray-100"
             onMouseEnter={handleMegaMenuMouseEnter}
             onMouseLeave={handleMegaMenuMouseLeave}
+            onClick={(e) => e.stopPropagation()}
           >
             {activeMenu === 'glasses' && renderMegaMenu(glassesMenuData)}
             {activeMenu === 'sunglasses' && renderMegaMenu(sunglassesMenuData)}
@@ -540,31 +642,32 @@ export default function Navbar() {
             exit="exit"
             variants={mobileMenuVariants}
           >
-            <div className="bg-white divide-y divide-gray-200">
-              {/* Render menu items with submenus */}
+            <div className="bg-white divide-y divide-gray-100">
               {allMenuData.map((menuData) => renderMobileMenuItem(menuData))}
-
-              {/* Simple menu items without submenus */}
-              <Link
-                href="/health-funds"
-                className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-gray-900 border-b border-gray-200"
-                onClick={toggleMobileMenu}
+              <motion.div
+                variants={itemVariants}
+                className="border-b border-gray-200 last:border-b-0"
               >
-                Health Funds
-              </Link>
-              <Link
-                href="/stores"
-                className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-gray-900 border-b border-gray-200"
-                onClick={toggleMobileMenu}
+                <Link
+                  href="/health-funds"
+                  className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  Health Funds
+                </Link>
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                className="border-b border-gray-200 last:border-b-0"
               >
-                Stores
-              </Link>
-
-              <div className="p-3">
-                <Button className="w-full bg-black text-white hover:bg-gray-800">
-                  Book An Eye Test
-                </Button>
-              </div>
+                <Link
+                  href="/stores"
+                  className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  Stores
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}
