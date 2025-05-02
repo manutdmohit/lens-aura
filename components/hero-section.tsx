@@ -4,6 +4,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import AnimatedButton from "@/components/animated-button"
 import { Sparkles, Glasses, Sun, ArrowRight, BadgePercent, ShoppingBag } from "lucide-react"
+import Image from "next/image"
 
 export default function HeroSection() {
   // Animation variants
@@ -29,10 +30,13 @@ export default function HeroSection() {
         animate={{ scale: 1 }}
         transition={{ duration: 10, ease: "easeOut" }}
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
           alt="Person wearing sunglasses at the beach"
           className="w-full h-full object-cover"
+          width={1800}
+          height={1200}
+          priority
         />
       </motion.div>
 

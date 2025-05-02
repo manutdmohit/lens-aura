@@ -4,9 +4,17 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
-import { getProducts } from "@/lib/db"
-import type { Product } from "@/types/product"
 import StaggeredList from "@/components/staggered-list"
+
+// Define the product type based on API response
+interface Product {
+  _id: string
+  name: string
+  slug: string
+  productType: string
+  price: number
+  imageUrl: string
+}
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([])
@@ -15,8 +23,12 @@ export default function FeaturedProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const featuredProducts = await getProducts(4)
-        setProducts(featuredProducts)
+        const response = await fetch('/api/glasses/featured')
+        if (!response.ok) {
+          throw new Error('Failed to fetch featured products')
+        }
+        const data = await response.json()
+        setProducts(data)
       } catch (error) {
         console.error("Failed to fetch products:", error)
       } finally {
@@ -53,7 +65,10 @@ export default function FeaturedProducts() {
   return (
     <StaggeredList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => (
-        <Link key={product.id} href={`/product/${product.id}`}>
+        <Link 
+          key={product._id} 
+          href={`/product/${product.productType}/${product.slug}`}
+        >
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">
               <motion.img
