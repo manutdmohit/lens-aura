@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, CreditCard, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/navbar';
-import Footer from '@/components/footer';
 import { useCart } from '@/context/cart-context';
 import { createCheckoutSession } from '@/actions/checkout';
 import PageTransition from '@/components/page-transition';
@@ -56,13 +54,12 @@ export default function CheckoutPage() {
   if (!isClient) {
     return (
       <main className="flex flex-col min-h-screen">
-        <Navbar />
+   
         <div className="flex-grow max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="h-96 flex items-center justify-center">
             Loading checkout...
           </div>
-        </div>
-        <Footer />
+        </div>  
       </main>
     );
   }
@@ -70,7 +67,7 @@ export default function CheckoutPage() {
   return (
     <PageTransition>
       <main className="flex flex-col min-h-screen">
-        <Navbar />
+       
         <div className="flex-grow max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-8">
             <Link
@@ -213,7 +210,7 @@ export default function CheckoutPage() {
             </div>
           )}
         </div>
-        <Footer />
+        
       </main>
     </PageTransition>
   );
