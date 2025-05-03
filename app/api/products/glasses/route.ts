@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import Glasses from '@/lib/mongoose/models/glasses.model';
 import { glassesSchema } from '@/lib/api/validation';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/utils/authOptions';
 import { connectToDatabase } from '@/lib/api/db';
 
 // GET handler to retrieve all glasses products

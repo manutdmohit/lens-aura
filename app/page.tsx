@@ -3,6 +3,7 @@ import HeroSection from '@/components/hero-section';
 import FeaturedProducts from '@/components/featured-products';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
+import PriceRangeDisplay from '@/components/price-range-display';
 import { Glasses, Sun, Star, Quote, ArrowRight, Eye } from 'lucide-react';
 import { Playfair_Display, Montserrat } from 'next/font/google';
 import Image from 'next/image';
@@ -26,6 +27,11 @@ export default function Home() {
               materials, starting from just $95 including prescription lenses.
             </p>
             <FeaturedProducts />
+          </AnimatedSection>
+
+          {/* Price Range Display */}
+          <AnimatedSection className="py-12 px-4 max-w-7xl mx-auto" direction="up">
+            <PriceRangeDisplay />
           </AnimatedSection>
 
           {/* Lifestyle images section with enhanced design */}

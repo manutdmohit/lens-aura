@@ -1,4 +1,4 @@
-import { mongoose } from '@/lib/mongoose/db-config';
+import mongoose from 'mongoose';
 import { Schema, type Document, type Model } from 'mongoose';
 import slugify from 'slugify';
 
