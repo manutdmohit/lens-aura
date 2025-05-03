@@ -42,6 +42,18 @@ export default function CartPage() {
     }
   };
 
+  const handleUpdateQuantity = (productId: string | undefined, quantity: number, color: string) => {
+    if (productId) {
+      updateQuantity(productId, quantity, color);
+    }
+  };
+
+  const handleRemoveItem = (productId: string | undefined, color: string) => {
+    if (productId) {
+      removeItem(productId, color);
+    }
+  };
+
   if (!isClient) {
     return (
       <main className="flex flex-col min-h-screen">
@@ -111,9 +123,10 @@ export default function CartPage() {
                           <div className="flex items-center border rounded-md">
                             <button
                               onClick={() =>
-                                updateQuantity(
+                                handleUpdateQuantity(
                                   item.product.id,
-                                  item.quantity - 1
+                                  item.quantity - 1,
+                                  item.color
                                 )
                               }
                               className="p-2 hover:bg-gray-100"
@@ -124,9 +137,10 @@ export default function CartPage() {
                             <span className="px-4">{item.quantity}</span>
                             <button
                               onClick={() =>
-                                updateQuantity(
+                                handleUpdateQuantity(
                                   item.product.id,
-                                  item.quantity + 1
+                                  item.quantity + 1,
+                                  item.color
                                 )
                               }
                               className="p-2 hover:bg-gray-100"
@@ -136,7 +150,7 @@ export default function CartPage() {
                             </button>
                           </div>
                           <button
-                            onClick={() => removeItem(item.product.id)}
+                            onClick={() => handleRemoveItem(item.product.id, item.color)}
                             className="text-gray-500 hover:text-red-600"
                             aria-label="Remove item"
                           >

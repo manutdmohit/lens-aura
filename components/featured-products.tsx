@@ -19,25 +19,57 @@ interface Product {
 export default function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/api/glasses/featured')
+        setLoading(true)
+        setError(null)
+        
+        // Add timestamp to avoid caching issues
+        const response = await fetch(`/api/glasses/featured`, {
+          cache: 'no-store'
+        })
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch featured products')
+          throw new Error(`Failed to fetch featured products: ${response.status} ${response.statusText}`)
         }
+        
         const data = await response.json()
-        setProducts(data)
+        
+        // Ensure data is an array
+        if (Array.isArray(data)) {
+          setProducts(data)
+        } else {
+          console.warn("Unexpected response format:", data)
+          setProducts([])
+        }
       } catch (error) {
         console.error("Failed to fetch products:", error)
+        setError(error instanceof Error ? error.message : "An error occurred")
+        
+        // Retry logic - retry up to 3 times with increasing delays
+        if (retryCount < 3) {
+          const delay = Math.pow(2, retryCount) * 1000 // Exponential backoff
+          console.log(`Retrying in ${delay}ms (attempt ${retryCount + 1}/3)`)
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1)
+          }, delay)
+        }
       } finally {
         setLoading(false)
       }
     }
 
     fetchProducts()
-  }, [])
+  }, [retryCount])
+
+  // Retry button handler
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1)
+  }
 
   if (loading) {
     return (
@@ -62,12 +94,35 @@ export default function FeaturedProducts() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load featured products</h3>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button 
+          onClick={handleRetry}
+          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No featured products available at the moment.</p>
+      </div>
+    )
+  }
+
   return (
     <StaggeredList className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => (
         <Link 
           key={product._id} 
-          href={`/product/${product.productType}/${product.slug}`}
+          href={`/${product.productType}/${product.slug}`}
         >
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">

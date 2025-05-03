@@ -6,25 +6,38 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    // Get price ranges for glasses
-    const glassesRange = await getPriceRange('glasses');
-    
-    // Get price ranges for sunglasses
-    const sunglassesRange = await getPriceRange('sunglasses');
-    
-    // Get price ranges for contacts
-    const contactsRange = await getPriceRange('contacts');
+    try {
+      // Get price ranges for glasses
+      const glassesRange = await getPriceRange('glasses');
+      
+      // Get price ranges for sunglasses
+      const sunglassesRange = await getPriceRange('sunglasses');
+      
+      // Get price ranges for contacts
+      const contactsRange = await getPriceRange('contacts');
 
-    await disconnectFromDatabase();
+      console.log(glassesRange);
+      
 
-    return NextResponse.json({
-      glasses: glassesRange,
-      sunglasses: sunglassesRange,
-      contacts: contactsRange
-    }, { status: 200 });
+      return NextResponse.json({
+        glasses: glassesRange,
+        sunglasses: sunglassesRange,
+        contacts: contactsRange
+      }, { status: 200 });
+    } finally {
+      // Ensure we always disconnect from the database
+      await disconnectFromDatabase();
+    }
   } catch (error) {
     console.error('Error fetching price ranges:', error);
-    await disconnectFromDatabase();
+    
+    // Try to disconnect if we're connected
+    try {
+      await disconnectFromDatabase();
+    } catch (disconnectError) {
+      console.error('Error disconnecting from database:', disconnectError);
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch price ranges' }, { status: 500 });
   }
 }

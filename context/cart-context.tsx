@@ -20,8 +20,8 @@ interface CartContextType {
   items: CartItem[];
   itemCount: number;
   addItem: (product: Product, quantity: number, color: string) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: string, color?: string) => void;
+  updateQuantity: (productId: string, quantity: number, color: string) => void;
   clearCart: () => void;
   subtotal: number;
 }
@@ -79,21 +79,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prevItems) =>
-      prevItems.filter((item) => item.product.id !== productId)
-    );
+  const removeItem = (productId: string, color?: string) => {
+    setItems((prevItems) => {
+      if (color) {
+        // Remove specific product with specific color
+        return prevItems.filter(
+          (item) => !(item.product.id === productId && item.color === color)
+        );
+      } else {
+        // Remove all items with this product ID (legacy behavior)
+        return prevItems.filter((item) => item.product.id !== productId);
+      }
+    });
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, color: string) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(productId, color);
       return;
     }
 
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId && item.color === color
+          ? { ...item, quantity }
+          : item
       )
     );
   };

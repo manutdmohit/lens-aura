@@ -58,8 +58,12 @@ export default function CartDropdown() {
     setIsOpen(!isOpen);
   };
 
-  const handleQuantityChange = (productId: string, newQuantity: number) => {
-    updateQuantity(productId, newQuantity);
+  const handleQuantityChange = (productId: string, newQuantity: number, color: string) => {
+    updateQuantity(productId, newQuantity, color);
+  };
+
+  const handleRemoveItem = (productId: string, color: string) => {
+    removeItem(productId, color);
   };
 
   const dropdownVariants = {
@@ -184,7 +188,8 @@ export default function CartDropdown() {
                               onClick={() =>
                                 handleQuantityChange(
                                   item.product.id!,
-                                  item.quantity - 1
+                                  item.quantity - 1,
+                                  item.color
                                 )
                               }
                               className="p-1 hover:bg-gray-100"
@@ -203,7 +208,8 @@ export default function CartDropdown() {
                                     onClick={() =>
                                       handleQuantityChange(
                                         item.product.id!,
-                                        item.quantity + 1
+                                        item.quantity + 1,
+                                        item.color
                                       )
                                     }
                                     className={`p-1 ${
@@ -231,7 +237,7 @@ export default function CartDropdown() {
                             </TooltipProvider>
                           </div>
                           <button
-                            onClick={() => removeItem(item.product.id!)}
+                            onClick={() => handleRemoveItem(item.product.id!, item.color)}
                             className="text-gray-500 hover:text-red-600 p-1"
                             aria-label="Remove item"
                           >
