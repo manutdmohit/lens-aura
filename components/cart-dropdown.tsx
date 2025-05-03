@@ -124,7 +124,7 @@ export default function CartDropdown() {
         {isOpen && (
           <motion.div
             id="cart-dropdown"
-            className="absolute right-0 mt-2 w-screen max-w-[250px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
+            className="absolute right-0 mt-2 w-screen max-w-[250px] md:max-w-[400px] bg-white shadow-lg rounded-lg z-50 overflow-hidden md:right-0 md:top-full"
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
