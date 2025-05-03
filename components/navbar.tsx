@@ -38,10 +38,8 @@ const glassesMenuData = {
   ],
   additionalLinks: [
     { title: 'All Glasses', href: '/glasses' },
-    { title: 'Bestsellers', href: '/glasses/bestsellers' },
-    { title: 'Kids Glasses', href: '/glasses/kids' },
-    { title: 'Multifocals', href: '/glasses/multifocals' },
-    { title: 'Gifts & Accessories', href: '/glasses/accessories' },
+    { title: "Men's Glasses", href: '/glasses/mens' },
+    { title: "Women's Glasses", href: '/glasses/womens' },
   ],
 };
 
@@ -70,10 +68,8 @@ const sunglassesMenuData = {
   ],
   additionalLinks: [
     { title: 'All Sunglasses', href: '/sunglasses' },
-    { title: 'Bestsellers', href: '/sunglasses/bestsellers' },
-    { title: 'Polarized', href: '/sunglasses/polarized' },
-    { title: 'Prescription Sunglasses', href: '/sunglasses/prescription' },
-    { title: 'Gifts & Accessories', href: '/sunglasses/accessories' },
+    { title: "Men's Sunglasses", href: '/sunglasses/mens' },
+    { title: "Women's Sunglasses", href: '/sunglasses/womens' },
   ],
 };
 
