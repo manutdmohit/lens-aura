@@ -1,45 +1,49 @@
 import { type NextRequest, NextResponse } from 'next/server';
-// import { connectToDatabase } from '@/lib/mongoose/db-config';
-import Glasses from '@/lib/mongoose/models/glasses.model';
-import { glassesSchema } from '@/lib/api/validation';
+import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import Product from '@/models/Product';
+import { productSchema } from '@/lib/api/validation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
-import { connectToDatabase } from '@/lib/api/db';
 
 // GET handler to retrieve all glasses products
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    // Parse query parameters
-    const url = new URL(req.url);
-    const limit = Number.parseInt(url.searchParams.get('limit') || '10');
-    const page = Number.parseInt(url.searchParams.get('page') || '1');
-    const sort = url.searchParams.get('sort') || 'createdAt';
-    const order = url.searchParams.get('order') || 'desc';
+    try {
+      // Parse query parameters
+      const url = new URL(req.url);
+      const limit = Number.parseInt(url.searchParams.get('limit') || '10');
+      const page = Number.parseInt(url.searchParams.get('page') || '1');
+      const sort = url.searchParams.get('sort') || 'createdAt';
+      const order = url.searchParams.get('order') || 'desc';
 
-    // Build query
-    const skip = (page - 1) * limit;
-    const sortOptions: Record<string, 1 | -1> = {};
-    sortOptions[sort] = order === 'desc' ? -1 : 1;
+      // Build query
+      const skip = (page - 1) * limit;
+      const sortOptions: Record<string, 1 | -1> = {};
+      sortOptions[sort] = order === 'desc' ? -1 : 1;
 
-    // Execute query
-    const [glasses, total] = await Promise.all([
-      Glasses.find({}).sort(sortOptions).skip(skip).limit(limit).lean(),
-      Glasses.countDocuments({}),
-    ]);
+      // Execute query
+      const [glasses, total] = await Promise.all([
+        Product.find({ productType: 'glasses' }).sort(sortOptions).skip(skip).limit(limit).lean(),
+        Product.countDocuments({ productType: 'glasses' }),
+      ]);
 
-    // Return response
-    return NextResponse.json({
-      success: true,
-      data: glasses,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-      },
-    });
+      // Return response
+      return NextResponse.json({
+        success: true,
+        data: glasses,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+        },
+      });
+    } finally {
+      // Ensure we always disconnect from the database
+      await disconnectFromDatabase();
+    }
   } catch (error) {
     console.error('Error fetching glasses:', error);
     return NextResponse.json(
@@ -64,41 +68,47 @@ export async function POST(req: NextRequest) {
     // Connect to database
     await connectToDatabase();
 
-    // Parse request body
-    const body = await req.json();
+    try {
+      // Parse request body
+      const body = await req.json();
 
-    // Validate request body
-    const validationResult = glassesSchema.safeParse(body);
-    if (!validationResult.success) {
+      // Validate request body
+      const validationResult = productSchema.safeParse(body);
+      if (!validationResult.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Validation failed',
+            errors: validationResult.error.errors,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Create new glasses product
+      const newGlasses = new Product({
+        ...validationResult.data,
+        productType: 'glasses',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Save to database
+      await newGlasses.save();
+
+      // Return success response
       return NextResponse.json(
         {
-          success: false,
-          message: 'Validation failed',
-          errors: validationResult.error.errors,
+          success: true,
+          message: 'Glasses product created successfully',
+          data: newGlasses,
         },
-        { status: 400 }
+        { status: 201 }
       );
+    } finally {
+      // Ensure we always disconnect from the database
+      await disconnectFromDatabase();
     }
-
-    // Create new glasses product
-    const newGlasses = new Glasses({
-      ...validationResult.data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-
-    // Save to database
-    await newGlasses.save();
-
-    // Return success response
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Glasses product created successfully',
-        data: newGlasses,
-      },
-      { status: 201 }
-    );
   } catch (error) {
     console.error('Error creating glasses product:', error);
     return NextResponse.json(

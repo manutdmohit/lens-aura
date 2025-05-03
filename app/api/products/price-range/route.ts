@@ -30,15 +30,9 @@ export async function GET(req: NextRequest) {
     }
   } catch (error) {
     console.error('Error fetching price ranges:', error);
-    
-    // Try to disconnect if we're connected
-    try {
-      await disconnectFromDatabase();
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError);
-    }
-    
-    return NextResponse.json({ error: 'Failed to fetch price ranges' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to fetch price ranges'
+    }, { status: 500 });
   }
 }
 
