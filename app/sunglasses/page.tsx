@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductGrid from '@/components/product-grid';
 import { ProductFormValues as Product } from '@/lib/api/validation';
@@ -31,7 +31,8 @@ interface PriceRange {
   } | null;
 }
 
-export default function SunGlassesPage() {
+// Separate the main content to a client component
+function SunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
@@ -113,12 +114,12 @@ export default function SunGlassesPage() {
     <main className="flex flex-col min-h-screen">
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Sun Glasses</h1>
+          <h1 className="text-4xl font-bold mb-4">Sunglasses</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             {priceRange?.lowest ? (
               <>
-                Our designer sunglasses start from just ${priceRange.lowest.price.toFixed(2)}, with options for 
-                prescription lenses available. Explore our stylish collection for every occasion.{' '}
+                Our designer sunglasses start from just ${priceRange.lowest.price.toFixed(2)}. Choose from our wide range of styles and
+                colors.{' '}
                 {priceRange.lowest && (
                   <Link 
                     href={`/sunglasses/${priceRange.lowest.slug}`}
@@ -130,8 +131,8 @@ export default function SunGlassesPage() {
               </>
             ) : (
               <>
-                Our designer sunglasses start from just $95, with options for 
-                prescription lenses available. Explore our stylish collection for every occasion.
+                Our designer sunglasses start from just $95. Choose from our wide range of styles and
+                colors.
               </>
             )}
           </p>
@@ -166,5 +167,14 @@ export default function SunGlassesPage() {
         )}
       </div>
     </main>
+  );
+}
+
+// Main export with Suspense boundary
+export default function SunglassesPage() {
+  return (
+    <Suspense fallback={<LoadingPage loading={true} />}>
+      <SunglassesContent />
+    </Suspense>
   );
 }

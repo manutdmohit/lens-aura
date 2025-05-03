@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductGrid from '@/components/product-grid';
 import { ProductFormValues as Product } from '@/lib/api/validation';
@@ -31,7 +31,8 @@ interface PriceRange {
   } | null;
 }
 
-export default function GlassesPage() {
+// Separate the main content to a client component
+function GlassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
@@ -168,5 +169,14 @@ export default function GlassesPage() {
         )}
       </div>
     </main>
+  );
+}
+
+// Main export with Suspense boundary
+export default function GlassesPage() {
+  return (
+    <Suspense fallback={<LoadingPage loading={true} />}>
+      <GlassesContent />
+    </Suspense>
   );
 }
