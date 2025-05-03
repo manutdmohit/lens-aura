@@ -5,6 +5,7 @@ import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
 import { Glasses, Sun, Star, Quote, ArrowRight, Eye } from 'lucide-react';
 import { Playfair_Display, Montserrat } from 'next/font/google';
+import Image from 'next/image';
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 const montserrat = Montserrat({ subsets: ['latin'] });
@@ -39,19 +40,20 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <AnimatedSection direction="left" delay={0.1}>
                   <div className="group aspect-[3/4] relative overflow-hidden rounded-2xl shadow-2xl">
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=1800&auto=format&fit=crop"
                       alt="Person wearing Bailey Nelson glasses"
                       width={1800}
                       height={2400}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end transition-opacity duration-300">
                       <div className="p-8 text-white w-full">
                         <div className="flex items-center gap-3 mb-3">
                           <Glasses className="w-6 h-6" />
                           <h3 className={`${playfair.className} text-2xl font-bold`}>
-                            Optical Frames
+                            Glasses
                           </h3>
                         </div>
                         <Link
