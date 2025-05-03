@@ -67,7 +67,7 @@ export default function FeaturedProducts() {
       {products.map((product) => (
         <Link 
           key={product._id} 
-          href={`/${product.productType}/${product.slug}`}
+          href={`/product/${product.productType}/${product.slug}`}
         >
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">

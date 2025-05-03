@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, ArrowRight } from "lucide-react"
@@ -9,7 +9,8 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { useCart } from "@/context/cart-context"
 
-export default function CheckoutSuccessPage() {
+// Client component that uses search params
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
   const [orderDetails, setOrderDetails] = useState<any>(null)
@@ -119,5 +120,27 @@ export default function CheckoutSuccessPage() {
       </div>
       <Footer />
     </main>
+  )
+}
+
+// Main export with Suspense boundary
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex flex-col min-h-screen">
+        <Navbar />
+        <div className="flex-grow max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+            <div className="h-32 bg-gray-200 rounded w-full mx-auto mt-8"></div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   )
 }
