@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Check } from 'lucide-react';
+import { ShoppingBag, Check, AlertCircle, ShoppingCart, Clock } from 'lucide-react';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import { useCart } from '@/context/cart-context';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface AddToCartButtonProps {
   product: Product;
@@ -14,30 +15,27 @@ interface AddToCartButtonProps {
   quantity?: number;
 }
 
+
 export default function AddToCartButton({
   product,
   selectedColor,
   quantity = 1,
 }: AddToCartButtonProps) {
+  const router = useRouter();
+
+
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const { addItem, itemCount, items } = useCart();
-  const { toast } = useToast();
 
   // Determine if product is out of stock or has insufficient quantity
-  const isOutOfStock = !product.inStock || product.stockQuantity <= 0;
-  // const hasInsufficientStock = product.stockQuantity < quantity;
+  const isOutOfStock = product.stockQuantity <= 0;
   const cartQuantity =
-    items.find((item) => item.product.slug === product.slug)?.quantity || 0;
+    items.find((item) => item.product.id === product.id)?.quantity || 0;
 
-  const isCartQuanitityGreaterThanProductStockQuantity =
-    cartQuantity + quantity > product.stockQuantity;
+  const hasInsufficientStock = cartQuantity + quantity > product.stockQuantity;
 
-  const buttonDisabled =
-    isAdding ||
-    isOutOfStock ||
-    // hasInsufficientStock ||
-    isCartQuanitityGreaterThanProductStockQuantity;
+  const buttonDisabled = isAdding || isOutOfStock || hasInsufficientStock;
 
   const handleAddToCart = async () => {
     if (buttonDisabled) return;
@@ -45,7 +43,7 @@ export default function AddToCartButton({
     setIsAdding(true);
 
     // Use the first color if none is selected
-    const color = selectedColor || product.colors[0];
+    const color = selectedColor || (product.colors && product.colors.length > 0 ? product.colors[0] : 'default');
 
     // Add item to cart
     addItem(product, quantity, color);
@@ -57,29 +55,49 @@ export default function AddToCartButton({
     setTimeout(() => {
       setIsAdding(false);
       setIsAdded(false);
-    }, 2000);
+      
+      // Show toast notification AFTER the button state has changed for better UX
+      toast.success('Added to Cart', {
+        description: `${product.name} has been added to your cart.`,
+        action: {
+          label: 'View Cart',
+          onClick: () => {
+            // You can add navigation to cart here if needed
+            router.push('/cart');
+          }
+        
+        },
+        position: 'bottom-right',
+        duration: 2000,
+      });
+    }, 1000);
+  };
+
+  // Get icon based on button state
+  const getButtonIcon = () => {
+    if (isAdding) return <Clock className="mr-2 h-5 w-5 animate-spin" />;
+    if (isAdded) return <Check className="mr-2 h-5 w-5" />;
+    if (isOutOfStock) return <AlertCircle className="mr-2 h-5 w-5" />;
+    if (hasInsufficientStock) return <AlertCircle className="mr-2 h-5 w-5" />;
+    return <ShoppingCart className="mr-2 h-5 w-5" />;
   };
 
   // Determine button text based on stock status
   const getButtonText = () => {
     if (isAdding) return 'Adding to Cart...';
     if (isAdded) return 'Added to Cart';
-    // if (isOutOfStock) return 'Out of Stock';
-    // if (hasInsufficientStock) return `Only ${product.stockQuantity} Available`;
-    if (cartQuantity + quantity > product.stockQuantity)
-      return 'Max Stock Reached';
+    if (isOutOfStock) return 'Out of Stock';
+    if (hasInsufficientStock) return 'Max Stock Reached';
     return 'Add to Cart';
   };
 
-  const getItemFromCart = items.find(
-    (item) => item.product.slug === product.slug
-  );
-
-  let productQuantityInStock = 0;
-
-  if (getItemFromCart) {
-    productQuantityInStock = getItemFromCart.quantity;
-  }
+  // Determine button background color based on state
+  const getButtonClass = () => {
+    if (isAdded) return 'bg-blue-600 hover:bg-blue-700 text-white';
+    if (isOutOfStock) return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
+    if (hasInsufficientStock) return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
+    return 'bg-black text-white hover:bg-gray-800';
+  };
 
   return (
     <motion.div
@@ -89,18 +107,18 @@ export default function AddToCartButton({
       <Button
         onClick={handleAddToCart}
         disabled={buttonDisabled}
-        className={`w-full h-12 text-lg ${
-          isAdded
-            ? 'bg-green-600 hover:bg-green-700 text-white'
-            : 'bg-black text-white hover:bg-gray-800'
-        } ${buttonDisabled && !isAdded ? 'opacity-60 cursor-not-allowed' : ''}`}
+        className={`w-full h-12 text-lg transition-colors duration-300 ${getButtonClass()} ${
+          buttonDisabled && !isAdded ? 'opacity-80' : ''
+        }`}
       >
         {isAdding ? (
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="flex items-center justify-center"
           >
+            <Clock className="mr-2 h-5 w-5 animate-spin" />
             Adding to Cart...
           </motion.span>
         ) : isAdded ? (
@@ -115,7 +133,7 @@ export default function AddToCartButton({
           </motion.div>
         ) : (
           <>
-            <ShoppingBag className="mr-2 h-5 w-5" />
+            {getButtonIcon()}
             {getButtonText()}
           </>
         )}

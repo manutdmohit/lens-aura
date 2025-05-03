@@ -10,78 +10,13 @@ import { ProductFormValues as Product } from '@/lib/api/validation';
 import LoadingPage from './loading';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useCart } from '@/context/cart-context';
 
-// Sample product data
-// const products = [
-//   {
-//     id: "1",
-//     name: "Dailies Total 1",
-//     brand: "Alcon",
-//     price: 89.99,
-//     image: "https://images.unsplash.com/photo-1616296425622-4560a2ad2b82?q=80&w=300&auto=format&fit=crop",
-//     description: "Premium daily disposable lenses with water gradient technology for exceptional comfort.",
-//   },
-//   {
-//     id: "2",
-//     name: "Acuvue Oasys 1-Day",
-//     brand: "ACUVUE",
-//     price: 79.99,
-//     image: "https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=300&auto=format&fit=crop",
-//     description: "Daily disposable lenses with HydraLuxe™ Technology for all-day comfort.",
-//   },
-//   {
-//     id: "3",
-//     name: "Biofinity",
-//     brand: "CooperVision",
-//     price: 69.99,
-//     image: "https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=300&auto=format&fit=crop",
-//     description: "Monthly replacement lenses with Aquaform® Technology for natural wettability.",
-//   },
-//   {
-//     id: "4",
-//     name: "Air Optix plus HydraGlyde",
-//     brand: "Alcon",
-//     price: 74.99,
-//     image: "https://images.unsplash.com/photo-1616296425622-4560a2ad2b82?q=80&w=300&auto=format&fit=crop",
-//     description: "Monthly replacement lenses with SmartShield™ Technology for deposit resistance.",
-//   },
-//   {
-//     id: "5",
-//     name: "1-Day Acuvue Moist",
-//     brand: "ACUVUE",
-//     price: 65.99,
-//     image: "https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=300&auto=format&fit=crop",
-//     description: "Daily disposable lenses with LACREON® Technology for long-lasting comfort.",
-//   },
-//   {
-//     id: "6",
-//     name: "Dailies AquaComfort Plus",
-//     brand: "Alcon",
-//     price: 59.99,
-//     image: "https://images.unsplash.com/photo-1616296425622-4560a2ad2b82?q=80&w=300&auto=format&fit=crop",
-//     description: "Daily disposable lenses with triple action moisture technology.",
-//   },
-//   {
-//     id: "7",
-//     name: "MyDay",
-//     brand: "CooperVision",
-//     price: 72.99,
-//     image: "https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=300&auto=format&fit=crop",
-//     description: "Daily disposable lenses with Smart Silicone™ chemistry for breathability.",
-//   },
-//   {
-//     id: "8",
-//     name: "Acuvue Oasys for Astigmatism",
-//     brand: "ACUVUE",
-//     price: 84.99,
-//     image: "https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=300&auto=format&fit=crop",
-//     description: "Bi-weekly replacement toric lenses for astigmatism with HYDRACLEAR® PLUS Technology.",
-//   },
-// ]
 
 export default function ContactLensProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addItem, items } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -102,6 +37,36 @@ export default function ContactLensProducts() {
     fetchProducts();
   }, []);
 
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Find this product in cart to check current quantity
+    const cartItem = items.find(item => item.product.id === product.id);
+    const currentQuantity = cartItem ? cartItem.quantity : 0;
+    
+    // Check if adding one more would exceed stock
+    if (currentQuantity >= (product.stockQuantity || 0)) {
+      toast.error(`Maximum available quantity reached (${product.stockQuantity})`);
+      return;
+    }
+    
+    addItem(product, 1, 'default');
+    toast.success(`Added ${product.name} to cart`);
+  };
+
+
+  
+  
+  const isOutOfStock = (product: Product) => {
+    return !product.stockQuantity || product.stockQuantity <= 0;
+  };
+  
+  const isMaxLimitReached = (product: Product) => {
+    const cartItem = items.find(item => item.product.id === product.id);
+    return cartItem && cartItem.quantity >= (product.stockQuantity || 0);
+  };
+
   if (loading) {
     return <LoadingPage loading={loading} />;
   }
@@ -117,9 +82,10 @@ export default function ContactLensProducts() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.05 }}
+          className="flex"
         >
-          <Link href="/contacts/[slug]" as={`/contacts/${product.slug}`}>
-            <Card className="h-full flex flex-col">
+          <Card className="w-full flex flex-col">
+            <Link href={`/contacts/${product.slug}`} className="block">
               <div className="aspect-square bg-gray-100 flex items-center justify-center p-4">
                 <Image
                   src={product.imageUrl || '/placeholder.svg'}
@@ -130,26 +96,54 @@ export default function ContactLensProducts() {
                   priority
                 />
               </div>
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <div className="mb-auto">
+              <CardContent className="p-4 flex flex-col h-44">
+                <div>
                   <p className="text-sm text-gray-500">{product.brand}</p>
-                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">
+                  <h3 className="font-bold text-lg line-clamp-1">{product.name}</h3>
+                  <p className="text-gray-600 text-sm line-clamp-2 mb-2">
                     {product.description}
                   </p>
                 </div>
-                <div className="mt-4">
-                  <p className="text-lg font-medium mb-4">
-                    ${product.price.toFixed(2)}
-                  </p>
-                  <Button className="w-full bg-black text-white hover:bg-gray-800">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
+                <div className="mt-auto">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-lg font-medium">
+                      ${product.price.toFixed(2)}
+                    </p>
+                    {(product.stockQuantity > 0) && (
+                      <p className="text-xs text-gray-500">
+                        Stock: {product.stockQuantity}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
-            </Card>
-          </Link>
+            </Link>
+            <div className="px-4 pb-4">
+              {isOutOfStock(product) ? (
+                <Button 
+                  className="w-full bg-gray-300 text-gray-700 cursor-not-allowed"
+                  disabled
+                >
+                  Out of Stock
+                </Button>
+              ) : isMaxLimitReached(product) ? (
+                <Button 
+                  className="w-full bg-amber-500 text-white cursor-not-allowed"
+                  disabled
+                >
+                  Max Limit Reached
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full bg-black text-white hover:bg-gray-800"
+                  onClick={(e) => handleAddToCart(e, product)}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Add to Cart
+                </Button>
+              )}
+            </div>
+          </Card>
         </motion.div>
       ))}
     </div>

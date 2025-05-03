@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 
 const lensTypes = [
   {
@@ -39,15 +40,22 @@ export default function ContactLensTypes() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex"
         >
-          <Card className="h-full">
-            <div className="aspect-square overflow-hidden">
-              <img src={type.image || "/placeholder.svg"} alt={type.title} className="w-full h-full object-cover" />
+          <Card className="w-full flex flex-col">
+            <div className="aspect-square overflow-hidden relative">
+              <Image
+                src={type.image || "/placeholder.svg"}
+                alt={type.title}
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex flex-col flex-grow">
               <h3 className="text-xl font-bold mb-2">{type.title}</h3>
               <p className="text-gray-600 mb-4">{type.description}</p>
-              <div className="space-y-1">
+              <div className="space-y-1 mt-auto">
                 {type.features.map((feature, i) => (
                   <p key={i} className="text-sm flex items-center">
                     <span className="text-black mr-2">•</span>

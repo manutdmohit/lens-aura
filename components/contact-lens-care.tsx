@@ -46,9 +46,10 @@ export default function ContactLensCare() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex"
         >
-          <Card className="h-full">
-            <CardContent className="p-6 flex flex-col items-center text-center">
+          <Card className="w-full flex flex-col">
+            <CardContent className="p-6 flex flex-col items-center text-center flex-grow">
               <div className="mb-4 p-3 bg-blue-50 rounded-full">{step.icon}</div>
               <h3 className="text-xl font-bold mb-2">{step.title}</h3>
               <p className="text-gray-600">{step.description}</p>

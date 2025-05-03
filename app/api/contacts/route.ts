@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       productType: 'contacts',
     })
       .sort({ createdAt: -1 })
-      .select('name brand description slug productType price imageUrl')
+      .select('name brand description slug productType price imageUrl stockQuantity inStock')
       .limit(10);
 
     return NextResponse.json(products, { status: 200 });

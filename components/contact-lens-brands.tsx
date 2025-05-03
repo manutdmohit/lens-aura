@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -45,17 +46,27 @@ export default function ContactLensBrands() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex"
         >
-          <Card className="h-full">
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <div className="h-24 flex items-center justify-center mb-4">
-                <img src={brand.logo || "/placeholder.svg"} alt={`${brand.name} logo`} className="max-h-full" />
+          <Card className="w-full flex flex-col">
+            <CardContent className="p-6 flex flex-col items-center text-center h-full">
+              <div className="h-24 flex items-center justify-center mb-4 relative w-full">
+                <Image
+                  src={brand.logo || "/placeholder.svg"}
+                  alt={`${brand.name} logo`}
+                  width={160}
+                  height={80}
+                  className="max-h-full object-contain"
+                  priority
+                />
               </div>
               <h3 className="text-xl font-bold mb-2">{brand.name}</h3>
               <p className="text-gray-600 mb-4">{brand.description}</p>
-              <Button asChild className="w-full bg-black text-white hover:bg-gray-800 mt-auto">
-                <Link href={brand.link}>{brand.buttonText}</Link>
-              </Button>
+              <div className="mt-auto w-full">
+                <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                  <Link href={brand.link}>{brand.buttonText}</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
