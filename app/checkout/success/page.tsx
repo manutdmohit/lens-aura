@@ -36,11 +36,19 @@ export default function CheckoutSuccessPage() {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [hasLoadedOrder, setHasLoadedOrder] = useState(false)
   const { clearCart } = useCart()
 
   useEffect(() => {
+    // Prevent redundant fetching once order details have been loaded
+    if (hasLoadedOrder) {
+      console.log('[DEBUG] Order details already loaded, skipping fetch');
+      return;
+    }
+    
     const fetchOrderDetails = async () => {
       if (!sessionId) {
+        console.log('[DEBUG] No session ID found in URL');
         setError("No checkout session found")
         setIsLoading(false)
         return
@@ -48,26 +56,59 @@ export default function CheckoutSuccessPage() {
 
       try {
         // Clean the session ID - sometimes it might get malformed in transit
-        const cleanSessionId = sessionId.trim().replace(/['"]/g, '')
-        console.log(`Fetching order details for session: ${cleanSessionId}`)
+        // Remove any quotes and whitespace, and fix the 'ccs_test' prefix if present
+        const cleanSessionId = sessionId
+          .trim()
+          .replace(/['"]/g, '')
+          .replace(/^ccs_test/, 'cs_test');
+        
+        console.log(`[DEBUG] Original session ID: ${sessionId}`);
+        console.log(`[DEBUG] Cleaned session ID: ${cleanSessionId}`);
         
         const response = await fetch(`/api/stripe-sessions/${cleanSessionId}`)
         
         if (!response.ok) {
           const errorData = await response.json()
-          console.error("Error response:", errorData)
+          console.error("[DEBUG] Error response:", errorData)
           throw new Error(errorData.error || "Failed to fetch order details")
         }
         
         const data = await response.json()
+        console.log('[DEBUG] Successfully fetched order details:', data)
         setOrderDetails(data)
+        setHasLoadedOrder(true)
+        
+        // If the order is paid, ensure stock is reduced
+        if (data.paymentStatus === 'paid') {
+          try {
+            console.log('[DEBUG] Order is paid, ensuring stock reduction');
+            // Call our new API endpoint to reduce stock
+            const stockUpdateResponse = await fetch('/api/checkout/success', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ sessionId: cleanSessionId }),
+            });
+            
+            if (stockUpdateResponse.ok) {
+              const stockResult = await stockUpdateResponse.json();
+              console.log('[DEBUG] Stock update result:', stockResult);
+            } else {
+              console.error('[DEBUG] Failed to update stock:', await stockUpdateResponse.json());
+            }
+          } catch (stockError) {
+            console.error('[DEBUG] Error updating stock:', stockError);
+            // We don't need to show this error to the user as it's a background operation
+          }
+        }
         
         // Clear the cart if we've successfully loaded order details
         // This ensures we only clear when there's actually a valid order
         clearCart()
-        console.log("Cart cleared after successful order")
+        console.log("[DEBUG] Cart cleared after successful order")
       } catch (err) {
-        console.error("Error fetching order details:", err)
+        console.error("[DEBUG] Error fetching order details:", err)
         setError("Could not retrieve order details")
       } finally {
         setIsLoading(false)
@@ -75,7 +116,7 @@ export default function CheckoutSuccessPage() {
     }
 
     fetchOrderDetails()
-  }, [sessionId, clearCart])
+  }, [sessionId, clearCart, hasLoadedOrder])
 
   // Redirect to home if no session ID after 5 seconds
   useEffect(() => {
@@ -89,7 +130,9 @@ export default function CheckoutSuccessPage() {
 
   // Add a polling mechanism to refresh order status periodically
   useEffect(() => {
-    if (sessionId && orderDetails?.paymentStatus === 'pending') {
+    // Only start polling if sessionId exists and we're waiting for payment to complete
+    if (sessionId && orderDetails && orderDetails.paymentStatus === 'pending') {
+      console.log('Starting payment status polling for pending order');
       const interval = setInterval(async () => {
         try {
           const response = await fetch(`/api/stripe-sessions/${sessionId}`)
@@ -104,6 +147,7 @@ export default function CheckoutSuccessPage() {
             
             // Stop polling if payment is no longer pending
             if (data.paymentStatus !== 'pending') {
+              console.log('Payment status is no longer pending, stopping polling');
               clearInterval(interval)
             }
           }
@@ -114,7 +158,12 @@ export default function CheckoutSuccessPage() {
       
       return () => clearInterval(interval)
     }
-  }, [sessionId, orderDetails?.paymentStatus])
+    
+    // Don't poll if order is already paid
+    if (orderDetails && orderDetails.paymentStatus === 'paid') {
+      console.log('Order is already paid, no need to poll for status updates');
+    }
+  }, [sessionId, orderDetails])
 
   // Add a function to manually check and update payment status
   const checkAndUpdatePaymentStatus = async (sessionId: string) => {

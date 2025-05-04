@@ -4,6 +4,8 @@ import { updateOrderFromStripeSession, createPendingOrder } from '@/lib/order-se
 import { getCheckoutSession } from '@/lib/stripe';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
+import { updateProductStock } from '@/lib/products';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -13,101 +15,96 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(request: NextRequest) {
-  console.log('Webhook received:', new Date().toISOString());
+  console.log('[DEBUG] Webhook received:', new Date().toISOString());
   
   try {
     const body = await request.text();
-    console.log('Webhook body length:', body.length);
+    console.log('[DEBUG] Webhook body length:', body.length);
     
     const signature = request.headers.get('stripe-signature') || '';
-    console.log('Signature present:', !!signature);
-    console.log('Endpoint secret present:', !!endpointSecret);
+    console.log('[DEBUG] Signature present:', !!signature);
+    console.log('[DEBUG] Endpoint secret present:', !!endpointSecret);
 
     // Verify webhook signature
     let event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-      console.log('Event constructed successfully:', event.type);
+      console.log('[DEBUG] Event constructed successfully:', event.type);
     } catch (err: any) {
-      console.error(`⚠️ Webhook signature verification failed:`, err.message);
+      console.error('[DEBUG] Webhook signature verification failed:', err.message);
       return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
-      console.log('Received checkout.session.completed event for session:', event.data.object.id);
-      
-      // Extract the session object
+      console.log('[DEBUG] Processing checkout.session.completed event');
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log('Payment status:', session.payment_status);
-      console.log('Payment intent:', session.payment_intent);
-      
-      // Only process if payment was successful
-      if (session.payment_status === 'paid') {
-        console.log('Payment confirmed as paid, updating order...');
-        await handleCheckoutCompleted(session);
-      } else if (session.payment_status === 'unpaid') {
-        // This is normal for some payment methods that confirm later
-        console.log(`Payment not yet confirmed (status: ${session.payment_status}), skipping order update for now`);
-      } else {
-        console.log(`Unknown payment status: ${session.payment_status}`);
-      }
-    } else if (event.type === 'payment_intent.succeeded') {
-      console.log('Received payment_intent.succeeded event');
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log('Payment intent ID:', paymentIntent.id);
       
       try {
-        // First try to find order by payment intent ID
-        console.log('Looking for order with payment intent:', paymentIntent.id);
+        await handleCheckoutCompleted(session);
+      } catch (error) {
+        console.error('[DEBUG] Error handling checkout completed:', error);
+      }
+    } else if (event.type === 'payment_intent.succeeded') {
+      console.log('[DEBUG] Processing payment_intent.succeeded event');
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      
+      try {
+        // First try to find the order by payment intent ID
         await connectToDatabase();
         let order = await Order.findOne({ paymentIntent: paymentIntent.id });
         
         if (order) {
-          console.log(`Found order ${order._id} by payment intent, updating status to paid`);
+          console.log(`[DEBUG] Found order ${order._id} by payment intent, updating status to paid`);
           order.paymentStatus = 'paid';
           await order.save();
-          console.log(`Order ${order._id} updated to paid status`);
+          console.log(`[DEBUG] Order ${order._id} updated to paid status`);
+          
+          // Update stock quantities when payment intent succeeds
+          await updateProductStockFromStripeOrder(order);
         } else {
           // Find session associated with this payment intent
-          console.log('No order found by payment intent, looking for session...');
+          console.log('[DEBUG] No order found by payment intent, looking for session...');
           const sessions = await stripe.checkout.sessions.list({
             payment_intent: paymentIntent.id,
             expand: ['data.customer_details']
           });
           
           if (sessions.data.length > 0) {
-            console.log(`Found session for payment intent: ${sessions.data[0].id}`);
+            console.log(`[DEBUG] Found session for payment intent: ${sessions.data[0].id}`);
             
             // Find order by session ID
             order = await Order.findOne({ stripeSessionId: sessions.data[0].id });
             
             if (order) {
-              console.log(`Found order ${order._id} by session ID, updating status to paid`);
+              console.log(`[DEBUG] Found order ${order._id} by session ID, updating status to paid`);
               order.paymentStatus = 'paid';
               order.paymentIntent = paymentIntent.id;
               await order.save();
-              console.log(`Order ${order._id} updated to paid status`);
+              console.log(`[DEBUG] Order ${order._id} updated to paid status`);
+              
+              // Update stock quantities when payment intent succeeds
+              await updateProductStockFromStripeOrder(order);
             } else {
-              console.log(`No order found for session: ${sessions.data[0].id}, creating one...`);
+              console.log(`[DEBUG] No order found for session: ${sessions.data[0].id}, creating one...`);
               await handleCheckoutCompleted(sessions.data[0]);
             }
           } else {
-            console.log('No session found for payment intent:', paymentIntent.id);
+            console.log('[DEBUG] No session found for payment intent:', paymentIntent.id);
           }
         }
       } catch (error) {
-        console.error('Error processing payment intent:', error);
+        console.error('[DEBUG] Error processing payment intent:', error);
       }
     } else {
-      console.log(`Unhandled event type: ${event.type}`);
+      console.log(`[DEBUG] Unhandled event type: ${event.type}`);
     }
 
     // Return a 200 response to acknowledge receipt of the event
-    console.log('Webhook processed successfully');
+    console.log('[DEBUG] Webhook processed successfully');
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error);
+    console.error('[DEBUG] Error processing webhook:', error);
     return NextResponse.json(
       { error: `Webhook handler failed: ${error.message}` }, 
       { status: 500 }
@@ -200,21 +197,61 @@ async function createOrderFromStripeSession(session: Stripe.Checkout.Session): P
   try {
     await connectToDatabase();
     
+    // Extract the session metadata for redundant product IDs
+    const sessionMetadata = session.metadata || {};
+    console.log('Session metadata:', JSON.stringify(sessionMetadata));
+    
     // Extract line items
     const lineItems = session.line_items?.data || [];
+    console.log('Line items data:', JSON.stringify(lineItems, null, 2));
+    
+    // Check if we have product IDs in session metadata as a backup
+    const backupProductIds = sessionMetadata.productIds ? sessionMetadata.productIds.split(',') : [];
+    console.log('Backup product IDs from session metadata:', backupProductIds);
     
     // Format order items
-    const orderItems = lineItems.map(item => {
+    const orderItems = lineItems.map((item, index) => {
       const productData = item.price?.product as Stripe.Product;
+      console.log(`Processing line item ${index + 1}:`, item.description);
+      
+      // Log the full product data for debugging
+      console.log('Product data:', JSON.stringify(productData, null, 2));
+      
+      // Try getting metadata from various sources
+      const priceMetadata = (item.price as any)?.product_data?.metadata || {};
+      const productMetadata = productData?.metadata || {};
+      
+      console.log('Price metadata:', JSON.stringify(priceMetadata, null, 2));
+      console.log('Product metadata:', JSON.stringify(productMetadata, null, 2));
+      
+      // Try multiple approaches to get the product ID
+      // 1. From price metadata (most reliable)
+      // 2. From product metadata
+      // 3. From session metadata backup (if index matches)
+      // 4. From product ID itself
+      const productId = 
+        priceMetadata.productId || 
+        productMetadata.productId || 
+        (backupProductIds[index] || '') || 
+        productData.id || '';
+        
+      console.log(`Resolved product ID for item ${index + 1}: ${productId}`);
+      
+      if (!productId) {
+        console.warn(`⚠️ Warning: Could not resolve product ID for item: ${item.description || 'Unknown'}`);
+      }
+      
       return {
-        productId: productData.metadata?.productId || '',
+        productId: productId,
         name: item.description || productData.name || 'Unknown Product',
         price: (item.price?.unit_amount || 0) / 100, // Convert from cents
         quantity: item.quantity || 1,
-        color: productData.metadata?.color || 'Default',
+        color: priceMetadata.color || productMetadata.color || 'Default',
         imageUrl: productData.images?.[0] || '',
       };
     });
+    
+    console.log('Formatted order items:', JSON.stringify(orderItems, null, 2));
     
     // Calculate total amount
     const totalAmount = orderItems.reduce(
@@ -226,7 +263,7 @@ async function createOrderFromStripeSession(session: Stripe.Checkout.Session): P
     const order = new Order({
       items: orderItems,
       totalAmount,
-      paymentStatus: 'pending',
+      paymentStatus: session.payment_status === 'paid' ? 'paid' : 'pending',
       stripeSessionId: session.id,
       // Customer data will be updated later with updateOrderFromStripeSession
     });
@@ -234,9 +271,126 @@ async function createOrderFromStripeSession(session: Stripe.Checkout.Session): P
     await order.save();
     console.log(`Created order from Stripe session: ${order._id}`);
     
+    // If payment is already marked as paid, update product stock
+    if (session.payment_status === 'paid') {
+      await updateProductStockFromStripeOrder(order);
+    }
+    
     return { orderId: order._id, orderNumber: order.orderNumber };
   } catch (error) {
     console.error('Error creating order from Stripe session:', error);
     throw error;
+  }
+}
+
+/**
+ * Updates product stock quantities for orders created directly from Stripe
+ */
+async function updateProductStockFromStripeOrder(order: any) {
+  try {
+    console.log('Updating product stock quantities for Stripe order:', order._id);
+    console.log('Order items:', JSON.stringify(order.items, null, 2));
+    
+    if (!order.items || !Array.isArray(order.items) || order.items.length === 0) {
+      console.error('No items found in order');
+      return;
+    }
+    
+    // For each item in the order
+    for (const item of order.items) {
+      // Skip if no productId
+      if (!item.productId) {
+        console.warn(`Skipping stock update for item without productId: ${item.name}`);
+        continue;
+      }
+      
+      console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
+      
+      try {
+        // Use our utility function to update the product stock
+        const updatedProduct = await updateProductStock(item.productId, item.quantity);
+        
+        if (!updatedProduct) {
+          console.error(`Failed to update stock for product ${item.productId}`);
+          continue;
+        }
+        
+        console.log(`Successfully updated stock for ${updatedProduct.name}: ${updatedProduct.stockQuantity} remaining (in stock: ${updatedProduct.inStock})`);
+      } catch (itemError) {
+        console.error(`Error updating stock for product ${item.productId}:`, itemError);
+        
+        // Fall back to direct update if the utility function fails
+        try {
+          // Directly find and update the product
+          const product = await Product.findById(item.productId);
+          
+          if (!product) {
+            console.error(`Product not found in fallback: ${item.productId}`);
+            continue;
+          }
+          
+          console.log(`Fallback: Current stock for ${product.name}: ${product.stockQuantity}`);
+          
+          // Calculate new stock quantity
+          const newStockQuantity = Math.max(0, product.stockQuantity - item.quantity);
+          
+          // Update the product
+          product.stockQuantity = newStockQuantity;
+          product.inStock = newStockQuantity > 0;
+          
+          // Save the product
+          await product.save();
+          
+          console.log(`Fallback: Updated stock for ${product.name}: ${product.stockQuantity} remaining`);
+        } catch (fallbackError) {
+          console.error(`Fallback stock update also failed for ${item.productId}:`, fallbackError);
+        }
+      }
+    }
+    
+    console.log('Stock update completed for order:', order._id);
+  } catch (error) {
+    console.error('Error updating product stock quantities:', error);
+    // We don't throw here to prevent breaking the payment process
+  }
+}
+
+/**
+ * Update product stock directly with MongoDB operations
+ * This is a fallback method to ensure stock is updated correctly
+ */
+async function updateProductStockDirectly(productId: string, quantity: number) {
+  try {
+    console.log(`Direct MongoDB update for product ${productId}, reducing by ${quantity}`);
+    
+    // First get the current stock quantity
+    const currentProduct = await Product.findById(productId);
+    if (!currentProduct) {
+      console.error(`Product not found for direct update: ${productId}`);
+      return;
+    }
+    
+    // Calculate new stock
+    const newStock = Math.max(0, currentProduct.stockQuantity - quantity);
+    
+    // Direct MongoDB update
+    const result = await Product.findByIdAndUpdate(
+      productId,
+      { 
+        $set: { 
+          stockQuantity: newStock,
+          inStock: newStock > 0
+        }
+      },
+      { new: true }
+    );
+    
+    if (result) {
+      console.log(`Direct update successful, new stock: ${result.stockQuantity}`);
+    } else {
+      console.log(`Direct update failed, product may be out of stock or not found`);
+    }
+  } catch (error) {
+    console.error(`Error in direct stock update for ${productId}:`, error);
   }
 } 

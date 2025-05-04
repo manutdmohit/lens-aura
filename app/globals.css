@@ -67,12 +67,19 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+  
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    position: relative;
+    padding-top: 140px; /* Adjust based on your header height */
   }
 }
 
@@ -84,6 +91,29 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Shimmer effect for navbar */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 12s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* Animation utilities */
@@ -167,7 +197,12 @@
 
 /* Ensure the header has proper positioning context */
 header {
-  position: relative;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 50 !important;
 }
 
 /* Ensure mega menu is properly positioned */

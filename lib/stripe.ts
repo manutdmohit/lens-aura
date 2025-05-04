@@ -77,6 +77,19 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       // Validate the image URL
       const validatedImageUrl = validateImageUrl(item.product.imageUrl);
       
+      // Log product ID for debugging
+      console.log(`Adding product to Stripe checkout: ID=${item.product.id}, Name=${item.product.name}`);
+      
+      // Create a detailed metadata object for each product
+      const productMetadata = {
+        productId: item.product.id || '',
+        color: item.color || 'Default',
+        name: item.product.name
+      };
+      
+      // Log the metadata we're sending to Stripe
+      console.log('Product metadata:', JSON.stringify(productMetadata));
+      
       return {
         price_data: {
           currency: "aud",
@@ -84,10 +97,7 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
             name: item.product.name,
             description: `Color: ${item.color}`,
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
-            metadata: {
-              productId: item.product.id || '',
-              color: item.color
-            }
+            metadata: productMetadata
           },
           unit_amount: Math.round(item.product.price * 100), // Convert to cents
         },
@@ -95,7 +105,15 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       };
     });
 
-    console.log(`Creating Stripe checkout session with ${lineItems.length} items`)
+    // Also store product IDs in the session metadata for redundancy
+    const sessionMetadata = {
+      orderId: `order_${Date.now()}`,
+      itemCount: items.length.toString(),
+      productIds: items.map(item => item.product.id).join(',')
+    };
+    
+    console.log(`Creating Stripe checkout session with ${lineItems.length} items`);
+    console.log('Session metadata:', JSON.stringify(sessionMetadata));
     
     // Create a checkout session
     // Note: To fully disable Link, currency conversion, and currency selector, 
@@ -109,10 +127,7 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       allow_promotion_codes: false,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      metadata: {
-        orderId: `order_${Date.now()}`,
-        itemCount: items.length.toString()
-      },
+      metadata: sessionMetadata,
       shipping_address_collection: {
         allowed_countries: ["AU"],
       },
@@ -170,12 +185,30 @@ export async function getCheckoutSession(sessionId: string) {
   }
 
   try {
-    // Retrieve the checkout session
+    console.log(`Retrieving checkout session: ${sessionId}`);
+    
+    // Retrieve the checkout session with expanded objects
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["line_items", "customer_details"],
-    })
+      expand: [
+        'line_items',
+        'line_items.data.price.product',
+        'customer_details'
+      ],
+    });
+    
+    console.log(`Session retrieved successfully, payment status: ${session.payment_status}`);
+    
+    // Log the metadata for debugging
+    if (session.metadata) {
+      console.log('Session metadata:', JSON.stringify(session.metadata));
+    }
+    
+    // Log product IDs if available in metadata
+    if (session.metadata?.productIds) {
+      console.log('Product IDs from metadata:', session.metadata.productIds);
+    }
 
-    return session
+    return session;
   } catch (error: any) {
     console.error("Error retrieving checkout session:", error)
     throw new Error(`Failed to retrieve checkout details: ${error.message || "Unknown error"}`)

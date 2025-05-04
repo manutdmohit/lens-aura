@@ -14,50 +14,62 @@ export async function GET(
   { params }: { params: { sessionId: string } }
 ) {
   try {
-    // Properly await the params object before accessing properties
-    const sessionParams = await Promise.resolve(params);
-    const sessionId = sessionParams.sessionId;
-    
-    console.log(`Fetching order for session ID: ${sessionId}`);
-    
-    if (!sessionId) {
-      console.log('No session ID provided');
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
-    }
-    
     await connectToDatabase();
     
-    // Find the order by Stripe session ID
-    console.log(`Looking up order with stripeSessionId: ${sessionId}`);
-    const order = await Order.findOne({ stripeSessionId: sessionId });
+    // Clean the session ID - handle various formats
+    const cleanSessionId = params.sessionId
+      .trim()
+      .replace(/['"]/g, '')
+      .replace(/^ccs_test/, 'cs_test')
+      .replace(/^cs_test/, 'cs_test'); // Ensure consistent format
+    
+    console.log(`[DEBUG] Original session ID: ${params.sessionId}`);
+    console.log(`[DEBUG] Cleaned session ID: ${cleanSessionId}`);
+    
+    // Try to find the order with the cleaned session ID
+    const order = await Order.findOne({ stripeSessionId: cleanSessionId });
     
     if (!order) {
-      console.log(`No order found for session ID: ${sessionId}`);
+      console.log(`[DEBUG] No order found for session ID: ${cleanSessionId}`);
+      
+      // Try alternative formats
+      const alternativeFormats = [
+        cleanSessionId,
+        cleanSessionId.replace(/^cs_test/, 'ccs_test'),
+        cleanSessionId.replace(/^ccs_test/, 'cs_test')
+      ];
+      
+      console.log(`[DEBUG] Trying alternative session ID formats:`, alternativeFormats);
+      
+      for (const format of alternativeFormats) {
+        const altOrder = await Order.findOne({ stripeSessionId: format });
+        if (altOrder) {
+          console.log(`[DEBUG] Found order with alternative format: ${format}`);
+          return NextResponse.json(altOrder);
+        }
+      }
       
       // Count all orders to check if the database has any records
       const totalOrders = await Order.countDocuments({});
-      console.log(`Total orders in database: ${totalOrders}`);
+      console.log(`[DEBUG] Total orders in database: ${totalOrders}`);
       
       // Get a list of recent orders to check their session IDs
       const recentOrders = await Order.find().sort({ createdAt: -1 }).limit(5);
-      console.log('Recent order session IDs:');
+      console.log('[DEBUG] Recent order session IDs:');
       recentOrders.forEach(order => {
-        console.log(`- Order: ${order._id}, Session ID: ${order.stripeSessionId}`);
+        console.log(`[DEBUG] - Order: ${order._id}, Session ID: ${order.stripeSessionId}`);
       });
       
       // Try to retrieve the session from Stripe
       try {
-        console.log(`Attempting to retrieve session ${sessionId} from Stripe...`);
+        console.log(`[DEBUG] Attempting to retrieve session ${cleanSessionId} from Stripe...`);
         const stripeSession = await stripe.checkout.sessions.retrieve(
-          sessionId,
+          cleanSessionId,
           { expand: ['line_items', 'customer_details'] }
         );
         
         if (stripeSession) {
-          console.log(`Found Stripe session: ${stripeSession.id}, status: ${stripeSession.status}, payment status: ${stripeSession.payment_status}`);
+          console.log(`[DEBUG] Found Stripe session: ${stripeSession.id}, status: ${stripeSession.status}, payment status: ${stripeSession.payment_status}`);
           
           // For debugging purposes, return a special response
           return NextResponse.json(
@@ -72,7 +84,7 @@ export async function GET(
           );
         }
       } catch (stripeError) {
-        console.error('Error retrieving Stripe session:', stripeError);
+        console.error('[DEBUG] Error retrieving Stripe session:', stripeError);
       }
       
       return NextResponse.json(
@@ -81,23 +93,12 @@ export async function GET(
       );
     }
     
-    console.log(`Order found: ${order._id}, payment status: ${order.paymentStatus}`);
-    
-    // Return the order details
-    return NextResponse.json({
-      id: order._id,
-      orderNumber: order.orderNumber,
-      customerEmail: order.customerEmail,
-      items: order.items,
-      totalAmount: order.totalAmount,
-      paymentStatus: order.paymentStatus,
-      createdAt: order.createdAt,
-    });
-    
+    console.log(`[DEBUG] Found order: ${order._id}`);
+    return NextResponse.json(order);
   } catch (error) {
-    console.error('Error retrieving order details:', error);
+    console.error('[DEBUG] Error retrieving order:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve order details' },
+      { error: 'Failed to retrieve order' },
       { status: 500 }
     );
   }

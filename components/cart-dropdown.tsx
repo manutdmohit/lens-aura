@@ -83,15 +83,15 @@ export default function CartDropdown() {
       {/* Cart Icon Button */}
       <button
         onClick={toggleDropdown}
-        className="relative p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-full"
+        className="relative p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded-full"
         aria-label={`Shopping cart with ${itemCount} items`}
         aria-expanded={isOpen}
         aria-controls="cart-dropdown"
       >
-        <ShoppingBag className="h-6 w-6 text-gray-700" />
+        <ShoppingBag className="h-6 w-6 text-white hover:text-purple-300 transition-colors" />
         {itemCount > 0 && (
           <motion.span
-            className="absolute -top-2 -right-2 bg-black text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
+            className="absolute -top-2 -right-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{
@@ -147,7 +147,7 @@ export default function CartDropdown() {
                 <p className="text-gray-600 mb-4">Your cart is empty</p>
                 <Button
                   asChild
-                  className="bg-black text-white hover:bg-gray-800"
+                  className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90"
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href="/">Continue Shopping</Link>
@@ -268,7 +268,7 @@ export default function CartDropdown() {
                   <div className="space-y-2">
                     <Button
                       asChild
-                      className="w-full bg-black text-white hover:bg-gray-800"
+                      className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90"
                       onClick={() => setIsOpen(false)}
                     >
                       <Link href="/checkout">
@@ -279,7 +279,7 @@ export default function CartDropdown() {
                     <Button
                       asChild
                       variant="outline"
-                      className="w-full"
+                      className="w-full border-purple-200 hover:bg-purple-50 hover:text-purple-700"
                       onClick={() => setIsOpen(false)}
                     >
                       <Link href="/cart">View Cart</Link>

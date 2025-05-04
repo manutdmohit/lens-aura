@@ -74,24 +74,44 @@ export interface IProduct extends Document {
 
 const ProductSchema = new Schema<IProduct>(
   {
-    name: { type: String, required: true, trim: true, index: true },
+    name: {
+      type: String,
+      required: [true, 'Product name is required'],
+      trim: true,
+    },
     slug: { type: String, required: true, trim: true, index: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true, min: 0 },
-    imageUrl: { type: String, required: true },
-    stockQuantity: { type: Number, required: true, min: 0, default: 0 },
+    description: {
+      type: String,
+      required: [true, 'Product description is required'],
+    },
+    price: {
+      type: Number,
+      required: [true, 'Product price is required'],
+      min: [0, 'Price cannot be negative'],
+    },
+    imageUrl: {
+      type: String,
+      required: [true, 'Product image URL is required'],
+    },
+    stockQuantity: {
+      type: Number,
+      required: [true, 'Stock quantity is required'],
+      min: [0, 'Stock quantity cannot be negative'],
+      default: 0,
+    },
     inStock: {
       type: Boolean,
-      default: function (this: IProduct) {
-        return this.stockQuantity > 0;
-      },
+      default: true,
     },
     productType: {
       type: String,
       required: true,
       enum: ['glasses', 'sunglasses', 'contacts'],
     },
-    colors: { type: [String], default: [] },
+    colors: [{
+      name: String,
+      hex: String,
+    }],
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
 
     // Shared: Glasses & Sunglasses
@@ -203,6 +223,39 @@ ProductSchema.pre('save', async function (next) {
   }
   next();
 });
+
+// Update the updatedAt field before saving
+ProductSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Update the updatedAt field before updating
+ProductSchema.pre('findOneAndUpdate', function(next) {
+  this.set({ updatedAt: new Date() });
+  next();
+});
+
+// Ensure stockQuantity and inStock are in sync
+ProductSchema.pre('save', function(next) {
+  this.inStock = this.stockQuantity > 0;
+  next();
+});
+
+// Ensure stockQuantity and inStock are in sync for updates
+ProductSchema.pre('findOneAndUpdate', function(next) {
+  const update = this.getUpdate() as { $set?: { stockQuantity?: number } };
+  const stockQuantity = update?.$set?.stockQuantity;
+  if (stockQuantity !== undefined) {
+    this.set({ inStock: stockQuantity > 0 });
+  }
+  next();
+});
+
+// Create indexes for better query performance
+ProductSchema.index({ name: 'text', description: 'text' });
+ProductSchema.index({ slug: 1 });
+ProductSchema.index({ inStock: 1 });
 
 const Product: Model<IProduct> =
   mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

@@ -187,35 +187,37 @@ export default function Navbar() {
   // Update renderNavItem with improved style and animation
   const renderNavItem = (title: string, href: string, menuId: string) => (
     <div
-      className="h-full"
+      className="h-full flex items-center"
       onMouseEnter={(e) => handleMenuMouseEnter(menuId, e)}
       onMouseLeave={handleMenuMouseLeave}
     >
       <Link
         href={href}
-        className="flex items-center h-full px-3 text-base text-gray-700 hover:text-indigo-600 relative group"
+        className="flex items-center h-full px-4 text-base text-white hover:text-[#F2D399] relative group drop-shadow-sm"
       >
         <span>{title}</span>
         <ChevronDown
           className={`ml-1 h-4 w-4 transition-transform ${
-            activeMenu === menuId ? 'rotate-180 text-indigo-600' : ''
-          } group-hover:text-indigo-600`}
+            activeMenu === menuId ? 'rotate-180 text-[#F2D399]' : ''
+          } group-hover:text-[#F2D399]`}
           aria-hidden="true"
         />
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#F2D399] group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
 
   // Function to render a simple nav link with improved styling
   const renderNavLink = (title: string, href: string) => (
-    <Link
-      href={href}
-      className="flex items-center h-full px-3 text-base text-gray-700 hover:text-indigo-600 relative group"
-    >
-      {title}
-      <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
-    </Link>
+    <div className="h-full flex items-center">
+      <Link
+        href={href}
+        className="flex items-center h-full px-4 text-base text-white hover:text-[#F2D399] relative group drop-shadow-sm"
+      >
+        {title}
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#F2D399] group-hover:w-full transition-all duration-300"></span>
+      </Link>
+    </div>
   );
 
   const navVariants = {
@@ -358,12 +360,12 @@ export default function Navbar() {
     return (
       <div
         key={menuData.id}
-        className="border-b border-gray-200 last:border-b-0"
+        className="border-b border-gray-700 last:border-b-0"
       >
         <div className="flex items-center justify-between">
           <Link
             href={menuData.mainLink}
-            className="flex-grow px-3 py-3 text-base font-medium text-gray-700 hover:text-gray-900"
+            className="flex-grow px-3 py-3 text-base font-medium text-white hover:text-indigo-300"
             onClick={(e) => {
               // Prevent navigation if submenu toggle is clicked
               if (isExpanded) {
@@ -375,7 +377,7 @@ export default function Navbar() {
           </Link>
           <button
             type="button"
-            className="p-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="p-3 text-gray-300 hover:text-[#F2D399] focus:outline-none"
             onClick={() => toggleMobileSubmenu(menuData.id)}
             aria-expanded={isExpanded}
             aria-label={`Toggle ${menuData.title} submenu`}
@@ -412,7 +414,7 @@ export default function Navbar() {
                   opacity: { duration: 0.2 }
                 }
               }}
-              className="bg-gray-50 overflow-hidden"
+              className="bg-gray-800 overflow-hidden"
             >
               <div className="px-4 py-3 space-y-4">
                 {/* Featured Categories */}
@@ -421,7 +423,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.3 }}
                 >
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
                     Featured Categories
                   </h4>
                   <ul className="space-y-2">
@@ -434,10 +436,10 @@ export default function Navbar() {
                       >
                         <Link
                           href={link.href}
-                          className="flex items-center py-2 text-base text-gray-700 hover:text-black"
+                          className="flex items-center py-2 text-base text-gray-300 hover:text-[#F2D399]"
                           onClick={toggleMobileMenu}
                         >
-                          <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
+                          <ChevronRight className="h-4 w-4 mr-2 text-gray-500" />
                           {link.title}
                         </Link>
                       </motion.li>
@@ -451,7 +453,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.3 }}
                 >
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
                     More Options
                   </h4>
                   <ul className="space-y-2">
@@ -464,10 +466,10 @@ export default function Navbar() {
                       >
                         <Link
                           href={link.href}
-                          className="flex items-center py-2 text-base text-gray-700 hover:text-black"
+                          className="flex items-center py-2 text-base text-gray-300 hover:text-[#F2D399]"
                           onClick={toggleMobileMenu}
                         >
-                          <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
+                          <ChevronRight className="h-4 w-4 mr-2 text-gray-500" />
                           {link.title}
                         </Link>
                       </motion.li>
@@ -483,11 +485,11 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white">
+    <header className="bg-[#1E1C1D]">
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-sm py-1.5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
+      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-sm h-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex justify-between items-center h-full">
             <div className="flex items-center space-x-4">
               <span className="flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -523,33 +525,43 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation */}
-      <div className="border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center min-h-[5rem] sm:min-h-[6rem]">
+      <div className="border-b border-gray-800 shadow-sm relative">
+        {/* Gradient background - complementing the gold/beige logo color */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1E1C1D] from-0% via-[#1E1C1D] via-35% via-[#3A2B3D] via-65% to-[#362A59] to-100% opacity-95"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(242,211,153,0.07),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(138,106,209,0.15),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_20%,rgba(242,211,153,0.04)_40%,rgba(138,106,209,0.08)_60%,transparent_95%)] shimmer"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex justify-between items-center h-24 sm:h-28">
+            {/* No need for extra background elements */}
+            
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2 sm:space-x-4">
-              <Image
-                src="/images/logo2.png"
-                alt="Lens Aura Logo"
-                width={120}
-                height={120}
-                // className="w-22 h-22 sm:w-24 sm:h-24 object-contain"
-                priority
-              />
+            <Link href="/" className="flex items-center py-3 space-x-4 sm:space-x-5 relative z-10">
+              <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
+                <Image
+                  src="/images/lens-aura-logo-bg-removed.png"
+                  alt="Lens Aura Logo"
+                  width={160}
+                  height={160} 
+                  className="h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
+                  priority
+                />
+              </div>
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
                   Lens Aura
                 </span>
-                <span className="text-sm sm:text-base text-gray-700 font-medium hidden sm:inline">Vision Perfected</span>
+                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline">Vision Perfected</span>
               </div>
             </Link>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center space-x-4">
+            <div className="md:hidden flex items-center h-full space-x-4">
               <CartDropdown />
               <button
                 type="button"
-                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                className="inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-gray-800 hover:text-purple-300 transition-colors"
                 onClick={toggleMobileMenu}
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle menu"
@@ -592,12 +604,12 @@ export default function Navbar() {
 
             {/* Desktop Cart */}
             <motion.div
-              className="hidden md:flex items-center"
+              className="hidden md:flex items-center h-full"
               initial="hidden"
               animate="visible"
               variants={navVariants}
             >
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="h-full flex items-center">
                 <CartDropdown />
               </motion.div>
             </motion.div>
@@ -638,15 +650,15 @@ export default function Navbar() {
             exit="exit"
             variants={mobileMenuVariants}
           >
-            <div className="bg-white divide-y divide-gray-100">
+            <div className="bg-[#2A2829] divide-y divide-gray-700">
               {allMenuData.map((menuData) => renderMobileMenuItem(menuData))}
               <motion.div
                 variants={itemVariants}
-                className="border-b border-gray-200 last:border-b-0"
+                className="border-b border-gray-700 last:border-b-0"
               >
                 <Link
                   href="/health-funds"
-                  className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
                   onClick={toggleMobileMenu}
                 >
                   Health Funds
@@ -654,11 +666,11 @@ export default function Navbar() {
               </motion.div>
               <motion.div
                 variants={itemVariants}
-                className="border-b border-gray-200 last:border-b-0"
+                className="border-b border-gray-700 last:border-b-0"
               >
                 <Link
                   href="/stores"
-                  className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
                   onClick={toggleMobileMenu}
                 >
                   Stores
