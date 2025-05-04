@@ -31,7 +31,18 @@ export default function ProductPage({ params }: ProductPageProps) {
         if (!productData) {
           notFound();
         }
-        setProduct(productData);
+        
+        // Ensure product.id is properly set if undefined
+        if (!productData.id) {
+          productData.id = params.id;
+        }
+        
+        // Fix productType if it's "contactLenses" instead of "contacts"
+        if (productData.productType === "contactLenses") {
+          productData.productType = "contacts" as any;
+        }
+        
+        setProduct(productData as any);
         setSelectedColor(productData.colors[0]);
       } catch (error) {
         console.error('Failed to fetch product:', error);
@@ -88,7 +99,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
           {/* Product Images */}
           <ProductDetailImages
-            productId={product.id}
+            productId={product.id || params.id}
             mainImage={product.imageUrl}
             productName={product.name}
           />
@@ -106,9 +117,9 @@ export default function ProductPage({ params }: ProductPageProps) {
             <div className="mt-6">
               <h2 className="text-lg font-medium mb-2">Color</h2>
               <ProductColorSelector
-                productId={product.id}
                 colors={product.colors}
-                onColorChange={setSelectedColor}
+                selectedColor={selectedColor}
+                onSelectColor={setSelectedColor}
               />
             </div>
 

@@ -1,146 +1,273 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { CheckCircle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/context/cart-context"
 
-// Client component that uses search params
-function CheckoutSuccessContent() {
+interface OrderItem {
+  productId: string
+  name: string
+  price: number
+  quantity: number
+  color: string
+  imageUrl?: string
+}
+
+interface OrderDetails {
+  id: string
+  orderNumber: string
+  customerEmail: string
+  items: OrderItem[]
+  totalAmount: number
+  paymentStatus: string
+  createdAt: string
+}
+
+export default function CheckoutSuccessPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const sessionId = searchParams.get("session_id")
-  const [orderDetails, setOrderDetails] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const sessionId = searchParams?.get("session_id") || null
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const { clearCart } = useCart()
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchOrderDetails = async () => {
       if (!sessionId) {
-        setError("No session ID provided")
-        setLoading(false)
+        setError("No checkout session found")
+        setIsLoading(false)
         return
       }
 
       try {
-        const response = await fetch(`/api/checkout-session?sessionId=${sessionId}`)
-
+        // Clean the session ID - sometimes it might get malformed in transit
+        const cleanSessionId = sessionId.trim().replace(/['"]/g, '')
+        console.log(`Fetching order details for session: ${cleanSessionId}`)
+        
+        const response = await fetch(`/api/stripe-sessions/${cleanSessionId}`)
+        
         if (!response.ok) {
-          throw new Error("Failed to fetch session")
+          const errorData = await response.json()
+          console.error("Error response:", errorData)
+          throw new Error(errorData.error || "Failed to fetch order details")
         }
-
+        
         const data = await response.json()
         setOrderDetails(data)
-
-        // Clear the cart on successful checkout
+        
+        // Clear the cart if we've successfully loaded order details
+        // This ensures we only clear when there's actually a valid order
         clearCart()
-      } catch (error) {
-        console.error("Error fetching session:", error)
-        setError("Failed to load order details")
+        console.log("Cart cleared after successful order")
+      } catch (err) {
+        console.error("Error fetching order details:", err)
+        setError("Could not retrieve order details")
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
-    fetchSession()
+    fetchOrderDetails()
   }, [sessionId, clearCart])
 
-  return (
-    <main className="flex flex-col min-h-screen">
-      <Navbar />
-      <div className="flex-grow max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
-          <h1 className="text-3xl font-bold mb-2">Thank You for Your Order!</h1>
-          <p className="text-lg text-gray-600 mb-8">Your order has been successfully placed and is being processed.</p>
+  // Redirect to home if no session ID after 5 seconds
+  useEffect(() => {
+    if (!sessionId) {
+      const timer = setTimeout(() => {
+        router.push("/")
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [sessionId, router])
 
-          {loading ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-yellow-50 p-6 rounded-lg mb-8">
-              <p className="text-yellow-700">{error}</p>
-            </div>
-          ) : orderDetails ? (
-            <div className="bg-gray-50 p-6 rounded-lg mb-8 text-left">
-              <h2 className="text-xl font-medium mb-4">Order Details</h2>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Order ID:</span>
-                  <span>{orderDetails.id}</span>
-                </div>
-                {orderDetails.customer_details && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Name:</span>
-                      <span>{orderDetails.customer_details.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Email:</span>
-                      <span>{orderDetails.customer_details.email}</span>
-                    </div>
-                  </>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total:</span>
-                  <span>
-                    ${(orderDetails.amount_total / 100).toFixed(2)} {orderDetails.currency.toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Status:</span>
-                  <span className="text-green-600 font-medium capitalize">{orderDetails.payment_status}</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-yellow-50 p-6 rounded-lg mb-8">
-              <p className="text-yellow-700">
-                Order details could not be loaded. Please contact customer support for assistance.
-              </p>
-            </div>
-          )}
+  // Add a polling mechanism to refresh order status periodically
+  useEffect(() => {
+    if (sessionId && orderDetails?.paymentStatus === 'pending') {
+      const interval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/stripe-sessions/${sessionId}`)
+          if (response.ok) {
+            const data = await response.json()
+            
+            // Only update if the status has changed
+            if (data.paymentStatus !== orderDetails.paymentStatus) {
+              console.log(`Payment status updated: ${orderDetails.paymentStatus} → ${data.paymentStatus}`)
+              setOrderDetails(data)
+            }
+            
+            // Stop polling if payment is no longer pending
+            if (data.paymentStatus !== 'pending') {
+              clearInterval(interval)
+            }
+          }
+        } catch (err) {
+          console.error("Error refreshing order details:", err)
+        }
+      }, 3000) // Check every 3 seconds
+      
+      return () => clearInterval(interval)
+    }
+  }, [sessionId, orderDetails?.paymentStatus])
 
-          <div className="space-y-4">
-            <p className="text-gray-600">We've sent a confirmation email with all the details of your purchase.</p>
-            <Button asChild className="bg-black text-white hover:bg-gray-800">
-              <Link href="/">
-                Continue Shopping
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+  // Add a function to manually check and update payment status
+  const checkAndUpdatePaymentStatus = async (sessionId: string) => {
+    try {
+      console.log('Manually checking payment status...');
+      const response = await fetch(`/api/stripe/update-payment-status?sessionId=${sessionId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Payment status update failed:', errorData);
+        return false;
+      }
+      
+      const data = await response.json();
+      console.log('Payment status check result:', data);
+      
+      if (data.success && data.paymentStatus === 'paid') {
+        // Refresh order details to show the updated status
+        const orderResponse = await fetch(`/api/stripe-sessions/${sessionId}`);
+        if (orderResponse.ok) {
+          const orderData = await orderResponse.json();
+          setOrderDetails(orderData);
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (err) {
+      console.error('Error checking payment status:', err);
+      return false;
+    }
+  };
+
+  // Add a button to manually check payment status if it's still pending
+  const handleManualStatusCheck = async () => {
+    if (!sessionId || !orderDetails) return;
+    
+    setIsLoading(true);
+    await checkAndUpdatePaymentStatus(sessionId);
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container max-w-md mx-auto py-10">
+        <div className="flex flex-col items-center space-y-6">
+          <h1 className="text-3xl font-bold">Processing your order...</h1>
+          <p className="text-gray-600">Please wait while we confirm your payment.</p>
         </div>
       </div>
-      <Footer />
-    </main>
-  )
-}
+    )
+  }
 
-// Main export with Suspense boundary
-export default function CheckoutSuccessPage() {
-  return (
-    <Suspense fallback={
-      <main className="flex flex-col min-h-screen">
-        <Navbar />
-        <div className="flex-grow max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
-          <div className="animate-pulse space-y-4">
-            <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-            <div className="h-32 bg-gray-200 rounded w-full mx-auto mt-8"></div>
-          </div>
+  if (error) {
+    return (
+      <div className="container max-w-md mx-auto py-10">
+        <div className="flex flex-col items-center space-y-6">
+          <h1 className="text-3xl font-bold text-red-500">Order Not Found</h1>
+          <p>{error}</p>
+          <p>You will be redirected to the home page shortly.</p>
         </div>
-        <Footer />
-      </main>
-    }>
-      <CheckoutSuccessContent />
-    </Suspense>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container max-w-md mx-auto py-10">
+      <div className="flex flex-col space-y-8">
+        <div className="flex flex-col items-center space-y-4">
+          <CheckCircle className="h-12 w-12 text-green-500" />
+          <h1 className="text-3xl font-bold text-center">Thank You for Your Order!</h1>
+          <p className="text-lg text-gray-600 text-center">Your payment was successful and your order has been placed.</p>
+        </div>
+
+        <Card className="p-6 bg-gray-50">
+          <div className="flex flex-col space-y-4">
+            <h2 className="text-lg font-medium">Order Details</h2>
+            <Separator />
+            
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Order ID:</span>
+              <span>{orderDetails?.orderNumber || sessionId}</span>
+            </div>
+            
+            {orderDetails?.customerEmail && (
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Email:</span>
+                <span>{orderDetails.customerEmail}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Status:</span>
+              <div className="flex items-center gap-2">
+                {orderDetails?.paymentStatus === 'paid' ? (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">Paid</Badge>
+                ) : orderDetails?.paymentStatus === 'pending' ? (
+                  <>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Pending</Badge>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="text-xs py-0 h-6 px-2"
+                      onClick={handleManualStatusCheck}
+                    >
+                      Refresh
+                    </Button>
+                  </>
+                ) : (
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">Failed</Badge>
+                )}
+              </div>
+            </div>
+            
+            {orderDetails?.totalAmount && (
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Total:</span>
+                <span>${orderDetails.totalAmount.toFixed(2)} AUD</span>
+              </div>
+            )}
+            
+            {orderDetails?.items && orderDetails.items.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-2">Items:</h3>
+                <div className="space-y-2">
+                  {orderDetails.items.map((item, index) => (
+                    <div key={index} className="text-sm flex justify-between">
+                      <span>{item.quantity}x {item.name} ({item.color})</span>
+                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <p className="text-sm text-gray-600 mt-4">
+              You will receive a confirmation email with your order details shortly.
+            </p>
+          </div>
+        </Card>
+        
+        <div className="text-center mt-6">
+          <Button 
+            variant="link" 
+            onClick={() => {
+              router.push("/")
+              clearCart()
+            }}
+          >
+            Continue Shopping
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

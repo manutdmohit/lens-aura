@@ -1,5 +1,8 @@
 import Stripe from "stripe"
 import type { CartItem } from "@/context/cart-context"
+import { connectToDatabase } from './api/db'
+import Order from '@/models/Order'
+import { updateOrderFromStripeSession } from './order-service'
 
 // Initialize Stripe with the secret key
 const getStripeSecretKey = () => {
@@ -81,6 +84,10 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
             name: item.product.name,
             description: `Color: ${item.color}`,
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
+            metadata: {
+              productId: item.product.id || '',
+              color: item.color
+            }
           },
           unit_amount: Math.round(item.product.price * 100), // Convert to cents
         },
@@ -99,10 +106,13 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       mode: "payment",
       locale: "en",
       currency: "aud", // Explicitly set currency to AUD
-
       allow_promotion_codes: false,
       success_url: successUrl,
       cancel_url: cancelUrl,
+      metadata: {
+        orderId: `order_${Date.now()}`,
+        itemCount: items.length.toString()
+      },
       shipping_address_collection: {
         allowed_countries: ["AU"],
       },
