@@ -30,6 +30,7 @@ export interface IOrder extends Document {
   paymentStatus: 'pending' | 'paid' | 'failed';
   paymentIntent?: string;
   stripeSessionId: string;
+  stockReduced: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +69,7 @@ const OrderSchema = new Schema({
   },
   paymentIntent: { type: String },
   stripeSessionId: { type: String, required: true },
+  stockReduced: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });

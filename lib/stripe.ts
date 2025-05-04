@@ -84,7 +84,9 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       const productMetadata = {
         productId: item.product.id || '',
         color: item.color || 'Default',
-        name: item.product.name
+        name: item.product.name,
+        price: item.product.price.toString(),
+        quantity: item.quantity.toString()
       };
       
       // Log the metadata we're sending to Stripe
@@ -94,6 +96,7 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
         price_data: {
           currency: "aud",
           product_data: {
+            product_id: item.product.id,
             name: item.product.name,
             description: `Color: ${item.color}`,
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
@@ -105,7 +108,7 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       };
     });
 
-    // Also store product IDs in the session metadata for redundancy
+    // Also store product IDs and details in the session metadata for redundancy
     const sessionMetadata = {
       orderId: `order_${Date.now()}`,
       itemCount: items.length.toString(),

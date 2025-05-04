@@ -35,6 +35,16 @@ export async function POST(request: NextRequest) {
       });
     }
     
+    // Check if stock has already been reduced
+    if (order.stockReduced) {
+      console.log(`Stock already reduced for order ${order._id}`);
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Stock already reduced',
+        orderId: order._id
+      });
+    }
+    
     // Process each order item to reduce stock
     const updateResults = [];
     let success = true;
@@ -109,6 +119,10 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('Stock update completed for order:', order._id);
+    
+    // Mark the order as having stock reduced
+    order.stockReduced = true;
+    await order.save();
     
     // Return the results
     return NextResponse.json({

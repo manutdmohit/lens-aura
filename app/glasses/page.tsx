@@ -50,7 +50,7 @@ function GlassesContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get('page') || '1');
+  const currentPage = parseInt(searchParams?.get('page') || '1');
 
   useEffect(() => {
     const fetchPriceRange = async () => {
@@ -100,9 +100,8 @@ function GlassesContent() {
 
     fetchProducts();
   }, [currentPage]); // Only depend on currentPage
-
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('page', page.toString());
     router.push(`/glasses?${params.toString()}`);
   };

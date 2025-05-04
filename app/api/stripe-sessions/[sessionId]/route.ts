@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { Stripe } from 'stripe';
 import { createPendingOrder } from '@/lib/order-service';
+import { updateProductStock } from '@/lib/products';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -94,11 +95,77 @@ export async function GET(
     }
     
     console.log(`[DEBUG] Found order: ${order._id}`);
+    
+    // Check Stripe session status
+    try {
+      const stripeSession = await stripe.checkout.sessions.retrieve(
+        cleanSessionId,
+        { expand: ['line_items', 'customer_details'] }
+      );
+      
+      console.log(`[DEBUG] Stripe session status: ${stripeSession.payment_status}`);
+      
+      // Update order status if it's different from Stripe
+      if (stripeSession.payment_status === 'paid' && order.paymentStatus !== 'paid') {
+        console.log(`[DEBUG] Updating order status to paid`);
+        order.paymentStatus = 'paid';
+        await order.save();
+      }
+    } catch (stripeError) {
+      console.error('[DEBUG] Error checking Stripe session:', stripeError);
+    }
+    
     return NextResponse.json(order);
   } catch (error) {
     console.error('[DEBUG] Error retrieving order:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve order' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: { sessionId: string } }
+) {
+  try {
+    await connectToDatabase();
+    const { checkStock } = await request.json();
+    const { sessionId } = params;
+
+    // Find the order by session ID
+    const order = await Order.findOne({ stripeSessionId: sessionId });
+    
+    if (!order) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    // If checkStock is true and payment is successful, check and update stock
+    if (checkStock && order.paymentStatus === 'paid' && !order.stockReduced) {
+      try {
+        // Update stock for each item in the order
+        for (const item of order.items) {
+          await updateProductStock(item.productId, item.quantity);
+        }
+        
+        // Mark the order as having stock reduced
+        order.stockReduced = true;
+        await order.save();
+      } catch (error) {
+        console.error('Error updating stock:', error);
+        // Don't fail the request if stock update fails
+      }
+    }
+
+    return NextResponse.json(order);
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch order details' },
       { status: 500 }
     );
   }

@@ -27,10 +27,15 @@ export async function createPendingOrder(
     console.log(`[DEBUG] Creating pending order for session: ${stripeSessionId}`);
     
     // Create initial order data with proper ObjectId conversion
+  
     const orderItems = items.map(item => {
-      console.log(`[DEBUG] Processing item: ${item.product.name}, ID: ${item.product.id}`);
+      console.log(`[DEBUG] Processing item: ${item.product.name}, ID: ${item.product._id!}`, { item });
+      // Ensure the product ID exists and is valid
+      if (!item.product._id!) {
+        console.error(`[DEBUG] Missing product ID for ${item.product.name}`, item.product);
+      }
       return {
-        productId: new mongoose.Types.ObjectId(item.product.id),
+        productId: (item.product._id!),
         name: item.product.name,
         price: item.product.price,
         quantity: item.quantity,

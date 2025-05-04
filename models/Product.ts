@@ -79,7 +79,7 @@ const ProductSchema = new Schema<IProduct>(
       required: [true, 'Product name is required'],
       trim: true,
     },
-    slug: { type: String, required: true, trim: true, index: true },
+    slug: { type: String, required: true, trim: true },
     description: {
       type: String,
       required: [true, 'Product description is required'],
@@ -254,7 +254,7 @@ ProductSchema.pre('findOneAndUpdate', function(next) {
 
 // Create indexes for better query performance
 ProductSchema.index({ name: 'text', description: 'text' });
-ProductSchema.index({ slug: 1 });
+ProductSchema.index({ slug: 1 }, { unique: true });
 ProductSchema.index({ inStock: 1 });
 
 const Product: Model<IProduct> =

@@ -17,16 +17,15 @@ export async function updateProductStock(productId: string, quantity: number) {
     // Use findOneAndUpdate with $inc for atomic operation
     const updatedProduct = await Product.findOneAndUpdate(
       { _id: productObjectId },
-      {
-        $inc: { stockQuantity: -quantity },
-        $set: { 
-          inStock: { $gt: ['$stockQuantity', 0] }
+      [
+        {
+          $set: {
+            stockQuantity: { $subtract: ['$stockQuantity', quantity] },
+            inStock: { $gt: [{ $subtract: ['$stockQuantity', quantity] }, 0] }
+          }
         }
-      },
-      { 
-        new: true,
-        runValidators: true
-      }
+      ],
+      { new: true }
     );
     
     if (!updatedProduct) {

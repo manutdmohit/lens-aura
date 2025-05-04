@@ -72,7 +72,7 @@ const formatText = (text: string) => {
 export default function GlassesProductPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
 
   const [product, setProduct] = useState<ProductFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(true);
