@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
-import { Stripe } from 'stripe';
+import Stripe from 'stripe';
 import { createPendingOrder } from '@/lib/order-service';
 import { updateProductStock } from '@/lib/products';
 
@@ -16,110 +16,81 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    
+
     // Clean the session ID - handle various formats
     const cleanSessionId = params.sessionId
       .trim()
       .replace(/['"]/g, '')
       .replace(/^ccs_test/, 'cs_test')
       .replace(/^cs_test/, 'cs_test'); // Ensure consistent format
-    
+
     console.log(`[DEBUG] Original session ID: ${params.sessionId}`);
     console.log(`[DEBUG] Cleaned session ID: ${cleanSessionId}`);
-    
+
     // Try to find the order with the cleaned session ID
     const order = await Order.findOne({ stripeSessionId: cleanSessionId });
-    
+    console.log(`[DEBUG] Found order: ${order?._id}`);
+
     if (!order) {
-      console.log(`[DEBUG] No order found for session ID: ${cleanSessionId}`);
-      
-      // Try alternative formats
-      const alternativeFormats = [
-        cleanSessionId,
-        cleanSessionId.replace(/^cs_test/, 'ccs_test'),
-        cleanSessionId.replace(/^ccs_test/, 'cs_test')
-      ];
-      
-      console.log(`[DEBUG] Trying alternative session ID formats:`, alternativeFormats);
-      
-      for (const format of alternativeFormats) {
-        const altOrder = await Order.findOne({ stripeSessionId: format });
-        if (altOrder) {
-          console.log(`[DEBUG] Found order with alternative format: ${format}`);
-          return NextResponse.json(altOrder);
-        }
-      }
-      
-      // Count all orders to check if the database has any records
-      const totalOrders = await Order.countDocuments({});
-      console.log(`[DEBUG] Total orders in database: ${totalOrders}`);
-      
-      // Get a list of recent orders to check their session IDs
-      const recentOrders = await Order.find().sort({ createdAt: -1 }).limit(5);
-      console.log('[DEBUG] Recent order session IDs:');
-      recentOrders.forEach(order => {
-        console.log(`[DEBUG] - Order: ${order._id}, Session ID: ${order.stripeSessionId}`);
-      });
-      
-      // Try to retrieve the session from Stripe
-      try {
-        console.log(`[DEBUG] Attempting to retrieve session ${cleanSessionId} from Stripe...`);
-        const stripeSession = await stripe.checkout.sessions.retrieve(
-          cleanSessionId,
-          { expand: ['line_items', 'customer_details'] }
-        );
-        
-        if (stripeSession) {
-          console.log(`[DEBUG] Found Stripe session: ${stripeSession.id}, status: ${stripeSession.status}, payment status: ${stripeSession.payment_status}`);
-          
-          // For debugging purposes, return a special response
-          return NextResponse.json(
-            { 
-              error: 'Order not found in database, but session exists in Stripe', 
-              stripeSessionExists: true,
-              stripeSessionId: stripeSession.id,
-              stripeSessionStatus: stripeSession.status,
-              stripePaymentStatus: stripeSession.payment_status,
-            },
-            { status: 404 }
-          );
-        }
-      } catch (stripeError) {
-        console.error('[DEBUG] Error retrieving Stripe session:', stripeError);
-      }
-      
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
       );
     }
-    
-    console.log(`[DEBUG] Found order: ${order._id}`);
-    
-    // Check Stripe session status
-    try {
-      const stripeSession = await stripe.checkout.sessions.retrieve(
-        cleanSessionId,
-        { expand: ['line_items', 'customer_details'] }
-      );
+
+    // Get the latest session status from Stripe
+    const session = await stripe.checkout.sessions.retrieve(cleanSessionId);
+    console.log(`[DEBUG] Stripe session status: ${session.payment_status}`);
+
+    // Map Stripe payment status to our order status
+    const paymentStatus = session.payment_status === 'paid' ? 'paid' : 'pending';
+
+    // If the session is paid and the order is not yet marked as paid, update it
+    if (session.payment_status === 'paid' && order.paymentStatus !== 'paid') {
+      console.log(`[DEBUG] Updating order ${order._id} to paid status`);
+      order.paymentStatus = 'paid';
+      order.paymentIntent = session.payment_intent as string;
       
-      console.log(`[DEBUG] Stripe session status: ${stripeSession.payment_status}`);
-      
-      // Update order status if it's different from Stripe
-      if (stripeSession.payment_status === 'paid' && order.paymentStatus !== 'paid') {
-        console.log(`[DEBUG] Updating order status to paid`);
-        order.paymentStatus = 'paid';
-        await order.save();
+      // Update customer email from session
+      if (session.customer_details?.email) {
+        order.customerEmail = session.customer_details.email;
       }
-    } catch (stripeError) {
-      console.error('[DEBUG] Error checking Stripe session:', stripeError);
+      
+      // Update customer phone from session
+      if (session.customer_details?.phone) {
+        order.customerPhone = session.customer_details.phone;
+      }
+      
+      // Update shipping address from session
+      if (session.customer_details?.address) {
+        order.shippingAddress = {
+          address: session.customer_details.address.line1,
+          address2: session.customer_details.address.line2 || '',
+          city: session.customer_details.address.city,
+          state: session.customer_details.address.state,
+          postalCode: session.customer_details.address.postal_code,
+          country: session.customer_details.address.country || 'Australia',
+          phone: session.customer_details.phone || ''
+        };
+      }
+      
+      await order.save();
     }
-    
-    return NextResponse.json(order);
+
+    return NextResponse.json({
+      orderId: order._id,
+      orderNumber: order.orderNumber,
+      paymentStatus: order.paymentStatus, // Use the updated order status
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
+      shippingAddress: order.shippingAddress,
+      amount_total: session.amount_total,
+      customer_details: session.customer_details
+    });
   } catch (error) {
-    console.error('[DEBUG] Error retrieving order:', error);
+    console.error('[DEBUG] Error fetching session status:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve order' },
+      { error: 'Failed to fetch session status' },
       { status: 500 }
     );
   }

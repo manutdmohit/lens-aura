@@ -85,7 +85,13 @@ export async function updateOrderFromStripeSession(
   stripeSessionId: string,
   paymentStatus: 'paid' | 'failed',
   customerEmail: string,
-  shippingAddress: any,
+  shippingAddress: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+  },
   paymentIntent: string
 ) {
   try {
@@ -94,6 +100,8 @@ export async function updateOrderFromStripeSession(
     
     // Find the order by Stripe session ID
     const order = await Order.findOne({ stripeSessionId });
+
+    
     
     if (!order) {
       console.error(`[DEBUG] Order not found for session: ${stripeSessionId}`);
@@ -106,10 +114,17 @@ export async function updateOrderFromStripeSession(
     order.customerEmail = customerEmail;
     order.paymentStatus = paymentStatus;
     order.paymentIntent = paymentIntent;
-    order.shippingAddress = shippingAddress;
+    order.shippingAddress = {
+      address: shippingAddress.line1,
+      address2: shippingAddress.line2,
+      city: shippingAddress.city,
+      state: shippingAddress.state,
+      postalCode: shippingAddress.postalCode,
+      country: 'Australia' // Default to Australia
+    };
     
     await order.save();
-    console.log(`[DEBUG] Updated order ${order._id} payment status from ${order.paymentStatus} to ${paymentStatus}`);
+    console.log(`[DEBUG] Updated order ${order._id} with shipping details and payment status: ${paymentStatus}`);
     
     // If payment is successful, reduce the stock quantity
     if (paymentStatus === 'paid') {

@@ -139,14 +139,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     
     // Create the shipping address object
     const shippingAddress = {
-      firstName: customerDetails.name?.split(' ')[0] || '',
-      lastName: customerDetails.name?.split(' ').slice(1).join(' ') || '',
-      address: customerDetails.address?.line1 || '',
+      line1: customerDetails.address?.line1 || '',
+      line2: customerDetails.address?.line2 || '',
       city: customerDetails.address?.city || '',
       state: customerDetails.address?.state || '',
       postalCode: customerDetails.address?.postal_code || '',
-      country: customerDetails.address?.country || '',
-      phone: customerDetails.phone || '',
     };
     
     try {
@@ -265,6 +262,8 @@ async function createOrderFromStripeSession(session: Stripe.Checkout.Session): P
       totalAmount,
       paymentStatus: session.payment_status === 'paid' ? 'paid' : 'pending',
       stripeSessionId: session.id,
+      customerEmail: session.customer_details?.email,
+      customerPhone: session.customer_details?.phone,
       // Customer data will be updated later with updateOrderFromStripeSession
     });
     

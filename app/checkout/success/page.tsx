@@ -28,6 +28,19 @@ interface OrderDetails {
   totalAmount: number
   paymentStatus: string
   createdAt: string
+  amount_total: number
+  customer_details: {
+    name: string
+    email: string
+    address: {
+      line1: string
+      line2?: string
+      city: string
+      state: string
+      postal_code: string
+      country: string
+    }
+  }
 }
 
 
@@ -76,6 +89,7 @@ export default function CheckoutSuccessPage() {
         }
         
         const data = await response.json();
+        
         console.log('[DEBUG] Successfully fetched order details:', data);
         
         // If payment is successful and stock hasn't been reduced, reduce stock
@@ -211,8 +225,23 @@ export default function CheckoutSuccessPage() {
                 
                 <div>
                   <p className="text-sm text-gray-500">Total Amount</p>
-                  <p className="font-medium">${orderDetails?.totalAmount.toFixed(2)} AUD</p>
+                  <p className="font-medium">${(orderDetails?.amount_total || 0) / 100} AUD</p>
                 </div>
+                
+                {orderDetails?.customer_details?.address && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-gray-500">Shipping Address</p>
+                    <p className="font-medium">
+                      {orderDetails.customer_details.name}<br />
+                      {orderDetails.customer_details.address.line1}<br />
+                      {orderDetails.customer_details.address.line2 && (
+                        <>{orderDetails.customer_details.address.line2}<br /></>
+                      )}
+                      {orderDetails.customer_details.address.city}, {orderDetails.customer_details.address.state} {orderDetails.customer_details.address.postal_code}<br />
+                      {orderDetails.customer_details.address.country}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

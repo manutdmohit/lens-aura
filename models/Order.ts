@@ -24,6 +24,7 @@ export interface IOrder extends Document {
   userId?: string;
   orderNumber: string;
   customerEmail?: string;
+  customerPhone?: string;
   items: IOrderItem[];
   totalAmount: number;
   shippingAddress?: IShippingAddress;
@@ -43,6 +44,7 @@ const OrderSchema = new Schema({
     required: true
   },
   customerEmail: { type: String },
+  customerPhone: { type: String },
   items: [{
     productId: { type: String },
     name: { type: String, required: true },

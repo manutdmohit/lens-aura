@@ -134,6 +134,9 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       shipping_address_collection: {
         allowed_countries: ["AU"],
       },
+      phone_number_collection: {
+        enabled: true
+      },
       shipping_options: [
         {
           shipping_rate_data: {
