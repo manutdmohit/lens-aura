@@ -23,12 +23,12 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden">
-      {/* Background image with parallax effect */}
+      {/* Background image with subtle continuous zoom */}
       <motion.div
         className="absolute inset-0 z-0"
         initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 10, ease: "easeOut" }}
+        animate={{ scale: [1.1, 1, 1.05, 1] }}
+        transition={{ duration: 30, ease: "easeInOut", repeat: Infinity }}
       >
         <Image
           src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
@@ -126,16 +126,16 @@ export default function HeroSection() {
         <motion.div
           className="w-32 h-32 rounded-full border border-amber-400/30 backdrop-blur-sm"
           initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 0.6, x: 0 }}
-          transition={{ delay: 1.5, duration: 1 }}
+          animate={{ opacity: 0.6, x: [0, -15, 0, 15, 0] }}
+          transition={{ delay: 1.5, duration: 10, ease: "easeInOut", repeat: Infinity }}
         />
       </div>
       <div className="absolute left-1/4 top-1/4 hidden lg:block z-5">
         <motion.div
           className="w-16 h-16 rounded-full border border-teal-400/20 backdrop-blur-sm"
           initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 0.4, y: 0 }}
-          transition={{ delay: 1.7, duration: 1 }}
+          animate={{ opacity: 0.4, y: [0, 20, 0, -20, 0] }}
+          transition={{ delay: 1.7, duration: 12, ease: "easeInOut", repeat: Infinity }}
         />
       </div>
     </section>

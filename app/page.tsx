@@ -14,12 +14,12 @@ const montserrat = Montserrat({ subsets: ['latin'] });
 export default function Home() {
   return (
     <PageTransition>
-      <main className={`min-h-screen flex flex-col ${montserrat.className}`}>
+      <main className={`min-h-screen flex flex-col ${montserrat.className} bg-[#F2D399]`}>
         {/* <Navbar /> */}
         <div className="flex-grow">
           <HeroSection />
           <AnimatedSection className="py-24 px-4 max-w-7xl mx-auto text-center">
-            <h2 className={`${playfair.className} text-5xl md:text-6xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-teal-500`}>
+            <h2 className={`${playfair.className} text-5xl md:text-6xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 relative z-10 drop-shadow-sm`} style={{ textShadow: '0 0 25px rgba(242, 211, 153, 0.3)' }}>
               Extraordinary Design, Surprising Prices
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-16 leading-relaxed">
@@ -35,7 +35,7 @@ export default function Home() {
           </AnimatedSection>
 
           {/* Lifestyle images section with enhanced design */}
-          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to-white">
+          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to- #F2D399">
             <div className="max-w-7xl mx-auto px-4">
               <AnimatedSection direction="up" className="text-center mb-16">
                 <h2 className={`${playfair.className} text-4xl md:text-5xl font-bold mb-6`}>

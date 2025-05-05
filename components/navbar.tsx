@@ -487,7 +487,7 @@ export default function Navbar() {
   return (
     <header className="bg-[#1E1C1D]">
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-sm h-10">
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-sm h-10 text-white font-medium shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex justify-between items-center h-full">
             <div className="flex items-center space-x-4">
@@ -505,8 +505,8 @@ export default function Navbar() {
                 30-day returns
               </span>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/stores" className="hover:underline flex items-center">
+            <div className="flex items-center space-x-4 text-sm">
+              <Link href="/stores" className="hover:underline flex items-center text-sm">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -549,10 +549,10 @@ export default function Navbar() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[#B48E4A!important]">
                   Lens Aura
                 </span>
-                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline">Vision Perfected</span>
+                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline text-[#B48E4A!important]">Vision Perfected</span>
               </div>
             </Link>
 
