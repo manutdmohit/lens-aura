@@ -5,18 +5,58 @@ import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import User from '@/models/User';
 
+// Helper function to calculate percentage change
+function calculatePercentageChange(oldValue: number, newValue: number): number {
+  if (oldValue === 0) return newValue === 0 ? 0 : 100;
+  return ((newValue - oldValue) / oldValue) * 100;
+}
+
 export async function GET(req: NextRequest) {
   try {
+    console.log('Fetching session...');
     const session = await getServerSession(authOptions);
+    console.log('Session:', session);
 
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session) {
+      console.error('No session found');
+      return new NextResponse(
+        JSON.stringify({ error: 'Authentication required' }),
+        { 
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
 
+    if (!session.user?.role) {
+      console.error('No user role found in session:', session);
+      return new NextResponse(
+        JSON.stringify({ error: 'User role not found' }),
+        { 
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (session.user.role !== 'admin') {
+      console.error('User does not have admin role:', session.user.role);
+      return new NextResponse(
+        JSON.stringify({ error: 'Admin access required' }),
+        { 
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('Connecting to database...');
     await connectToDatabase();
+    console.log('Database connected successfully');
 
     const { searchParams } = new URL(req.url);
     const timeRange = searchParams.get('timeRange') || 'month';
+    console.log('Time range:', timeRange);
 
     // Calculate start date based on time range
     const startDate = new Date();
@@ -54,80 +94,118 @@ export async function GET(req: NextRequest) {
         break;
     }
 
+    console.log('Date ranges:', {
+      startDate: startDate.toISOString(),
+      prevStartDate: prevStartDate.toISOString()
+    });
+
     // Get current period metrics
-    const [currentRevenue, currentOrders, currentCustomers] = await Promise.all([
-      // Total Revenue - sum of totalAmount for paid orders
-      Order.aggregate([
-        {
-          $match: {
-            createdAt: { $gte: startDate },
-            paymentStatus: 'paid'
+    console.log('Fetching current period metrics...');
+    let currentRevenue, currentOrders, currentCustomers;
+    try {
+      [currentRevenue, currentOrders, currentCustomers] = await Promise.all([
+        Order.aggregate([
+          {
+            $match: {
+              createdAt: { $gte: startDate },
+              paymentStatus: 'paid'
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$totalAmount' }
+            }
           }
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$totalAmount' }
-          }
-        }
-      ]),
-      // Total Orders - count all orders
-      Order.countDocuments({
-        createdAt: { $gte: startDate }
-      }),
-      // Total Customers - count users with role 'customer'
-      User.countDocuments({
-        role: 'customer',
-        createdAt: { $gte: startDate }
-      })
-    ]);
+        ]).exec(),
+        Order.countDocuments({
+          createdAt: { $gte: startDate }
+        }).exec(),
+        User.countDocuments({
+          role: 'customer',
+          createdAt: { $gte: startDate }
+        }).exec()
+      ]);
+    } catch (error) {
+      console.error('Error fetching current period metrics:', error);
+      throw error;
+    }
+
+    console.log('Current period metrics:', {
+      revenue: currentRevenue,
+      orders: currentOrders,
+      customers: currentCustomers
+    });
 
     // Get previous period metrics
-    const [prevRevenue, prevOrders, prevCustomers] = await Promise.all([
-      // Previous Total Revenue - sum of totalAmount for paid orders
-      Order.aggregate([
-        {
-          $match: {
-            createdAt: { $gte: prevStartDate, $lt: startDate },
-            paymentStatus: 'paid'
+    console.log('Fetching previous period metrics...');
+    let prevRevenue, prevOrders, prevCustomers;
+    try {
+      [prevRevenue, prevOrders, prevCustomers] = await Promise.all([
+        Order.aggregate([
+          {
+            $match: {
+              createdAt: { $gte: prevStartDate, $lt: startDate },
+              paymentStatus: 'paid'
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$totalAmount' }
+            }
           }
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$totalAmount' }
-          }
-        }
-      ]),
-      // Previous Total Orders - count all orders
-      Order.countDocuments({
-        createdAt: { $gte: prevStartDate, $lt: startDate }
-      }),
-      // Previous Total Customers - count users with role 'customer'
-      User.countDocuments({
-        role: 'customer',
-        createdAt: { $gte: prevStartDate, $lt: startDate }
-      })
-    ]);
+        ]).exec(),
+        Order.countDocuments({
+          createdAt: { $gte: prevStartDate, $lt: startDate }
+        }).exec(),
+        User.countDocuments({
+          role: 'customer',
+          createdAt: { $gte: prevStartDate, $lt: startDate }
+        }).exec()
+      ]);
+    } catch (error) {
+      console.error('Error fetching previous period metrics:', error);
+      throw error;
+    }
 
-    // Calculate total visitors (approximation)
-    const totalVisitors = await User.countDocuments({
-      createdAt: { $gte: startDate }
+    console.log('Previous period metrics:', {
+      revenue: prevRevenue,
+      orders: prevOrders,
+      customers: prevCustomers
     });
 
-    // Calculate previous period visitors
-    const prevVisitors = await User.countDocuments({
-      createdAt: { $gte: prevStartDate, $lt: startDate }
+    // Calculate total visitors
+    console.log('Calculating visitor metrics...');
+    let totalVisitors, prevVisitors;
+    try {
+      [totalVisitors, prevVisitors] = await Promise.all([
+        User.countDocuments({
+          createdAt: { $gte: startDate }
+        }).exec(),
+        User.countDocuments({
+          createdAt: { $gte: prevStartDate, $lt: startDate }
+        }).exec()
+      ]);
+    } catch (error) {
+      console.error('Error calculating visitor metrics:', error);
+      throw error;
+    }
+
+    console.log('Visitor metrics:', {
+      current: totalVisitors,
+      previous: prevVisitors
     });
 
-    // Calculate metrics
+    // Calculate final metrics
+    console.log('Calculating final metrics...');
+    const currentRevenueValue = currentRevenue[0]?.total || 0;
+    const prevRevenueValue = prevRevenue[0]?.total || 0;
+    
     const metrics = {
       totalRevenue: {
-        value: currentRevenue[0]?.total || 0,
-        change: calculatePercentageChange(
-          prevRevenue[0]?.total || 0,
-          currentRevenue[0]?.total || 0
-        )
+        value: currentRevenueValue,
+        change: calculatePercentageChange(prevRevenueValue, currentRevenueValue)
       },
       totalOrders: {
         value: currentOrders,
@@ -146,19 +224,26 @@ export async function GET(req: NextRequest) {
       }
     };
 
-    return NextResponse.json(metrics);
-  } catch (error) {
-    console.error('Error fetching dashboard metrics:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch dashboard metrics' },
-      { status: 500 }
-    );
-  } finally {
-    await disconnectFromDatabase();
-  }
-}
+    console.log('Final calculated metrics:', metrics);
 
-function calculatePercentageChange(previous: number, current: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0;
-  return ((current - previous) / previous) * 100;
+    return new NextResponse(
+      JSON.stringify(metrics),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  } catch (error) {
+    console.error('Unhandled error in metrics calculation:', error);
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Failed to calculate metrics',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
 } 

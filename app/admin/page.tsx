@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AdminLayout from "@/components/admin/admin-layout"
 import ProtectedRoute from "@/components/admin/protected-route"
+import Overview from "@/components/admin/overview"
+import TopProducts from "@/components/admin/top-products"
 
 interface MetricValue {
   value: number;
@@ -35,21 +37,49 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        setLoading(true)
-        const response = await fetch(`/api/admin/dashboard/metrics?timeRange=${timeRange}`)
-        if (!response.ok) throw new Error('Failed to fetch metrics')
-        const data = await response.json()
-        setMetrics(data)
+        setLoading(true);
+        console.log('Fetching metrics...');
+        const response = await fetch(`/api/admin/dashboard/metrics?timeRange=${timeRange}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        // Log the raw response for debugging
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+        
+        const text = await response.text();
+        console.log('Raw response body:', text);
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          console.error('Failed to parse response as JSON:', parseError);
+          throw new Error('Invalid response format');
+        }
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch metrics');
+        }
+        
+        console.log('Parsed metrics data:', data);
+        setMetrics(data);
       } catch (error) {
-        console.error("Error fetching dashboard metrics:", error)
-        setMetrics(defaultMetrics)
+        console.error('Error fetching dashboard metrics:', error);
+        setMetrics(defaultMetrics);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchMetrics()
-  }, [timeRange])
+    fetchMetrics();
+  }, [timeRange]);
 
   return (
     <ProtectedRoute resource="analytics" action="read">
@@ -192,6 +222,27 @@ export default function AdminDashboardPage() {
               </motion.div>
             </div>
           )}
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue Overview Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 }}
+            >
+              <Overview />
+            </motion.div>
+
+            {/* Top Products Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.6 }}
+            >
+              <TopProducts />
+            </motion.div>
+          </div>
         </div>
       </AdminLayout>
     </ProtectedRoute>

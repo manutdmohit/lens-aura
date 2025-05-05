@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CartProvider } from '@/context/cart-context';
+import { SessionProvider } from '@/components/session-provider';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { Toaster } from 'sonner';
@@ -29,14 +30,14 @@ export default function RootLayout({
         <script src="https://js.stripe.com/v3/" async></script>
       </head>
       <body className={inter.className}>
-        {/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange> */}
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-          <Toaster />
-        </CartProvider>
-        {/* </ThemeProvider> */}
+        <SessionProvider>
+          <CartProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <Toaster />
+          </CartProvider>
+        </SessionProvider>
       </body>
     </html>
   );
