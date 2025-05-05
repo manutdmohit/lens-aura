@@ -51,13 +51,15 @@ const OrderSchema = new Schema({
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
     color: { type: String, required: true },
-    imageUrl: { type: String }
+    imageUrl: { type: String },
+    productType: { type: String },
+    product: { type: Schema.Types.ObjectId, ref: 'Product' }
   }],
   totalAmount: { type: Number, required: true },
   shippingAddress: {
     firstName: { type: String },
     lastName: { type: String },
-    address: { type: String },
+    street: { type: String },
     city: { type: String },
     state: { type: String },
     postalCode: { type: String },
@@ -69,8 +71,13 @@ const OrderSchema = new Schema({
     enum: ['pending', 'paid', 'failed'], 
     default: 'pending' 
   },
+  paymentMethod: { type: String },
   paymentIntent: { type: String },
-  stripeSessionId: { type: String, required: true },
+  stripeSessionId: { 
+    type: String, 
+    required: true,
+    index: true // Add index for faster lookups
+  },
   stockReduced: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

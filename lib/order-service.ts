@@ -1,9 +1,10 @@
 import { connectToDatabase } from './api/db';
 import Order from '@/models/Order';
-import Product from '@/models/Product';
 import type { CartItem } from '@/context/cart-context';
 import mongoose from 'mongoose';
 import { updateProductStock } from './products';
+import type { IProduct } from '@/lib/mongoose/models/product.model';
+import { Product } from '@/models';
 
 /**
  * Generates a unique order number
@@ -27,20 +28,27 @@ export async function createPendingOrder(
     console.log(`[DEBUG] Creating pending order for session: ${stripeSessionId}`);
     
     // Create initial order data with proper ObjectId conversion
-  
     const orderItems = items.map(item => {
-      console.log(`[DEBUG] Processing item: ${item.product.name}, ID: ${item.product._id!}`, { item });
+      console.log(`[DEBUG] Processing item: ${item.product.name}, ID: ${item.product._id}`, { item });
       // Ensure the product ID exists and is valid
-      if (!item.product._id!) {
+      if (!item.product._id) {
         console.error(`[DEBUG] Missing product ID for ${item.product.name}`, item.product);
+        throw new Error(`Missing product ID for ${item.product.name}`);
+      }
+      const productId = item.product._id.toString();
+      if (!productId) {
+        console.error(`[DEBUG] Invalid product ID for ${item.product.name}`, item.product);
+        throw new Error(`Invalid product ID for ${item.product.name}`);
       }
       return {
-        productId: (item.product._id!),
+        productId: productId,
         name: item.product.name,
         price: item.product.price,
         quantity: item.quantity,
         color: item.color,
         imageUrl: item.product.imageUrl,
+        productType: item.product.productType,
+        product: item.product._id
       };
     });
     
@@ -62,6 +70,8 @@ export async function createPendingOrder(
       paymentStatus: 'pending',
       stripeSessionId,
       orderNumber,
+      stockReduced: false,
+      paymentMethod: 'stripe'
     });
     
     await order.save();
@@ -100,8 +110,6 @@ export async function updateOrderFromStripeSession(
     
     // Find the order by Stripe session ID
     const order = await Order.findOne({ stripeSessionId });
-
-    
     
     if (!order) {
       console.error(`[DEBUG] Order not found for session: ${stripeSessionId}`);

@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Check, AlertCircle, ShoppingCart, Clock } from 'lucide-react';
-import type { ProductFormValues as Product } from '@/lib/api/validation';
+import { IProduct } from '@/models';
 import { useCart } from '@/context/cart-context';
 import { toast } from 'sonner';
 
 interface AddToCartButtonProps {
-  product: Product;
+  product: IProduct;
   selectedColor?: string;
   quantity?: number;
 }

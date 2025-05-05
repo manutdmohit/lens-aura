@@ -78,11 +78,11 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
       const validatedImageUrl = validateImageUrl(item.product.imageUrl);
       
       // Log product ID for debugging
-      console.log(`Adding product to Stripe checkout: ID=${item.product.id}, Name=${item.product.name}`);
+      console.log(`Adding product to Stripe checkout: ID=${item.product._id}, Name=${item.product.name}`);
       
       // Create a detailed metadata object for each product
       const productMetadata = {
-        productId: item.product.id || '',
+        productId: item.product._id?.toString() || '',
         color: item.color || 'Default',
         name: item.product.name,
         price: item.product.price.toString(),
@@ -96,7 +96,6 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
         price_data: {
           currency: "aud",
           product_data: {
-            product_id: item.product.id,
             name: item.product.name,
             description: `Color: ${item.color}`,
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
@@ -112,7 +111,7 @@ export async function createCheckoutSession(items: CartItem[], successUrl: strin
     const sessionMetadata = {
       orderId: `order_${Date.now()}`,
       itemCount: items.length.toString(),
-      productIds: items.map(item => item.product.id).join(',')
+      productIds: items.map(item => item.product._id?.toString()).join(',')
     };
     
     console.log(`Creating Stripe checkout session with ${lineItems.length} items`);

@@ -85,10 +85,19 @@ export default function CheckoutSuccessPage() {
         if (!response.ok) {
           const errorData = await response.json();
           console.error("[DEBUG] Error response:", errorData);
-          throw new Error(errorData.error || "Failed to fetch order details");
+          setError(errorData.error || "Failed to fetch order details");
+          setIsLoading(false);
+          return;
         }
         
         const data = await response.json();
+        
+        if (!data) {
+          console.error("[DEBUG] No data received from API");
+          setError("No order data received");
+          setIsLoading(false);
+          return;
+        }
         
         console.log('[DEBUG] Successfully fetched order details:', data);
         
@@ -103,11 +112,10 @@ export default function CheckoutSuccessPage() {
             body: JSON.stringify({ sessionId: cleanSessionId }),
           });
           
-          if (stockUpdateResponse.ok) {
-            const stockResult = await stockUpdateResponse.json();
-            console.log('[DEBUG] Stock update result:', stockResult);
-          } else {
-            console.error('[DEBUG] Failed to update stock:', await stockUpdateResponse.json());
+          if (!stockUpdateResponse.ok) {
+            const stockError = await stockUpdateResponse.json();
+            console.error("[DEBUG] Error reducing stock:", stockError);
+            // Don't set error here, just log it - we still want to show the order
           }
         } else if (data.paymentStatus === 'paid') {
           console.log('[DEBUG] Payment successful but stock already reduced');

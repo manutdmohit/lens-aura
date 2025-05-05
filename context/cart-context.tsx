@@ -8,10 +8,10 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { ProductFormValues as Product } from '@/lib/api/validation';
+import { Product, IProduct } from '@/models';
 
 export interface CartItem {
-  product: Product;
+  product: IProduct;
   quantity: number;
   color: string;
 }
@@ -19,7 +19,7 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   itemCount: number;
-  addItem: (product: Product, quantity: number, color: string) => void;
+  addItem: (product: IProduct, quantity: number, color: string) => void;
   removeItem: (productId: string, color?: string) => void;
   updateQuantity: (productId: string, quantity: number, color: string) => void;
   clearCart: () => void;
@@ -61,12 +61,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
-  const addItem = (product: Product, quantity: number, color: string) => {
+  const addItem = (product: IProduct, quantity: number, color: string) => {
     setItems((prevItems) => {
       if (!Array.isArray(prevItems)) return [];
 
       const existingItemIndex = prevItems.findIndex(
-        (item) => item.product.id === product.id && item.color === color
+        (item) => item.product._id === product._id && item.color === color
       );
 
       if (existingItemIndex >= 0) {
@@ -84,11 +84,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (color) {
         // Remove specific product with specific color
         return prevItems.filter(
-          (item) => !(item.product.id === productId && item.color === color)
+          (item) => !(item.product._id === productId && item.color === color)
         );
       } else {
         // Remove all items with this product ID (legacy behavior)
-        return prevItems.filter((item) => item.product.id !== productId);
+        return prevItems.filter((item) => item.product._id !== productId);
       }
     });
   };
@@ -101,7 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.product.id === productId && item.color === color
+        item.product._id === productId && item.color === color
           ? { ...item, quantity }
           : item
       )

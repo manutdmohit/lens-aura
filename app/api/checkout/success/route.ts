@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { updateProductStock, getProductById } from '@/lib/products';
+import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,37 +12,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
     }
     
-    console.log(`Processing successful checkout for session: ${sessionId}`);
+    // Clean the session ID to match frontend
+    const cleanSessionId = sessionId
+      .trim()
+      .replace(/['"]/g, '')
+      .replace(/^ccs_test/, 'cs_test');
+    
+    console.log(`Processing successful checkout for session: ${cleanSessionId}`);
     
     await connectToDatabase();
     
     // Find the order by Stripe session ID
-    const order = await Order.findOne({ stripeSessionId: sessionId });
+    const foundOrder = await Order.findOne({ stripeSessionId: cleanSessionId });
     
-    if (!order) {
-      console.error(`Order not found for session: ${sessionId}`);
+    if (!foundOrder) {
+      console.error(`Order not found for session: ${cleanSessionId}`);
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
     
-    console.log(`Found order ${order._id}, payment status: ${order.paymentStatus}`);
+    console.log(`Found order ${foundOrder._id}, payment status: ${foundOrder.paymentStatus}`);
     
     // Only process if the order is paid
-    if (order.paymentStatus !== 'paid') {
-      console.log(`Order ${order._id} is not paid, skipping stock reduction`);
+    if (foundOrder.paymentStatus !== 'paid') {
+      console.log(`Order ${foundOrder._id} is not paid, skipping stock reduction`);
       return NextResponse.json({ 
         success: false, 
         message: 'Order not paid',
-        paymentStatus: order.paymentStatus
+        paymentStatus: foundOrder.paymentStatus
       });
     }
     
     // Check if stock has already been reduced
-    if (order.stockReduced) {
-      console.log(`Stock already reduced for order ${order._id}`);
+    if (foundOrder.stockReduced) {
+      console.log(`Stock already reduced for order ${foundOrder._id}`);
       return NextResponse.json({ 
         success: true, 
         message: 'Stock already reduced',
-        orderId: order._id
+        orderId: foundOrder._id
       });
     }
     
@@ -49,13 +56,13 @@ export async function POST(request: NextRequest) {
     const updateResults = [];
     let success = true;
     
-    console.log(`Processing ${order.items.length} items for stock reduction`);
+    console.log(`Processing ${foundOrder.items.length} items for stock reduction`);
     
-    for (const item of order.items) {
+    for (const item of foundOrder.items) {
       try {
-        // Skip if no productId
+        // Skip if no product
         if (!item.productId) {
-          console.warn(`Skipping stock update for item without productId: ${item.name}`);
+          console.warn(`Skipping stock update for item without product: ${item.name}`);
           updateResults.push({
             product: item.name,
             success: false,
@@ -64,15 +71,20 @@ export async function POST(request: NextRequest) {
           continue;
         }
         
-        console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
+        // Convert productId to ObjectId if it's not already
+        const productId = item.productId instanceof mongoose.Types.ObjectId 
+          ? item.productId 
+          : new mongoose.Types.ObjectId(item.productId);
+        
+        console.log(`Updating stock for product ${productId}, reducing by ${item.quantity}`);
         
         // Get the original product data
-        const originalProduct = await getProductById(item.productId);
+        const originalProduct = await getProductById(productId.toString());
         
         if (!originalProduct) {
-          console.error(`Product not found: ${item.productId}`);
+          console.error(`Product not found: ${productId}`);
           updateResults.push({
-            productId: item.productId,
+            productId: productId,
             success: false,
             error: 'Product not found'
           });
@@ -84,12 +96,12 @@ export async function POST(request: NextRequest) {
         console.log(`Current stock for ${originalProduct.name}: ${originalStock}`);
         
         // Update the product stock
-        const updatedProduct = await updateProductStock(item.productId, item.quantity);
+        const updatedProduct = await updateProductStock(productId.toString(), item.quantity);
         
         if (!updatedProduct) {
-          console.error(`Failed to update stock for product: ${item.productId}`);
+          console.error(`Failed to update stock for product: ${productId}`);
           updateResults.push({
-            productId: item.productId,
+            productId: productId,
             success: false,
             error: 'Failed to update stock'
           });
@@ -100,7 +112,7 @@ export async function POST(request: NextRequest) {
         console.log(`Updated stock for ${updatedProduct.name}: ${updatedProduct.stockQuantity} (was ${originalStock})`);
         
         updateResults.push({
-          productId: item.productId,
+          productId: productId,
           name: updatedProduct.name,
           success: true,
           originalStock,
@@ -108,7 +120,7 @@ export async function POST(request: NextRequest) {
           reduced: item.quantity
         });
       } catch (error: any) {
-        console.error(`Error updating stock for product in order ${order._id}:`, error);
+        console.error(`Error updating stock for product in order ${foundOrder._id}:`, error);
         updateResults.push({
           productId: item.productId,
           success: false,
@@ -118,17 +130,17 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    console.log('Stock update completed for order:', order._id);
+    console.log('Stock update completed for order:', foundOrder._id);
     
     // Mark the order as having stock reduced
-    order.stockReduced = true;
-    await order.save();
+    foundOrder.stockReduced = true;
+    await foundOrder.save();
     
     // Return the results
     return NextResponse.json({
       success,
-      orderId: order._id,
-      orderNumber: order.orderNumber,
+      orderId: foundOrder._id,
+      orderNumber: foundOrder.orderNumber,
       updates: updateResults
     });
     

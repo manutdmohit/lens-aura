@@ -11,25 +11,62 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { sessionId: string } }
 ) {
   try {
     await connectToDatabase();
 
+    // Get the session ID from params and ensure it's a string
+    const sessionId = params.sessionId;
+
     // Clean the session ID - handle various formats
-    const cleanSessionId = params.sessionId
-      .trim()
-      .replace(/['"]/g, '')
-      .replace(/^ccs_test/, 'cs_test')
-      .replace(/^cs_test/, 'cs_test'); // Ensure consistent format
+    const cleanSessionId = sessionId
+      .replace(/^ccs_/, 'cs_') // Handle potential double 'c' prefix
+      .replace(/^ccs_test_/, 'cs_test_') // Handle test sessions with double 'c'
+      .trim();
 
-    console.log(`[DEBUG] Original session ID: ${params.sessionId}`);
-    console.log(`[DEBUG] Cleaned session ID: ${cleanSessionId}`);
+    console.log('[DEBUG] Original session ID:', sessionId);
+    console.log('[DEBUG] Cleaned session ID:', cleanSessionId);
 
-    // Try to find the order with the cleaned session ID
-    const order = await Order.findOne({ stripeSessionId: cleanSessionId });
-    console.log(`[DEBUG] Found order: ${order?._id}`);
+    // First try with the cleaned session ID
+    let order = await Order.findOne({ stripeSessionId: cleanSessionId });
+    console.log('[DEBUG] First search with cleanSessionId:', cleanSessionId, ', found:', order?._id);
+
+    // If not found, try with the original session ID
+    if (!order) {
+      order = await Order.findOne({ stripeSessionId: sessionId });
+      console.log('[DEBUG] Second search with original sessionId:', sessionId, ', found:', order?._id);
+    }
+
+    // If still not found, try with test prefix
+    if (!order && sessionId.startsWith('cs_test_')) {
+      const testSessionId = 'ccs_test_' + sessionId.slice(8);
+      order = await Order.findOne({ stripeSessionId: testSessionId });
+      console.log('[DEBUG] Third search with testSessionId:', testSessionId, ', found:', order?._id);
+    }
+
+    // If still not found, try with paymentDetails.stripeSessionId
+    if (!order) {
+      order = await Order.findOne({ 'paymentDetails.stripeSessionId': cleanSessionId });
+      console.log('[DEBUG] Fourth search with paymentDetails.stripeSessionId:', cleanSessionId, ', found:', order?._id);
+    }
+
+    // If still not found, try with paymentDetails.stripeSessionId and original session ID
+    if (!order) {
+      order = await Order.findOne({ 'paymentDetails.stripeSessionId': sessionId });
+      console.log('[DEBUG] Fifth search with paymentDetails.stripeSessionId:', sessionId, ', found:', order?._id);
+    }
+
+    // If still not found, log all orders for debugging
+    if (!order) {
+      const allOrders = await Order.find({}, { stripeSessionId: 1, 'paymentDetails.stripeSessionId': 1 });
+      console.log('[DEBUG] All orders with session IDs:', allOrders.map(o => ({
+        id: o._id,
+        sessionId: o.stripeSessionId,
+        paymentDetailsSessionId: o.paymentDetails?.stripeSessionId
+      })));
+    }
 
     if (!order) {
       return NextResponse.json(
@@ -64,13 +101,14 @@ export async function GET(
       // Update shipping address from session
       if (session.customer_details?.address) {
         order.shippingAddress = {
-          address: session.customer_details.address.line1,
-          address2: session.customer_details.address.line2 || '',
+          firstName: session.customer_details.name?.split(' ')[0] || 'Pending',
+          lastName: session.customer_details.name?.split(' ').slice(1).join(' ') || 'Customer',
+          street: session.customer_details.address.line1,
           city: session.customer_details.address.city,
           state: session.customer_details.address.state,
           postalCode: session.customer_details.address.postal_code,
           country: session.customer_details.address.country || 'Australia',
-          phone: session.customer_details.phone || ''
+          phoneNumber: session.customer_details.phone || ''
         };
       }
       
@@ -80,7 +118,7 @@ export async function GET(
     return NextResponse.json({
       orderId: order._id,
       orderNumber: order.orderNumber,
-      paymentStatus: order.paymentStatus, // Use the updated order status
+      paymentStatus: order.paymentStatus,
       customerEmail: order.customerEmail,
       customerPhone: order.customerPhone,
       shippingAddress: order.shippingAddress,
@@ -88,9 +126,9 @@ export async function GET(
       customer_details: session.customer_details
     });
   } catch (error) {
-    console.error('[DEBUG] Error fetching session status:', error);
+    console.error('[DEBUG] Error fetching order:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch session status' },
+      { error: 'Failed to fetch order' },
       { status: 500 }
     );
   }

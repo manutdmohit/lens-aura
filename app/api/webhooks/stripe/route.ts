@@ -41,7 +41,13 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       
       try {
-        await handleCheckoutCompleted(session);
+        // Check if payment is successful
+        if (session.payment_status === 'paid') {
+          console.log('[DEBUG] Payment is successful, processing order');
+          await handleCheckoutCompleted(session);
+        } else {
+          console.log('[DEBUG] Payment not successful, skipping order processing');
+        }
       } catch (error) {
         console.error('[DEBUG] Error handling checkout completed:', error);
       }
@@ -55,13 +61,19 @@ export async function POST(request: NextRequest) {
         let order = await Order.findOne({ paymentIntent: paymentIntent.id });
         
         if (order) {
-          console.log(`[DEBUG] Found order ${order._id} by payment intent, updating status to paid`);
-          order.paymentStatus = 'paid';
-          await order.save();
-          console.log(`[DEBUG] Order ${order._id} updated to paid status`);
+          console.log(`[DEBUG] Found order ${order._id} by payment intent`);
           
-          // Update stock quantities when payment intent succeeds
-          await updateProductStockFromStripeOrder(order);
+          // Only update if not already paid
+          if (order.paymentStatus !== 'paid') {
+            console.log(`[DEBUG] Updating order ${order._id} status to paid`);
+            order.paymentStatus = 'paid';
+            await order.save();
+            
+            // Update stock quantities when payment intent succeeds
+            await updateProductStockFromStripeOrder(order);
+          } else {
+            console.log(`[DEBUG] Order ${order._id} already marked as paid, skipping stock update`);
+          }
         } else {
           // Find session associated with this payment intent
           console.log('[DEBUG] No order found by payment intent, looking for session...');
@@ -74,17 +86,23 @@ export async function POST(request: NextRequest) {
             console.log(`[DEBUG] Found session for payment intent: ${sessions.data[0].id}`);
             
             // Find order by session ID
-            order = await Order.findOne({ stripeSessionId: sessions.data[0].id });
+            order = await Order.findOne({ 'paymentDetails.stripeSessionId': sessions.data[0].id });
             
             if (order) {
-              console.log(`[DEBUG] Found order ${order._id} by session ID, updating status to paid`);
-              order.paymentStatus = 'paid';
-              order.paymentIntent = paymentIntent.id;
-              await order.save();
-              console.log(`[DEBUG] Order ${order._id} updated to paid status`);
+              console.log(`[DEBUG] Found order ${order._id} by session ID`);
               
-              // Update stock quantities when payment intent succeeds
-              await updateProductStockFromStripeOrder(order);
+              // Only update if not already paid
+              if (order.paymentStatus !== 'paid') {
+                console.log(`[DEBUG] Updating order ${order._id} status to paid`);
+                order.paymentStatus = 'paid';
+                order.paymentIntent = paymentIntent.id;
+                await order.save();
+                
+                // Update stock quantities when payment intent succeeds
+                await updateProductStockFromStripeOrder(order);
+              } else {
+                console.log(`[DEBUG] Order ${order._id} already marked as paid, skipping stock update`);
+              }
             } else {
               console.log(`[DEBUG] No order found for session: ${sessions.data[0].id}, creating one...`);
               await handleCheckoutCompleted(sessions.data[0]);
@@ -297,34 +315,34 @@ async function updateProductStockFromStripeOrder(order: any) {
     
     // For each item in the order
     for (const item of order.items) {
-      // Skip if no productId
-      if (!item.productId) {
-        console.warn(`Skipping stock update for item without productId: ${item.name}`);
+      // Skip if no product
+      if (!item.product) {
+        console.warn(`Skipping stock update for item without product: ${item.name}`);
         continue;
       }
       
-      console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
+      console.log(`Updating stock for product ${item.product}, reducing by ${item.quantity}`);
       
       try {
         // Use our utility function to update the product stock
-        const updatedProduct = await updateProductStock(item.productId, item.quantity);
+        const updatedProduct = await updateProductStock(item.product.toString(), item.quantity);
         
         if (!updatedProduct) {
-          console.error(`Failed to update stock for product ${item.productId}`);
+          console.error(`Failed to update stock for product ${item.product}`);
           continue;
         }
         
         console.log(`Successfully updated stock for ${updatedProduct.name}: ${updatedProduct.stockQuantity} remaining (in stock: ${updatedProduct.inStock})`);
       } catch (itemError) {
-        console.error(`Error updating stock for product ${item.productId}:`, itemError);
+        console.error(`Error updating stock for product ${item.product}:`, itemError);
         
         // Fall back to direct update if the utility function fails
         try {
           // Directly find and update the product
-          const product = await Product.findById(item.productId);
+          const product = await Product.findById(item.product);
           
           if (!product) {
-            console.error(`Product not found in fallback: ${item.productId}`);
+            console.error(`Product not found in fallback: ${item.product}`);
             continue;
           }
           
@@ -342,7 +360,7 @@ async function updateProductStockFromStripeOrder(order: any) {
           
           console.log(`Fallback: Updated stock for ${product.name}: ${product.stockQuantity} remaining`);
         } catch (fallbackError) {
-          console.error(`Fallback stock update also failed for ${item.productId}:`, fallbackError);
+          console.error(`Fallback stock update also failed for ${item.product}:`, fallbackError);
         }
       }
     }
