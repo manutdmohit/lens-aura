@@ -33,6 +33,7 @@ interface AdminAuthContextType {
   status: 'loading' | 'authenticated' | 'unauthenticated';
   signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => void;
+  isInitialized: boolean;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
@@ -40,14 +41,19 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
 );
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const { data: sessionData, status: nextAuthStatus } = useSession();
+  const { data: sessionData, status: nextAuthStatus, update: updateSession } = useSession();
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>(nextAuthStatus);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   // Update status when nextAuthStatus changes
   useEffect(() => {
+    console.log("NextAuth status changed:", nextAuthStatus);
     setStatus(nextAuthStatus);
+    if (nextAuthStatus !== 'loading') {
+      setIsInitialized(true);
+    }
   }, [nextAuthStatus]);
 
   const session: AdminSession | null = useMemo(() => {
@@ -71,26 +77,42 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   // Handle redirection based on auth state
   useEffect(() => {
-    if (status === 'loading') return;
+    if (status === 'loading' || !isInitialized) return;
 
-    if (status === 'unauthenticated' && pathname !== '/admin/login') {
+    console.log("Auth state changed:", status, "pathname:", pathname);
+
+    if (status === 'unauthenticated' && pathname && !pathname.includes('/admin/login')) {
+      console.log("Redirecting to login page");
       router.push('/admin/login');
-    } else if (status === 'authenticated' && pathname === '/admin/login') {
+    } else if (status === 'authenticated' && pathname && pathname.includes('/admin/login')) {
+      console.log("Redirecting to admin dashboard");
       router.push('/admin');
-      router.refresh();
     }
-  }, [status, pathname, router]);
+  }, [status, pathname, router, isInitialized]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("Attempting sign in with email:", email);
       const result = await nextAuthSignIn('credentials', {
         redirect: false,
         email,
         password,
       });
 
+      console.log("Sign in result:", result);
+
       if (result?.ok) {
-        setStatus('authenticated');
+        console.log("Sign in successful, updating session");
+        try {
+          // Force a session update to ensure fresh data
+          await updateSession();
+          console.log("Session updated");
+        } catch (updateError) {
+          console.error("Error updating session:", updateError);
+        }
+        
+        console.log("Redirecting to admin dashboard");
+        window.location.href = '/admin'; // Force a hard navigation
         return true;
       }
       return false;
@@ -102,16 +124,20 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log("Signing out");
       await nextAuthSignOut({ redirect: false });
+      console.log("Signed out, redirecting to login page");
       setStatus('unauthenticated');
-      router.push('/admin/login');
+      window.location.href = '/admin/login'; // Force a hard navigation
     } catch (error) {
       console.error('Sign out error:', error);
+      // Force navigation even if error occurs
+      window.location.href = '/admin/login';
     }
   };
 
   return (
-    <AdminAuthContext.Provider value={{ session, status, signIn, signOut }}>
+    <AdminAuthContext.Provider value={{ session, status, signIn, signOut, isInitialized }}>
       {children}
     </AdminAuthContext.Provider>
   );
