@@ -48,6 +48,7 @@ export interface IOrder extends Document {
     lastFour?: string;
     [key: string]: any;
   };
+  deliveryStatus: 'ORDER_PLACED' | 'ORDER_CONFIRMED' | 'PROCESSING' | 'DISPATCHED' | 'IN_TRANSIT' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'DELAYED';
   shippingAddress: ShippingAddress;
   shippingMethod: 'standard' | 'express' | 'overnight';
   shippingCost: number;
@@ -144,6 +145,23 @@ const OrderSchema = new Schema<IOrder>(
       type: Schema.Types.Mixed,
       default: {},
     },
+    deliveryStatus: {
+      type: String,
+      required: true,
+      enum: [
+        'ORDER_PLACED',
+        'ORDER_CONFIRMED',
+        'PROCESSING',
+        'DISPATCHED',
+        'IN_TRANSIT',
+        'OUT_FOR_DELIVERY',
+        'DELIVERED',
+        'CANCELLED',
+        'RETURNED',
+        'DELAYED'
+      ],
+      default: 'ORDER_PLACED'
+    },
     shippingAddress: {
       firstName: {
         type: String,
@@ -229,6 +247,17 @@ OrderSchema.pre('save', async function (next) {
       .padStart(6, '0');
     this.orderNumber = `BN-${timestamp}-${random}`;
   }
+
+  // Set initial delivery status if not set
+  if (!this.deliveryStatus) {
+    this.deliveryStatus = 'ORDER_PLACED';
+  }
+
+  // Update delivery status when payment is completed
+  if (this.isModified('paymentStatus') && this.paymentStatus === 'paid' && this.deliveryStatus === 'ORDER_PLACED') {
+    this.deliveryStatus = 'ORDER_CONFIRMED';
+  }
+
   next();
 });
 

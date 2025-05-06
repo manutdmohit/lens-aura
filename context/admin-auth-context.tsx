@@ -11,6 +11,7 @@ import {
   useEffect,
   type ReactNode,
   useMemo,
+  useState,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -39,9 +40,15 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
 );
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const { data: sessionData, status } = useSession();
+  const { data: sessionData, status: nextAuthStatus } = useSession();
+  const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>(nextAuthStatus);
   const router = useRouter();
   const pathname = usePathname();
+
+  // Update status when nextAuthStatus changes
+  useEffect(() => {
+    setStatus(nextAuthStatus);
+  }, [nextAuthStatus]);
 
   const session: AdminSession | null = useMemo(() => {
     if (!sessionData) return null;
@@ -62,28 +69,45 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     };
   }, [sessionData]);
 
-  // 👇 Safer redirection
+  // Handle redirection based on auth state
   useEffect(() => {
+    if (status === 'loading') return;
+
     if (status === 'unauthenticated' && pathname !== '/admin/login') {
       router.push('/admin/login');
-    }
-    if (status === 'authenticated' && pathname === '/admin/login') {
+    } else if (status === 'authenticated' && pathname === '/admin/login') {
       router.push('/admin');
+      router.refresh();
     }
   }, [status, pathname, router]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
-    const result = await nextAuthSignIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const result = await nextAuthSignIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
 
-    return result?.ok ?? false;
+      if (result?.ok) {
+        setStatus('authenticated');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return false;
+    }
   };
 
-  const signOut = () => {
-    nextAuthSignOut({ callbackUrl: '/admin/login' });
+  const signOut = async () => {
+    try {
+      await nextAuthSignOut({ redirect: false });
+      setStatus('unauthenticated');
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   return (

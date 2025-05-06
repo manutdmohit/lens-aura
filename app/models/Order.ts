@@ -12,7 +12,7 @@ export interface IOrderItem {
 export interface IShippingAddress {
   firstName?: string;
   lastName?: string;
-  address?: string;
+  street?: string;
   city?: string;
   state?: string;
   postalCode?: string;
@@ -20,9 +20,19 @@ export interface IShippingAddress {
   phone?: string;
 }
 
+export type DeliveryStatus = 
+  | "ORDER_PLACED"
+  | "ORDER_CONFIRMED"
+  | "PROCESSING"
+  | "DISPATCHED"
+  | "IN_TRANSIT"
+  | "OUT_FOR_DELIVERY"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "RETURNED"
+  | "DELAYED";
+
 export interface IOrder extends Document {
-  paymentMethod: string;
-  deliveryStatus: 'ORDER_PLACED' | 'ORDER_CONFIRMED' | 'PROCESSING' | 'DISPATCHED' | 'IN_TRANSIT' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'DELAYED';
   userId?: string;
   orderNumber: string;
   customerEmail?: string;
@@ -31,6 +41,7 @@ export interface IOrder extends Document {
   totalAmount: number;
   shippingAddress?: IShippingAddress;
   paymentStatus: 'pending' | 'paid' | 'failed';
+  deliveryStatus: DeliveryStatus;
   paymentIntent?: string;
   stripeSessionId: string;
   stockReduced: boolean;
@@ -76,25 +87,25 @@ const OrderSchema = new Schema({
   deliveryStatus: {
     type: String,
     enum: [
-      'ORDER_PLACED',
-      'ORDER_CONFIRMED',
-      'PROCESSING',
-      'DISPATCHED',
-      'IN_TRANSIT',
-      'OUT_FOR_DELIVERY',
-      'DELIVERED',
-      'CANCELLED',
-      'RETURNED',
-      'DELAYED'
+      "ORDER_PLACED",
+      "ORDER_CONFIRMED",
+      "PROCESSING",
+      "DISPATCHED",
+      "IN_TRANSIT",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+      "CANCELLED",
+      "RETURNED",
+      "DELAYED"
     ],
-    default: 'ORDER_PLACED'
+    default: "ORDER_PLACED"
   },
   paymentMethod: { type: String },
   paymentIntent: { type: String },
   stripeSessionId: { 
     type: String, 
     required: true,
-    index: true // Add index for faster lookups
+    index: true
   },
   stockReduced: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
@@ -112,9 +123,13 @@ OrderSchema.pre('save', async function(next) {
     const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     order.orderNumber = `LA-${timestamp}-${random}`;
   }
+
+  // Update delivery status when payment is completed
+  if (order.isModified('paymentStatus') && order.paymentStatus === 'paid') {
+    order.deliveryStatus = 'ORDER_CONFIRMED';
+  }
   
   next();
 });
 
-// Use mongoose.models to check if the model exists already to prevent overwriting
-export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema); 

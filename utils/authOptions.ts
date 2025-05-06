@@ -1,4 +1,5 @@
 import type { NextAuthOptions } from 'next-auth';
+import type { User as NextAuthUser } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 import User from '@/models/User';
@@ -10,10 +11,15 @@ declare module 'next-auth' {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role?: string;
+      role: string;
     };
   }
 }
+
+// Extend the built-in User type
+type CustomUser = NextAuthUser & {
+  role: string;
+};
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -62,7 +68,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: `${user.firstName} ${user.lastName}`,
             role: user.role,
-          };
+          } as CustomUser;
         } catch (error) {
           console.error('Authentication error:', error);
           return null;
@@ -73,23 +79,33 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === 'update' && session) {
+        return { ...token, ...session.user };
+      }
       if (user) {
         token.id = user.id;
-        if ('role' in user) {
-          token.role = user.role;
-        }
+        token.role = (user as CustomUser).role;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        if (session.user) {
-          session.user.id = token.id as string;
-        }
+      if (token && session.user) {
+        session.user.id = token.id as string;
         session.user.role = token.role as string;
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      console.log('User signed in:', user);
+    },
+    async signOut() {
+      console.log('User signed out');
+    },
+    async session({ session }) {
+      console.log('Session updated:', session);
     },
   },
   pages: {
@@ -101,4 +117,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };

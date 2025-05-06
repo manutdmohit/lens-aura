@@ -282,6 +282,7 @@ async function createOrderFromStripeSession(session: Stripe.Checkout.Session): P
       stripeSessionId: session.id,
       customerEmail: session.customer_details?.email,
       customerPhone: session.customer_details?.phone,
+      deliveryStatus: session.payment_status === 'paid' ? 'ORDER_CONFIRMED' : 'ORDER_PLACED',
       // Customer data will be updated later with updateOrderFromStripeSession
     });
     

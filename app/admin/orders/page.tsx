@@ -6,6 +6,7 @@ import { Search, MoreHorizontal, Download, Filter, Eye, FileText, Calendar, Cred
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/components/ui/use-toast"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,119 +19,154 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import AdminLayout from "@/components/admin/admin-layout"
 import ProtectedRoute from "@/components/admin/protected-route"
+import Link from "next/link"
 
-// Mock orders data
-const mockOrders = [
-  {
-    id: "ORD-12345",
-    customer: "John Doe",
-    email: "john.doe@example.com",
-    date: "2023-04-15",
-    status: "completed",
-    payment: "credit_card",
-    total: 125.0,
-  },
-  {
-    id: "ORD-12344",
-    customer: "Jane Smith",
-    email: "jane.smith@example.com",
-    date: "2023-04-14",
-    status: "processing",
-    payment: "paypal",
-    total: 250.0,
-  },
-  {
-    id: "ORD-12343",
-    customer: "Robert Johnson",
-    email: "robert.johnson@example.com",
-    date: "2023-04-14",
-    status: "completed",
-    payment: "credit_card",
-    total: 95.0,
-  },
-  {
-    id: "ORD-12342",
-    customer: "Emily Davis",
-    email: "emily.davis@example.com",
-    date: "2023-04-13",
-    status: "pending",
-    payment: "credit_card",
-    total: 125.0,
-  },
-  {
-    id: "ORD-12341",
-    customer: "Michael Wilson",
-    email: "michael.wilson@example.com",
-    date: "2023-04-12",
-    status: "cancelled",
-    payment: "paypal",
-    total: 250.0,
-  },
-  {
-    id: "ORD-12340",
-    customer: "Sarah Brown",
-    email: "sarah.brown@example.com",
-    date: "2023-04-11",
-    status: "completed",
-    payment: "credit_card",
-    total: 95.0,
-  },
-  {
-    id: "ORD-12339",
-    customer: "David Miller",
-    email: "david.miller@example.com",
-    date: "2023-04-10",
-    status: "completed",
-    payment: "credit_card",
-    total: 125.0,
-  },
-  {
-    id: "ORD-12338",
-    customer: "Jennifer Taylor",
-    email: "jennifer.taylor@example.com",
-    date: "2023-04-09",
-    status: "processing",
-    payment: "paypal",
-    total: 250.0,
-  },
-]
+interface Order {
+  id: string
+  customer: string
+  email: string
+  date: string
+  status: string
+  payment: string
+  total: number
+  deliveryStatus: string
+}
+
+interface PaginationData {
+  total: number
+  page: number
+  limit: number
+  pages: number
+}
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState(mockOrders)
+  const { toast } = useToast()
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [pagination, setPagination] = useState<PaginationData>({
+    total: 0,
+    page: 1,
+    limit: 10,
+    pages: 0
+  })
+
+  const pageSizeOptions = [10, 25, 50, 100]
+
+  const handlePageSizeChange = (newSize: string) => {
+    setPagination(prev => ({
+      ...prev,
+      limit: parseInt(newSize),
+      page: 1 // Reset to first page when changing page size
+    }))
+  }
+
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxVisiblePages = 5
+    let startPage = Math.max(1, pagination.page - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(pagination.pages, startPage + maxVisiblePages - 1)
+
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    // Always include first and last page
+    if (startPage > 1) {
+      pageNumbers.push(1)
+      if (startPage > 2) pageNumbers.push('...')
+    }
+
+    // Add visible page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i)
+    }
+
+    // Add last page number if needed
+    if (endPage < pagination.pages) {
+      if (endPage < pagination.pages - 1) pageNumbers.push('...')
+      pageNumbers.push(pagination.pages)
+    }
+
+    return pageNumbers
+  }
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        search: searchQuery,
+        status: statusFilter,
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString()
+      })
+
+      const response = await fetch(`/api/admin/orders?${params}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch orders')
+      }
+      
+      setOrders(data.orders)
+      setPagination(data.pagination)
+    } catch (error) {
+      console.error("Error fetching orders:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch orders",
+        variant: "destructive"
+      })
+      setOrders([])
+      setPagination(prev => ({ ...prev, total: 0, pages: 0 }))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    // Simulate API call
     const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1000)
+      fetchOrders()
+    }, 300)
 
     return () => clearTimeout(timer)
-  }, [])
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.email.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter
-
-    return matchesSearch && matchesStatus
-  })
+  }, [searchQuery, statusFilter, pagination.page])
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "completed":
+      case "paid":
         return "bg-green-100 text-green-800 border-green-200"
-      case "processing":
-        return "bg-blue-100 text-blue-800 border-blue-200"
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "cancelled":
+      case "failed":
         return "bg-red-100 text-red-800 border-red-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
+  const getDeliveryStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case "ORDER_PLACED":
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "ORDER_CONFIRMED":
+        return "bg-green-100 text-green-800 border-green-200"
+      case "PROCESSING":
+        return "bg-purple-100 text-purple-800 border-purple-200"
+      case "DISPATCHED":
+      case "IN_TRANSIT":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "OUT_FOR_DELIVERY":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200"
+      case "DELIVERED":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200"
+      case "CANCELLED":
+      case "RETURNED":
+        return "bg-red-100 text-red-800 border-red-200"
+      case "DELAYED":
+        return "bg-orange-100 text-orange-800 border-orange-200"
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
@@ -186,7 +222,7 @@ export default function AdminOrdersPage() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Select defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-full sm:w-[150px]">
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4" />
@@ -195,10 +231,9 @@ export default function AdminOrdersPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -225,14 +260,15 @@ export default function AdminOrdersPage() {
                     <div className="flex-1">Customer</div>
                     <div className="flex-1">Date</div>
                     <div className="flex-1">Status</div>
+                    <div className="flex-1">Delivery</div>
                     <div className="flex-1">Payment</div>
                     <div className="flex-1 text-right">Total</div>
                     <div className="w-10"></div>
                   </div>
-                  {filteredOrders.length === 0 ? (
+                  {orders.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">No orders found matching your search.</div>
                   ) : (
-                    filteredOrders.map((order, index) => (
+                    orders.map((order, index) => (
                       <motion.div
                         key={order.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -254,6 +290,11 @@ export default function AdminOrdersPage() {
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </Badge>
                         </div>
+                        <div className="flex-1">
+                          <Badge variant="outline" className={getDeliveryStatusBadgeColor(order.deliveryStatus)}>
+                            {order.deliveryStatus.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+                          </Badge>
+                        </div>
                         <div className="flex-1 flex items-center">
                           {getPaymentIcon(order.payment)}
                           <span className="ml-2 capitalize">{order.payment.replace("_", " ")}</span>
@@ -269,10 +310,12 @@ export default function AdminOrdersPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="cursor-pointer">
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
+                              <Link href={`/admin/orders/${order.id}`}>
+                                <DropdownMenuItem className="cursor-pointer">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                              </Link>
                               <DropdownMenuItem className="cursor-pointer">
                                 <FileText className="h-4 w-4 mr-2" />
                                 Download Invoice
@@ -282,6 +325,92 @@ export default function AdminOrdersPage() {
                         </div>
                       </motion.div>
                     ))
+                  )}
+
+                  {/* Enhanced Pagination */}
+                  {pagination.pages > 0 && (
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                          Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
+                        </span>
+                        <Select value={pagination.limit.toString()} onValueChange={handlePageSizeChange}>
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pageSizeOptions.map(size => (
+                              <SelectItem key={size} value={size.toString()}>
+                                {size} / page
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setPagination(prev => ({ ...prev, page: 1 }))}
+                          disabled={pagination.page === 1}
+                          className="h-8 w-8"
+                        >
+                          <span className="sr-only">First page</span>
+                          ««
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                          disabled={pagination.page === 1}
+                          className="h-8 w-8"
+                        >
+                          <span className="sr-only">Previous page</span>
+                          «
+                        </Button>
+                        
+                        <div className="flex items-center gap-1">
+                          {getPageNumbers().map((pageNum, idx) => (
+                            pageNum === '...' ? (
+                              <span key={`ellipsis-${idx}`} className="px-2">...</span>
+                            ) : (
+                              <Button
+                                key={pageNum}
+                                variant={pagination.page === pageNum ? "default" : "outline"}
+                                size="icon"
+                                onClick={() => setPagination(prev => ({ ...prev, page: pageNum as number }))}
+                                className={`h-8 w-8 ${pagination.page === pageNum ? 'pointer-events-none' : ''}`}
+                              >
+                                <span className="sr-only">Page {pageNum}</span>
+                                {pageNum}
+                              </Button>
+                            )
+                          ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                          disabled={pagination.page === pagination.pages}
+                          className="h-8 w-8"
+                        >
+                          <span className="sr-only">Next page</span>
+                          »
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setPagination(prev => ({ ...prev, page: pagination.pages }))}
+                          disabled={pagination.page === pagination.pages}
+                          className="h-8 w-8"
+                        >
+                          <span className="sr-only">Last page</span>
+                          »»
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

@@ -1,8 +1,7 @@
 'use client';
 
 import type React from 'react';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAdminAuth } from '@/context/admin-auth-context';
@@ -25,8 +24,16 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAdminAuth();
+  const { signIn, status } = useAdminAuth();
   const router = useRouter();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/admin');
+      router.refresh(); // Force a refresh of the navigation
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +44,7 @@ export default function AdminLoginPage() {
       const success = await signIn(email, password);
       if (success) {
         router.push('/admin');
+        router.refresh(); // Force a refresh of the navigation
       } else {
         setError('Invalid email or password');
       }
@@ -47,6 +55,22 @@ export default function AdminLoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-pulse text-center">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render the form if already authenticated
+  if (status === 'authenticated') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -81,6 +105,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -92,6 +117,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>

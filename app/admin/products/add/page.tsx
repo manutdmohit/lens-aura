@@ -117,20 +117,21 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
+      // Format colors as objects with name and hex properties
+      const formattedColors = colors.map(color => ({
+        name: color,
+        hex: color.toLowerCase() // For now, just use the color name as hex. You might want to add a color picker later
+      }));
+
       // Add colors to the data
       const productData = {
         ...data,
-        colors,
-        // For glasses and sunglasses, add frameColor
+        colors: formattedColors, // Send formatted colors
+        // Only add frameColor for glasses and sunglasses
         ...(data.productType !== 'contacts' && { frameColor: colors }),
+        // Set the correct category based on product type
+        category: data.productType.toLowerCase()
       };
-
-      // Get admin token
-      // const token = localStorage.getItem('adminToken');
-
-      // if (!token) {
-      //   throw new Error('Authentication required');
-      // }
 
       // Determine the API endpoint based on product type
       let endpoint = '/api/admin/products';
@@ -140,7 +141,6 @@ export default function AddProductPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(productData),
       });

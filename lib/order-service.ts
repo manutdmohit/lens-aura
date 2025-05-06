@@ -71,7 +71,8 @@ export async function createPendingOrder(
       stripeSessionId,
       orderNumber,
       stockReduced: false,
-      paymentMethod: 'stripe'
+      paymentMethod: 'stripe',
+      deliveryStatus: 'ORDER_PLACED' // Explicitly set the initial delivery status
     });
     
     await order.save();
@@ -130,6 +131,11 @@ export async function updateOrderFromStripeSession(
       postalCode: shippingAddress.postalCode,
       country: 'Australia' // Default to Australia
     };
+    
+    // Update delivery status when payment is successful
+    if (paymentStatus === 'paid' && order.deliveryStatus === 'ORDER_PLACED') {
+      order.deliveryStatus = 'ORDER_CONFIRMED';
+    }
     
     await order.save();
     console.log(`[DEBUG] Updated order ${order._id} with shipping details and payment status: ${paymentStatus}`);
