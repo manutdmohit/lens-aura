@@ -1,17 +1,19 @@
+'use client';
+
 import type React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
 import { CartProvider } from '@/context/cart-context';
 import { SessionProvider } from '@/components/session-provider';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { Toaster } from 'sonner';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'Lens Aura | Premium Eyewear at Surprising Prices',
   description:
     'Shop prescription glasses, sunglasses and contact lenses. Book an eye test online.',
@@ -23,18 +25,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
+
   return (
     <html lang="en">
       <head>
-        {/* Add Stripe.js script */}
         <script src="https://js.stripe.com/v3/" async></script>
       </head>
       <body className={inter.className}>
         <SessionProvider>
           <CartProvider>
-            <Navbar />
+            {!isAdminRoute && <Navbar />}
             <main>{children}</main>
-            <Footer />
+            {!isAdminRoute && <Footer />}
             <Toaster />
           </CartProvider>
         </SessionProvider>
