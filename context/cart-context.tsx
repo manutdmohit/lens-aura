@@ -8,10 +8,10 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { Product, IProduct } from '@/models';
+import { IProduct } from '@/models';
 
 export interface CartItem {
-  product: IProduct;
+  product: IProduct & { _id: string };
   quantity: number;
   color: string;
 }
@@ -19,7 +19,7 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   itemCount: number;
-  addItem: (product: IProduct, quantity: number, color: string) => void;
+  addItem: (product: IProduct & { _id: string }, quantity: number, color: string) => void;
   removeItem: (productId: string, color?: string) => void;
   updateQuantity: (productId: string, quantity: number, color: string) => void;
   clearCart: () => void;
@@ -31,7 +31,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const isFirstRender = useRef(true); // 👈 create a ref
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -44,7 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem('cart');
         }
       }
-      isFirstRender.current = false; // 👈 mark first render complete
+      isFirstRender.current = false;
     }
   }, []);
 
@@ -61,7 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
-  const addItem = (product: IProduct, quantity: number, color: string) => {
+  const addItem = (product: IProduct & { _id: string }, quantity: number, color: string) => {
     setItems((prevItems) => {
       if (!Array.isArray(prevItems)) return [];
 
