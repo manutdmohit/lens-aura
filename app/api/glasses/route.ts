@@ -12,19 +12,28 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12');
     const skip = (page - 1) * limit;
 
-    // Get total count for pagination metadata
-    const totalCount = await Product.countDocuments({
+    // Add gender filter if present
+    const gender = searchParams.get('gender');
+  
+    const query: any = {
       status: 'active',
       productType: 'glasses',
-    });
+    };
+    if (gender === 'men') {
+      query.gender = { $in: ['men', 'unisex'] };
+    } else if (gender === 'women') {
+      query.gender = { $in: ['women', 'unisex'] };
+    } else if (gender === 'unisex') {
+      query.gender = 'unisex';
+    }
+
+    // Get total count for pagination metadata
+    const totalCount = await Product.countDocuments(query);
 
     // Fetch products with pagination
-    const products = await Product.find({
-      status: 'active',
-      productType: 'glasses',
-    })
+    const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug productType price imageUrl')
+      .select('name slug productType price imageUrl gender')
       .skip(skip)
       .limit(limit);
 
