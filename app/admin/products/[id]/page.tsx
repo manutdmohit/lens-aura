@@ -55,7 +55,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const productId = params.id as string;
+  const productId = params?.id as string;
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

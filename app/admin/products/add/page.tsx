@@ -117,20 +117,14 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
-      // Format colors as objects with name and hex properties
-      const formattedColors = colors.map(color => ({
-        name: color,
-        hex: color.toLowerCase() // For now, just use the color name as hex. You might want to add a color picker later
-      }));
-
-      // Add colors to the data
-      const productData = {
+      let productData;
+      // Always send colors as an array of strings for all product types
+      productData = {
         ...data,
-        colors: formattedColors, // Send formatted colors
-        // Only add frameColor for glasses and sunglasses
+        colors: colors, // array of strings for all types
         ...(data.productType !== 'contacts' && { frameColor: colors }),
-        // Set the correct category based on product type
-        category: data.productType.toLowerCase()
+        ...(data.productType === 'contacts' && { lensColor: colors[0] || '' }),
+        category: data.productType.toLowerCase(),
       };
 
       // Determine the API endpoint based on product type

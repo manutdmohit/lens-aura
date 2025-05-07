@@ -207,7 +207,7 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-600 text-lg leading-relaxed">
-                    "Bailey Nelson's sunglasses are my go-to. The polarized
+                    "Lens Aura's sunglasses are my go-to. The polarized
                     lenses are fantastic and the styles are so much more unique
                     than what you find at other stores."
                   </p>
