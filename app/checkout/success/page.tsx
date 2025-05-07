@@ -275,6 +275,10 @@ export default function CheckoutSuccessPage() {
               <p className="text-sm text-gray-600">
                 You will receive a confirmation email with your order details shortly.
               </p>
+              <p className="text-sm  text-gray-600">
+              Please check your spam folder if you don't see the email in your inbox.
+              Feel free to contact us at if you have any questions.
+              </p>
               <Button 
                 variant="default"
                 className="w-full max-w-xs"

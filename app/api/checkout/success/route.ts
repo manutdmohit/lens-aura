@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { updateProductStock, getProductById } from '@/lib/products';
 import mongoose from 'mongoose';
+import { sendInvoiceEmail } from '@/lib/send-invoice';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +46,24 @@ export async function POST(request: NextRequest) {
     // Check if stock has already been reduced
     if (foundOrder.stockReduced) {
       console.log(`Stock already reduced for order ${foundOrder._id}`);
+      // Send invoice if not already sent (idempotency is not handled here, but could be added)
+      if (foundOrder.customerEmail) {
+        try {
+          await sendInvoiceEmail({
+            to: foundOrder.customerEmail,
+            orderId: foundOrder.orderNumber || foundOrder._id.toString(),
+            items: foundOrder.items.map((item: any) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              color: item.color,
+            })),
+            total: foundOrder.totalAmount,
+          });
+        } catch (e) {
+          console.error('Failed to send invoice email:', e);
+        }
+      }
       return NextResponse.json({ 
         success: true, 
         message: 'Stock already reduced',
@@ -135,6 +154,25 @@ export async function POST(request: NextRequest) {
     // Mark the order as having stock reduced
     foundOrder.stockReduced = true;
     await foundOrder.save();
+
+    // Send invoice email after stock is reduced and order is paid
+    if (foundOrder.customerEmail) {
+      try {
+        await sendInvoiceEmail({
+          to: foundOrder.customerEmail,
+          orderId: foundOrder.orderNumber || foundOrder._id.toString(),
+          items: foundOrder.items.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            color: item.color,
+          })),
+          total: foundOrder.totalAmount,
+        });
+      } catch (e) {
+        console.error('Failed to send invoice email:', e);
+      }
+    }
     
     // Return the results
     return NextResponse.json({
