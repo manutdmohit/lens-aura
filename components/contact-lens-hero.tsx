@@ -19,11 +19,9 @@ export default function ContactLensHero() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild className="bg-black text-white hover:bg-gray-800">
-                <Link href="#products">Shop Contact Lenses</Link>
+                <Link href="/contacts">Shop Contact Lenses</Link>
               </Button>
-              <Button asChild variant="outline" className="border-black text-black hover:bg-gray-100">
-                <Link href="#book">Book an Eye Test</Link>
-              </Button>
+              
             </div>
           </motion.div>
           <motion.div
@@ -34,8 +32,8 @@ export default function ContactLensHero() {
           >
             <div className="aspect-square rounded-2xl overflow-hidden relative">
               <Image
-                src="https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=1000&auto=format&fit=crop"
-                alt="Person holding a contact lens"
+                src="/images/contact-lens/monthly-disposable.jpg"
+                alt="contact lens"
                 fill
                 className="object-cover"
                 priority

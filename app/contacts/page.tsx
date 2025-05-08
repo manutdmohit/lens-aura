@@ -6,6 +6,35 @@ import ContactLensProducts from '@/components/contact-lens-products';
 import ContactForm from '@/components/contact-form';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const faqs = [
+  {
+    question: "How do I know which contact lenses are right for me?",
+    answer: "The best way to determine the right contact lenses for you is to schedule an eye examination with one of our optometrists. They will assess your vision needs, eye health, and lifestyle to recommend the most suitable options."
+  },
+  {
+    question: "Can I sleep in my contact lenses?",
+    answer: "Some contact lenses are approved for extended wear, including while sleeping, but this increases the risk of eye infections. We generally recommend removing your contact lenses before sleeping, even if they are extended wear lenses."
+  },
+  {
+    question: "How often should I replace my contact lenses?",
+    answer: "Replacement schedules vary depending on the type of lenses. Daily disposables should be discarded after each use, bi-weekly lenses every two weeks, and monthly lenses every month. Always follow the replacement schedule recommended by your eye care professional."
+  },
+  {
+    question: "Can I wear contact lenses if I have astigmatism?",
+    answer: "Yes, toric contact lenses are specifically designed for people with astigmatism. These lenses have different powers in different meridians of the lens to correct the uneven curvature of the eye that causes astigmatism."
+  },
+  {
+    question: "Do you offer colored contact lenses?",
+    answer: "Yes, we offer a variety of colored contact lenses that can enhance your natural eye color or completely change it. These are available with or without vision correction. All colored contacts require a prescription, even if they're just for cosmetic purposes."
+  }
+];
 
 export default function ContactsPage() {
   return (
@@ -43,7 +72,7 @@ export default function ContactsPage() {
             <ContactLensCare />
           </AnimatedSection>
 
-          {/* Our Brands */}
+          {/* Our Brands
           <AnimatedSection className="py-16 px-4 max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
               Our Contact Lens Brands
@@ -53,7 +82,7 @@ export default function ContactsPage() {
               you find the perfect match for your vision needs and lifestyle.
             </p>
             <ContactLensBrands />
-          </AnimatedSection>
+          </AnimatedSection> */}
 
           {/* Featured Products */}
           <AnimatedSection
@@ -145,20 +174,6 @@ export default function ContactsPage() {
             </div>
           </AnimatedSection>
 
-          {/* Contact Form */}
-          <AnimatedSection
-            direction="up"
-            className="py-16 px-4 max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-              Contact Us
-            </h2>
-            <p className="text-lg text-gray-600 text-center mb-8">
-              Have questions about our contact lenses? Get in touch with our
-              team.
-            </p>
-            <ContactForm />
-          </AnimatedSection>
 
           {/* FAQs */}
           <AnimatedSection
@@ -169,71 +184,18 @@ export default function ContactsPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
                 Frequently Asked Questions
               </h2>
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">
-                    How do I know which contact lenses are right for me?
-                  </h3>
-                  <p className="text-gray-600">
-                    The best way to determine the right contact lenses for you
-                    is to schedule an eye examination with one of our
-                    optometrists. They will assess your vision needs, eye
-                    health, and lifestyle to recommend the most suitable
-                    options.
-                  </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">
-                    Can I sleep in my contact lenses?
-                  </h3>
-                  <p className="text-gray-600">
-                    Some contact lenses are approved for extended wear,
-                    including while sleeping, but this increases the risk of eye
-                    infections. We generally recommend removing your contact
-                    lenses before sleeping, even if they are extended wear
-                    lenses.
-                  </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">
-                    How often should I replace my contact lenses?
-                  </h3>
-                  <p className="text-gray-600">
-                    Replacement schedules vary depending on the type of lenses.
-                    Daily disposables should be discarded after each use,
-                    bi-weekly lenses every two weeks, and monthly lenses every
-                    month. Always follow the replacement schedule recommended by
-                    your eye care professional.
-                  </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">
-                    Can I wear contact lenses if I have astigmatism?
-                  </h3>
-                  <p className="text-gray-600">
-                    Yes, toric contact lenses are specifically designed for
-                    people with astigmatism. These lenses have different powers
-                    in different meridians of the lens to correct the uneven
-                    curvature of the eye that causes astigmatism.
-                  </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-2">
-                    Do you offer colored contact lenses?
-                  </h3>
-                  <p className="text-gray-600">
-                    Yes, we offer a variety of colored contact lenses that can
-                    enhance your natural eye color or completely change it.
-                    These are available with or without vision correction. All
-                    colored contacts require a prescription, even if they're
-                    just for cosmetic purposes.
-                  </p>
-                </div>
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} value={`item-${index}`} className="border-none">
+                    <AccordionTrigger className="text-left text-lg font-medium hover:no-underline [&[data-state=open]]:no-underline">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-gray-600">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           </AnimatedSection>
         </div>

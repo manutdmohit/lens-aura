@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Tag, Package } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { ProductFormValues as Product } from '@/lib/api/validation';
@@ -34,6 +34,27 @@ interface PriceRange {
     slug: string;
   } | null;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
 
 export default function ContactLensProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -143,7 +164,7 @@ export default function ContactLensProducts() {
   return (
     <>
       {priceRange?.lowest && (
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <p className="text-lg text-gray-600">
             Contact lenses start from just ${priceRange.lowest.price.toFixed(2)}.{' '}
             <Link 
@@ -166,47 +187,59 @@ export default function ContactLensProducts() {
       
       {hasProducts && (
         <>
-          <div
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
             id="products"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
           >
             {products.map((product, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="flex"
+                variants={cardVariants}
+                className="flex h-full"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
               >
-                <Card className="w-full flex flex-col">
+                <Card className="w-full flex flex-col overflow-hidden border-2 hover:border-black/10 transition-colors duration-200">
                   <Link href={`/contacts/${product.slug}`} className="block">
-                    <div className="aspect-square bg-gray-100 flex items-center justify-center p-4">
+                    <div className="aspect-[3/2] overflow-hidden relative bg-gray-50">
                       <Image
                         src={product.imageUrl || '/placeholder.svg'}
                         alt={product.name}
-                        className="max-h-full max-w-full object-contain"
-                        width={300}
-                        height={300}
+                        fill
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                         priority
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      {product.stockQuantity > 0 && (
+                        <div className="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          In Stock
+                        </div>
+                      )}
                     </div>
-                    <CardContent className="p-4 flex flex-col h-44">
+                    <CardContent className="p-4 flex flex-col flex-grow space-y-3">
                       <div>
-                        <p className="text-sm text-gray-500">{product.brand}</p>
-                        <h3 className="font-bold text-lg line-clamp-1">{product.name}</h3>
-                        <p className="text-gray-600 text-sm line-clamp-2 mb-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Tag className="h-3 w-3 text-gray-500" />
+                          <p className="text-xs text-gray-500">{product.brand}</p>
+                        </div>
+                        <h3 className="font-bold text-lg line-clamp-1 text-gray-900">{product.name}</h3>
+                        <p className="text-gray-600 text-xs line-clamp-2 mt-1">
                           {product.description}
                         </p>
                       </div>
-                      <div className="mt-auto">
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-lg font-medium">
+                      <div className="mt-auto pt-3 border-t border-gray-100">
+                        <div className="flex justify-between items-center">
+                          <p className="text-lg font-medium text-gray-900">
                             ${product.price.toFixed(2)}
                           </p>
-                          {(product.stockQuantity > 0) && (
-                            <p className="text-xs text-gray-500">
-                              Stock: {product.stockQuantity}
-                            </p>
+                          {product.stockQuantity > 0 && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Package className="h-3 w-3 mr-1" />
+                              <span>{product.stockQuantity} left</span>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -215,21 +248,21 @@ export default function ContactLensProducts() {
                   <div className="px-4 pb-4">
                     {isOutOfStock(product) ? (
                       <Button 
-                        className="w-full bg-gray-300 text-gray-700 cursor-not-allowed"
+                        className="w-full bg-gray-100 text-gray-400 cursor-not-allowed"
                         disabled
                       >
                         Out of Stock
                       </Button>
                     ) : isMaxLimitReached(product) ? (
                       <Button 
-                        className="w-full bg-amber-500 text-white cursor-not-allowed"
+                        className="w-full bg-amber-50 text-amber-600 border border-amber-200 cursor-not-allowed"
                         disabled
                       >
                         Max Limit Reached
                       </Button>
                     ) : (
                       <Button 
-                        className="w-full bg-black text-white hover:bg-gray-800"
+                        className="w-full bg-black text-white hover:bg-gray-800 transition-colors duration-200"
                         onClick={(e) => handleAddToCart(e, product)}
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
@@ -240,7 +273,7 @@ export default function ContactLensProducts() {
                 </Card>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
           
           {pagination.totalPages > 1 && (
             <div className="mt-8">
