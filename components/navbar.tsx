@@ -27,13 +27,13 @@ const glassesMenuData = {
       title: "Women's Glasses",
       href: '/glasses/womens',
       image:
-        'https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=1000&auto=format&fit=crop',
+        '/images/glasses/womens-glasses.jpg',
     },
     {
       title: "Men's Glasses",
       href: '/glasses/mens',
       image:
-        'https://images.unsplash.com/photo-1577744486770-2f42d1e38f29?q=80&w=1000&auto=format&fit=crop',
+        '/images/glasses/mens-glasses.jpg',
     },
   ],
   additionalLinks: [
@@ -63,7 +63,7 @@ const sunglassesMenuData = {
       title: "Men's Sunglasses",
       href: '/sunglasses/mens',
       image:
-        'https://images.unsplash.com/photo-1625591339971-4c9a87a66871?q=80&w=1000&auto=format&fit=crop',
+        '/images/sunglasses/mens-sunglasses.jpg',
     },
   ],
   additionalLinks: [
