@@ -63,7 +63,7 @@ const sunglassesMenuData = {
       title: "Men's Sunglasses",
       href: '/sunglasses/mens',
       image:
-        '/images/sunglasses/mens-sunglasses.jpg',
+        '/images/sunglasses/mens-sunglass.jpg',
     },
   ],
   additionalLinks: [
