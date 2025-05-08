@@ -291,7 +291,7 @@ export default function Navbar() {
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Featured Categories with Images */}
-        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-2">
           {data.featuredLinks.map((link, index) => (
             <motion.div
               key={index}
@@ -303,7 +303,7 @@ export default function Navbar() {
               }}
             >
               <Link href={link.href} className="group transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg overflow-hidden">
-                <div className="aspect-square overflow-hidden rounded-lg bg-gray-100 relative">
+                <div className="aspect-[4/3] h-24 sm:h-28 lg:h-32 overflow-hidden rounded-lg bg-gray-100 relative">
                   {link.image ? (
                     <img
                       src={link.image || '/placeholder.svg'}
@@ -316,10 +316,10 @@ export default function Navbar() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                    <h3 className="text-lg font-medium text-white p-4">{link.title}</h3>
+                    <h3 className="text-base font-medium text-white p-2">{link.title}</h3>
                   </div>
                 </div>
-                <h3 className="mt-3 text-lg font-medium group-hover:text-indigo-600 transition-colors duration-200">{link.title}</h3>
+                <h3 className="mt-2 text-base font-medium group-hover:text-indigo-600 transition-colors duration-200">{link.title}</h3>
               </Link>
             </motion.div>
           ))}
