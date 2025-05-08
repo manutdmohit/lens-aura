@@ -21,7 +21,7 @@ const glassesMenuData = {
       title: 'New Arrivals',
       href: '/glasses/new-arrivals',
       image:
-        'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?q=80&w=1000&auto=format&fit=crop',
+        '/images/glasses/new-arrivals.jpg',
     },
     {
       title: "Women's Glasses",
