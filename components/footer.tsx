@@ -12,6 +12,10 @@ import {
   Linkedin,
   Youtube,
   ChevronRight,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,7 +72,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-100 text-gray-700">
+    <footer className="bg-[#F2D399] text-gray-800">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
@@ -94,7 +98,7 @@ export default function Footer() {
                       placeholder="Your email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className=" text-black rounded-r-none outline-0 focus:outline-0 focus:ring-0"
+                      className="text-gray-800 rounded-r-none outline-0 focus:outline-0 focus:ring-0"
                     />
                     <motion.div
                       whileHover={{ scale: 1.05 }}
@@ -134,44 +138,49 @@ export default function Footer() {
           {/* Column 2: Shop */}
           <AnimatedSection direction="up" delay={0.2}>
             <h4 className="text-lg font-medium mb-4">Shop</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/glasses"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Glasses
                 </Link>
               </li>
               <li>
                 <Link
                   href="/sunglasses"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Sunglasses
                 </Link>
               </li>
               <li>
                 <Link
                   href="/contacts"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Contact Lenses
                 </Link>
               </li>
               <li>
                 <Link
                   href="/accessories"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Accessories
                 </Link>
               </li>
               <li>
                 <Link
                   href="/gift-cards"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Gift Cards
                 </Link>
               </li>
@@ -181,53 +190,50 @@ export default function Footer() {
           {/* Column 3: Help */}
           <AnimatedSection direction="up" delay={0.3}>
             <h4 className="text-lg font-medium mb-4">Help</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/about"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   About Us
                 </Link>
               </li>
               <li>
                 <Link
                   href="/stores"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Store Locator
                 </Link>
               </li>
               <li>
                 <Link
                   href="/health-funds"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Health Funds
                 </Link>
               </li>
               <li>
                 <Link
                   href="/faq"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   FAQs
                 </Link>
               </li>
               <li>
                 <Link
                   href="/returns"
-                  className="hover:text-gray-900 transition-colors"
+                  className="flex items-center hover:text-gray-900 transition-colors"
                 >
+                  <ChevronRight className="h-4 w-4 mr-2" />
                   Returns Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="hover:text-gray-900 transition-colors"
-                >
-                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -238,18 +244,31 @@ export default function Footer() {
             <div className="space-y-6">
               <div>
                 <h4 className="text-lg font-medium mb-4">Contact Us</h4>
-                <address className="not-italic space-y-2">
-                  <p>1800 GLASSES (1800 452 773)</p>
-                  <p>Monday to Friday: 9am - 5pm AEST</p>
-                  <p>
+                <div className="space-y-3">
+                  <div className="flex items-start">
+                    <Phone className="h-5 w-5 mr-3 mt-0.5" />
+                    <div>
+                      <p className="font-medium">1800 GLASSES</p>
+                      <p className="text-sm">(1800 452 773)</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Clock className="h-5 w-5 mr-3 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Business Hours</p>
+                      <p className="text-sm">Monday to Friday: 9am - 5pm AEST</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Mail className="h-5 w-5 mr-3 mt-0.5" />
                     <Link
                       href="mailto:hello@lensaura.com.au"
-                      className="hover:underline"
+                      className="hover:text-gray-900 transition-colors"
                     >
                       hello@lensaura.com.au
                     </Link>
-                  </p>
-                </address>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -267,8 +286,9 @@ export default function Footer() {
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={Icon.name}
+                          className="block p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
                         >
-                          <Icon className="h-5 w-5 hover:text-gray-900 transition-colors" />
+                          <Icon className="h-5 w-5" />
                         </Link>
                       </motion.div>
                     )
@@ -303,7 +323,7 @@ export default function Footer() {
         <div className="flex justify-center mt-8">
           <button
             onClick={scrollToTop}
-            className="text-sm flex items-center space-x-1 hover:underline"
+            className="text-sm flex items-center space-x-1 hover:text-gray-900 transition-colors"
           >
             <ArrowUp className="h-4 w-4" />
             <span>Back to Top</span>
@@ -311,7 +331,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="text-center text-xs text-gray-500 mt-8">
+        <div className="text-center text-xs text-gray-700 mt-8">
           © {new Date().getFullYear()} Lens Aura. All rights reserved.
         </div>
       </div>
