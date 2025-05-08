@@ -81,19 +81,19 @@ const contactsMenuData = {
       title: 'Daily Disposable',
       href: '/contacts/daily',
       image:
-        'https://images.unsplash.com/photo-1616296425622-4560a2ad2b82?q=80&w=1000&auto=format&fit=crop',
+        '/images/contact-lens/daily-disposable.jpg',
     },
     {
       title: 'Monthly Lenses',
       href: '/contacts/monthly',
       image:
-        'https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=1000&auto=format&fit=crop',
+        '/images/contact-lens/monthly-disposable.jpg',
     },
     {
       title: 'Colored Contacts',
       href: '/contacts/colored',
       image:
-        'https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=1000&auto=format&fit=crop',
+        '/images/contact-lens/colorful-contacts.jpg',
     },
   ],
   additionalLinks: [
