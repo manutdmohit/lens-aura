@@ -1,205 +1,93 @@
-import ContactLensHero from '@/components/contact-lens-hero';
-import ContactLensTypes from '@/components/contact-lens-types';
-import ContactLensCare from '@/components/contact-lens-care';
-import ContactLensBrands from '@/components/contact-lens-brands';
-import ContactLensProducts from '@/components/contact-lens-products';
-import ContactForm from '@/components/contact-form';
-import PageTransition from '@/components/page-transition';
-import AnimatedSection from '@/components/animated-section';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+'use client';
 
-const faqs = [
-  {
-    question: "How do I know which contact lenses are right for me?",
-    answer: "The best way to determine the right contact lenses for you is to schedule an eye examination with one of our optometrists. They will assess your vision needs, eye health, and lifestyle to recommend the most suitable options."
-  },
-  {
-    question: "Can I sleep in my contact lenses?",
-    answer: "Some contact lenses are approved for extended wear, including while sleeping, but this increases the risk of eye infections. We generally recommend removing your contact lenses before sleeping, even if they are extended wear lenses."
-  },
-  {
-    question: "How often should I replace my contact lenses?",
-    answer: "Replacement schedules vary depending on the type of lenses. Daily disposables should be discarded after each use, bi-weekly lenses every two weeks, and monthly lenses every month. Always follow the replacement schedule recommended by your eye care professional."
-  },
-  {
-    question: "Can I wear contact lenses if I have astigmatism?",
-    answer: "Yes, toric contact lenses are specifically designed for people with astigmatism. These lenses have different powers in different meridians of the lens to correct the uneven curvature of the eye that causes astigmatism."
-  },
-  {
-    question: "Do you offer colored contact lenses?",
-    answer: "Yes, we offer a variety of colored contact lenses that can enhance your natural eye color or completely change it. These are available with or without vision correction. All colored contacts require a prescription, even if they're just for cosmetic purposes."
-  }
-];
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function ContactsPage() {
   return (
-    <PageTransition>
-      <main className="flex flex-col min-h-screen">
-        <div className="flex-grow">
-          {/* Hero Section */}
-          <ContactLensHero />
+    <div className="min-h-screen bg-gradient-to-b from-[#1E1C1D] to-[#2A2829] flex items-center justify-center px-4">
+      <div className="max-w-4xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative"
+        >
+          {/* Decorative elements */}
+          <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#F2D399]/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+          
+          {/* Main content */}
+          <div className="relative z-10">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="mb-8"
+            >
+              <Image
+                src="/images/lens-aura-logo-bg-removed.png"
+                alt="Lens Aura Logo"
+                width={200}
+                height={200}
+                className="mx-auto"
+                priority
+              />
+            </motion.div>
 
-          {/* Types of Contact Lenses */}
-          <AnimatedSection className="py-16 px-4 max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-              Types of Contact Lenses
-            </h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Contact lenses come in various types to suit different needs and
-              lifestyles. Explore our range to find the perfect fit for you.
-            </p>
-            <ContactLensTypes />
-          </AnimatedSection>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#F2D399] via-[#B48E4A] to-[#F2D399]"
+            >
+              Contact Lenses
+            </motion.h1>
 
-          {/* Contact Lens Care */}
-          <AnimatedSection
-            direction="up"
-            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-              Contact Lens Care
-            </h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Proper care and maintenance of your contact lenses is essential
-              for eye health and comfort. Follow these guidelines to keep your
-              lenses clean and your eyes healthy.
-            </p>
-            <ContactLensCare />
-          </AnimatedSection>
-
-          {/* Our Brands
-          <AnimatedSection className="py-16 px-4 max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-              Our Contact Lens Brands
-            </h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              We offer a wide selection of premium contact lens brands to ensure
-              you find the perfect match for your vision needs and lifestyle.
-            </p>
-            <ContactLensBrands />
-          </AnimatedSection> */}
-
-          {/* Featured Products */}
-          <AnimatedSection
-            direction="up"
-            className="py-16 px-4 max-w-7xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-              Featured Contact Lenses
-            </h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
-              Browse our selection of popular contact lenses, available for
-              purchase online or in-store.
-            </p>
-            <ContactLensProducts />
-          </AnimatedSection>
-
-          {/* Benefits and Risks */}
-          <AnimatedSection
-            direction="up"
-            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
-          >
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-                Benefits and Considerations
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="mb-12"
+            >
+              <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4">
+                Coming Soon
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-4">
-                    Benefits of Contact Lenses
-                  </h3>
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>
-                        Natural field of vision without frame obstruction
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>Freedom for active lifestyles and sports</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>No fogging up in cold weather or with masks</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>Can change your eye color with colored lenses</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 font-bold mr-2">✓</span>
-                      <span>UV protection options available</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-bold mb-4">
-                    Important Considerations
-                  </h3>
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>Requires proper cleaning and maintenance</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>Not suitable for all eye conditions</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>
-                        Increased risk of eye infections if not properly cared
-                        for
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>
-                        May cause dryness or discomfort for some wearers
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-amber-500 font-bold mr-2">!</span>
-                      <span>Requires regular eye check-ups</span>
-                    </li>
-                  </ul>
-                </div>
+              <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto">
+                We're crafting an exceptional contact lens experience for you. 
+                Stay tuned for our premium collection of contact lenses, featuring 
+                top brands and innovative solutions for your vision needs.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <div className="flex items-center space-x-2 text-[#F2D399]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Launching Soon</span>
               </div>
-            </div>
-          </AnimatedSection>
-
-
-          {/* FAQs */}
-          <AnimatedSection
-            direction="up"
-            className="py-16 px-4 max-w-7xl mx-auto bg-gray-50"
-          >
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-                Frequently Asked Questions
-              </h2>
-              <Accordion type="single" collapsible className="w-full">
-                {faqs.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="border-none">
-                    <AccordionTrigger className="text-left text-lg font-medium hover:no-underline [&[data-state=open]]:no-underline">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-gray-600">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </AnimatedSection>
-        </div>
-      </main>
-    </PageTransition>
+              <div className="flex items-center space-x-2 text-[#F2D399]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Premium Quality</span>
+              </div>
+              <div className="flex items-center space-x-2 text-[#F2D399]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span>Top Brands</span>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
   );
 }

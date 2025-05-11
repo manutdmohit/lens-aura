@@ -175,15 +175,6 @@ export default function Footer() {
                   Accessories
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/gift-cards"
-                  className="flex items-center hover:text-gray-900 transition-colors"
-                >
-                  <ChevronRight className="h-4 w-4 mr-2" />
-                  Gift Cards
-                </Link>
-              </li>
             </ul>
           </AnimatedSection>
 
@@ -198,24 +189,6 @@ export default function Footer() {
                 >
                   <ChevronRight className="h-4 w-4 mr-2" />
                   About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/stores"
-                  className="flex items-center hover:text-gray-900 transition-colors"
-                >
-                  <ChevronRight className="h-4 w-4 mr-2" />
-                  Store Locator
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/health-funds"
-                  className="flex items-center hover:text-gray-900 transition-colors"
-                >
-                  <ChevronRight className="h-4 w-4 mr-2" />
-                  Health Funds
                 </Link>
               </li>
               <li>
@@ -248,8 +221,7 @@ export default function Footer() {
                   <div className="flex items-start">
                     <Phone className="h-5 w-5 mr-3 mt-0.5" />
                     <div>
-                      <p className="font-medium">1800 GLASSES</p>
-                      <p className="text-sm">(1800 452 773)</p>
+                      <p className="font-medium">+61 0402 564 501</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -262,10 +234,10 @@ export default function Footer() {
                   <div className="flex items-start">
                     <Mail className="h-5 w-5 mr-3 mt-0.5" />
                     <Link
-                      href="mailto:hello@lensaura.com.au"
+                      href="mailto:info@lensaura.com.au"
                       className="hover:text-gray-900 transition-colors"
                     >
-                      hello@lensaura.com.au
+                      info@lensaura.com.au
                     </Link>
                   </div>
                 </div>

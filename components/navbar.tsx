@@ -109,7 +109,6 @@ const contactsMenuData = {
 const allMenuData = [
   { id: 'glasses', ...glassesMenuData },
   { id: 'sunglasses', ...sunglassesMenuData },
-  { id: 'contacts', ...contactsMenuData },
 ];
 
 export default function Navbar() {
@@ -591,13 +590,7 @@ export default function Navbar() {
                   {renderNavItem('Sunglasses', '/sunglasses', 'sunglasses')}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
-                  {renderNavItem('Contacts', '/contacts', 'contacts')}
-                </motion.div>
-                <motion.div variants={itemVariants} className="h-full">
-                  {renderNavLink('Health Funds', '/health-funds')}
-                </motion.div>
-                <motion.div variants={itemVariants} className="h-full">
-                  {renderNavLink('Stores', '/stores')}
+                  {renderNavLink('Contacts', '/contacts')}
                 </motion.div>
               </div>
             </motion.nav>
@@ -635,7 +628,6 @@ export default function Navbar() {
           >
             {activeMenu === 'glasses' && renderMegaMenu(glassesMenuData)}
             {activeMenu === 'sunglasses' && renderMegaMenu(sunglassesMenuData)}
-            {activeMenu === 'contacts' && renderMegaMenu(contactsMenuData)}
           </motion.div>
         )}
       </AnimatePresence>
@@ -657,23 +649,11 @@ export default function Navbar() {
                 className="border-b border-gray-700 last:border-b-0"
               >
                 <Link
-                  href="/health-funds"
+                  href="/contacts"
                   className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
                   onClick={toggleMobileMenu}
                 >
-                  Health Funds
-                </Link>
-              </motion.div>
-              <motion.div
-                variants={itemVariants}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <Link
-                  href="/stores"
-                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
-                  onClick={toggleMobileMenu}
-                >
-                  Stores
+                  Contacts
                 </Link>
               </motion.div>
             </div>
