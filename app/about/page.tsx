@@ -1,129 +1,107 @@
-import Navbar from "@/components/navbar"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+'use client';
+
+import { motion } from 'framer-motion';
+import { Sparkles, Eye, Heart } from 'lucide-react';
+import AnimatedSection from '@/components/animated-section';
+import Image from 'next/image';
+
+const values = [
+  {
+    icon: Sparkles,
+    title: 'Premium Quality',
+    description: 'We craft each frame with meticulous attention to detail, using only the finest materials to ensure lasting beauty and durability.'
+  },
+  {
+    icon: Eye,
+    title: 'Innovative Design',
+    description: 'Our in-house design team creates contemporary styles that blend timeless elegance with modern aesthetics.'
+  },
+  {
+    icon: Heart,
+    title: 'Customer Focus',
+    description: "We're committed to providing exceptional service and ensuring every customer finds their perfect pair of glasses."
+  }
+];
 
 export default function AboutPage() {
   return (
-    <main>
-      <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">About Bailey Nelson</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            We're on a mission to change the eyewear industry for the better.
-          </p>
-        </div>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <AnimatedSection direction="up" delay={0.1}>
+          <div className="text-center mb-16">
+            <h1 className="text-4xl font-bold mb-4">About Lens Aura</h1>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Redefining eyewear with premium quality and accessible luxury
+            </p>
+          </div>
+        </AnimatedSection>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
-          <div>
-            <h2 className="text-3xl font-bold mb-4">Our Story</h2>
-            <p className="text-gray-600 mb-4">
-              Bailey Nelson was founded in 2012 with a simple idea: to create high-quality, thoughtfully designed
-              eyewear that doesn't cost a fortune.
-            </p>
-            <p className="text-gray-600 mb-4">
-              We saw an industry that was making high margins on low-quality products, and we knew there was a better
-              way. By designing our frames in-house and cutting out the middlemen, we're able to offer premium eyewear
-              at prices that make sense.
-            </p>
-            <p className="text-gray-600">
-              Today, we have stores across Australia, New Zealand, Canada, and the UK, but our mission remains the same:
-              to make beautiful, affordable eyewear available to everyone.
-            </p>
-          </div>
-          <div className="rounded-lg overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1556155092-490a1ba16284?q=80&w=1000&auto=format&fit=crop"
-              alt="Bailey Nelson team"
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <AnimatedSection direction="up" delay={0.2}>
+            <div>
+              <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
+              <p className="text-gray-600 mb-4">
+                At Lens Aura, we believe that premium eyewear should be accessible to everyone. We've reimagined the
+                traditional eyewear industry by combining exceptional craftsmanship with thoughtful design and fair pricing.
+              </p>
+              <p className="text-gray-600 mb-4">
+                Our journey began with a simple yet powerful idea: to create eyewear that not only enhances vision but
+                also elevates style. By designing our frames in-house and maintaining direct relationships with our
+                customers, we've created a new standard in the eyewear industry.
+              </p>
+              <p className="text-gray-600">
+                Today, we continue to push boundaries in eyewear design while staying true to our commitment to quality,
+                innovation, and customer satisfaction.
+              </p>
+            </div>
+          </AnimatedSection>
+          <AnimatedSection direction="up" delay={0.3}>
+            <div className="rounded-lg overflow-hidden shadow-xl">
+              <Image
+                src="/images/about-us.jpg"
+                alt="Lens Aura eyewear collection"
+                className="w-full h-full object-cover"
+                width={500}
+                height={500}
+                priority
+              />
+            </div>
+          </AnimatedSection>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Quality Materials</h3>
-            <p className="text-gray-600">
-              We use premium materials like Italian acetate, German hinges, and scratch-resistant lenses in all our
-              frames.
-            </p>
+        <AnimatedSection direction="up" delay={0.4}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {values.map((value, index) => (
+              <div key={index} className="bg-gray-50 p-8 rounded-lg">
+                <div className="mb-4">
+                  <value.icon className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{value.title}</h3>
+                <p className="text-gray-600">
+                  {value.description}
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Thoughtful Design</h3>
-            <p className="text-gray-600">
-              Our in-house design team creates frames that are both timeless and contemporary, ensuring you'll love your
-              glasses for years to come.
-            </p>
-          </div>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Fair Pricing</h3>
-            <p className="text-gray-600">
-              By cutting out the middlemen and selling direct, we're able to offer premium eyewear at prices that are
-              fair and transparent.
-            </p>
-          </div>
-        </div>
+        </AnimatedSection>
 
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-6">Our Team</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <div className="rounded-lg overflow-hidden mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=500&auto=format&fit=crop"
-                  alt="Team member"
-                  className="w-full aspect-square object-cover"
-                />
-              </div>
-              <h3 className="font-bold">James Wilson</h3>
-              <p className="text-gray-600">Co-Founder & CEO</p>
-            </div>
-            <div>
-              <div className="rounded-lg overflow-hidden mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=500&auto=format&fit=crop"
-                  alt="Team member"
-                  className="w-full aspect-square object-cover"
-                />
-              </div>
-              <h3 className="font-bold">Sarah Chen</h3>
-              <p className="text-gray-600">Co-Founder & Creative Director</p>
-            </div>
-            <div>
-              <div className="rounded-lg overflow-hidden mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=500&auto=format&fit=crop"
-                  alt="Team member"
-                  className="w-full aspect-square object-cover"
-                />
-              </div>
-              <h3 className="font-bold">Michael Taylor</h3>
-              <p className="text-gray-600">Head of Product</p>
-            </div>
-            <div>
-              <div className="rounded-lg overflow-hidden mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=500&auto=format&fit=crop"
-                  alt="Team member"
-                  className="w-full aspect-square object-cover"
-                />
-              </div>
-              <h3 className="font-bold">Emma Johnson</h3>
-              <p className="text-gray-600">Head of Retail</p>
+        <AnimatedSection direction="up" delay={0.5}>
+          <div className="bg-gray-50 p-12 rounded-lg">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-6">Our Commitment to Excellence</h2>
+              <p className="text-gray-600 mb-6">
+                Every pair of Lens Aura glasses is crafted with precision and care. We use premium materials like
+                Italian acetate, German-engineered hinges, and scratch-resistant lenses to ensure your eyewear
+                stands the test of time.
+              </p>
+              <p className="text-gray-600">
+                Our commitment extends beyond the product. We're dedicated to providing exceptional service,
+                from helping you find the perfect frame to ensuring your complete satisfaction with every purchase.
+              </p>
             </div>
           </div>
-        </div>
-
-        <div className="bg-gray-50 p-8 rounded-lg text-center">
-          <h2 className="text-3xl font-bold mb-4">Join Our Team</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
-            We're always looking for passionate people to join our growing team. Check out our current openings.
-          </p>
-          <Button asChild className="bg-black text-white hover:bg-gray-800">
-            <Link href="#">View Careers</Link>
-          </Button>
-        </div>
+        </AnimatedSection>
       </div>
-    </main>
-  )
+    </div>
+  );
 }

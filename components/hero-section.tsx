@@ -31,8 +31,9 @@ export default function HeroSection() {
         transition={{ duration: 30, ease: "easeInOut", repeat: Infinity }}
       >
         <Image
-          src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
-          alt="Person wearing sunglasses at the beach"
+          // src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
+          src="/images/about-us.jpg"
+          alt="glasses, sunglasses, and contact lenses"
           className="w-full h-full object-cover"
           width={1800}
           height={1200}

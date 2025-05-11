@@ -35,7 +35,7 @@ export default function Home() {
           </AnimatedSection>
 
           {/* Lifestyle images section with enhanced design */}
-          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to- #F2D399">
+          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to-[#F2D399]">
             <div className="max-w-7xl mx-auto px-4">
               <AnimatedSection direction="up" className="text-center mb-16">
                 <h2 className={`${playfair.className} text-4xl md:text-5xl font-bold mb-6`}>
@@ -45,28 +45,37 @@ export default function Home() {
               </AnimatedSection>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <AnimatedSection direction="left" delay={0.1}>
-                  <div className="group aspect-[3/4] relative overflow-hidden rounded-2xl shadow-2xl">
-                    <Image
-                      src="https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?q=80&w=1800&auto=format&fit=crop"
-                      alt="Person wearing Bailey Nelson glasses"
-                      width={1800}
-                      height={2400}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end transition-opacity duration-300">
-                      <div className="p-8 text-white w-full">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Glasses className="w-6 h-6" />
-                          <h3 className={`${playfair.className} text-2xl font-bold`}>
+                  <div className="group relative overflow-hidden rounded-2xl shadow-2xl h-[450px]">
+                    <div className="absolute inset-0">
+                      <Image
+                        src="/images/glasses.jpg"
+                        alt="Premium eyewear collection"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-contain transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+                        priority
+                        quality={100}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-end p-8">
+                      <div className="w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                            <Glasses className="w-6 h-6 text-white" />
+                          </div>
+                          <h3 className={`${playfair.className} text-2xl font-bold text-white`}>
                             Glasses
                           </h3>
                         </div>
                         <Link
                           href="/glasses"
-                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors"
+                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors group/link"
                         >
-                          Explore Collection <ArrowRight className="ml-2 w-5 h-5" />
+                          Explore Collection 
+                          <ArrowRight className="ml-2 w-5 h-5 transform group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       </div>
                     </div>
@@ -74,27 +83,37 @@ export default function Home() {
                 </AnimatedSection>
 
                 <AnimatedSection direction="up" delay={0.2}>
-                  <div className="group aspect-[3/4] relative overflow-hidden rounded-2xl shadow-2xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=1800&auto=format&fit=crop"
-                      alt="Person wearing Bailey Nelson sunglasses"
-                      width={1800}
-                      height={2400}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end transition-opacity duration-300">
-                      <div className="p-8 text-white w-full">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Sun className="w-6 h-6" />
-                          <h3 className={`${playfair.className} text-2xl font-bold`}>
+                  <div className="group relative overflow-hidden rounded-2xl shadow-2xl h-[450px]">
+                    <div className="absolute inset-0">
+                      <Image
+                        src="/images/sunglasses.jpg"
+                        alt="Premium sunglasses collection"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-contain transition-all duration-700 group-hover:scale-110 group-hover:-rotate-1"
+                        priority
+                        quality={100}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-end p-8">
+                      <div className="w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                            <Sun className="w-6 h-6 text-white" />
+                          </div>
+                          <h3 className={`${playfair.className} text-2xl font-bold text-white`}>
                             Sunglasses
                           </h3>
                         </div>
                         <Link
                           href="/sunglasses"
-                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors"
+                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors group/link"
                         >
-                          Explore Collection <ArrowRight className="ml-2 w-5 h-5" />
+                          Explore Collection 
+                          <ArrowRight className="ml-2 w-5 h-5 transform group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       </div>
                     </div>
@@ -102,27 +121,37 @@ export default function Home() {
                 </AnimatedSection>
 
                 <AnimatedSection direction="right" delay={0.3}>
-                  <div className="group aspect-[3/4] relative overflow-hidden rounded-2xl shadow-2xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1587385789097-0197a7fbd179?q=80&w=1800&auto=format&fit=crop"
-                      alt="Contact lenses"
-                      width={1800}
-                      height={2400}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end transition-opacity duration-300">
-                      <div className="p-8 text-white w-full">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Eye className="w-6 h-6" />
-                          <h3 className={`${playfair.className} text-2xl font-bold`}>
+                  <div className="group relative overflow-hidden rounded-2xl shadow-2xl h-[450px]">
+                    <div className="absolute inset-0">
+                      <Image
+                        src="/images/lens.jpg"
+                        alt="Contact lenses collection"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-contain transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+                        priority
+                        quality={100}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-end p-8">
+                      <div className="w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                            <Eye className="w-6 h-6 text-white" />
+                          </div>
+                          <h3 className={`${playfair.className} text-2xl font-bold text-white`}>
                             Contact Lenses
                           </h3>
                         </div>
                         <Link
                           href="/contacts"
-                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors"
+                          className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors group/link"
                         >
-                          Explore Collection <ArrowRight className="ml-2 w-5 h-5" />
+                          Explore Collection 
+                          <ArrowRight className="ml-2 w-5 h-5 transform group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       </div>
                     </div>
