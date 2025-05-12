@@ -281,15 +281,15 @@ export default function AdminSettingsPage() {
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="current-password">Current Password</Label>
-                      <Input id="current-password" type="password" ref={currentPasswordRef} />
+                      <Input id="current-password" ref={currentPasswordRef} placeholder="Enter your current password" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="new-password">New Password</Label>
-                      <Input id="new-password" type="password" ref={newPasswordRef} />
+                      <Input id="new-password" ref={newPasswordRef} placeholder="Enter a new password" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm New Password</Label>
-                      <Input id="confirm-password" type="password" ref={confirmPasswordRef} />
+                      <Input id="confirm-password" ref={confirmPasswordRef} placeholder="Confirm your new password" />
                     </div>
                     {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
                     {passwordSuccess && <p className="text-green-600 text-sm">{passwordSuccess}</p>}
