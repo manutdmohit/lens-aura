@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Accessory from '@/models/Accessory';
-
+import { connectToDatabase } from '@/lib/api/db';
 export async function GET() {
+    await connectToDatabase();
+
   try {
     const accessories = await Accessory.find().sort({ createdAt: -1 });
 
