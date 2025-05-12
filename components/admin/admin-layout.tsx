@@ -15,6 +15,7 @@ import {
   LogOut,
   Bell,
   Search,
+  Info,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/admin-auth-context';
 import { hasPermission } from '@/lib/rbac';
@@ -84,6 +85,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: <BarChart className="h-5 w-5" />,
       active: pathname === '/admin/analytics',
       permission: { resource: 'analytics', action: 'read' as const },
+    },
+    {
+      name: 'About',
+      href: '/admin/about',
+      icon: <Info className="h-5 w-5" />,
+      active: pathname === '/admin/about',
+      permission: { resource: 'settings', action: 'read' as const },
     },
     {
       name: 'Settings',

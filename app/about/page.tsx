@@ -1,106 +1,112 @@
-'use client';
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
 
-import { motion } from 'framer-motion';
-import { Sparkles, Eye, Heart } from 'lucide-react';
-import AnimatedSection from '@/components/animated-section';
-import Image from 'next/image';
+interface AboutApiData {
+  content: string;
+  vision: string;
+  values: { title: string; description: string }[];
+  commitment: string;
+}
 
-const values = [
-  {
-    icon: Sparkles,
-    title: 'Premium Quality',
-    description: 'We craft each frame with meticulous attention to detail, using only the finest materials to ensure lasting beauty and durability.'
-  },
-  {
-    icon: Eye,
-    title: 'Innovative Design',
-    description: 'Our in-house design team creates contemporary styles that blend timeless elegance with modern aesthetics.'
-  },
-  {
-    icon: Heart,
-    title: 'Customer Focus',
-    description: "We're committed to providing exceptional service and ensuring every customer finds their perfect pair of glasses."
+async function getAboutData(): Promise<AboutApiData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/about`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch");
+  const result = await res.json();
+  return result.data;
+}
+
+export default async function AboutPage() {
+  let data: AboutApiData;
+  try {
+    data = await getAboutData();
+  } catch {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-red-500 text-lg font-semibold">
+          Failed to load About Us content.
+        </div>
+      </div>
+    );
   }
-];
 
-export default function AboutPage() {
+  // Process HTML paragraphs
+  const visionHtml = String(data.vision ?? "");
+  const pTags = visionHtml.match(/<p>(.*?)<\/p>/g) || [];
+
+  const heading = pTags[0]?.replace(/<\/?p>/g, "").trim() || "About Lens Aura";
+  const subtitle =
+    pTags[1]?.replace(/<\/?p>/g, "").trim() ||
+    "Redefining eyewear with premium quality and accessible luxury";
+  const visionBody = pTags.length > 1 ? pTags.slice(1).join("") : visionHtml;
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <AnimatedSection direction="up" delay={0.1}>
-          <div className="text-center mb-16">
-            <h1 className="text-4xl font-bold mb-4">About Lens Aura</h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Redefining eyewear with premium quality and accessible luxury
-            </p>
-          </div>
-        </AnimatedSection>
+    <div className="bg-white min-h-screen flex flex-col space-y-12">
+      {/* Header */}
+      <div
+        className="container mx-auto px-4 pt-16 pb-6 text-center"
+      >
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">{heading}</h1>
+        <p className="text-base md:text-xl text-gray-600">{subtitle}</p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
-          <AnimatedSection direction="up" delay={0.2}>
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
-              <p className="text-gray-600 mb-4">
-                At Lens Aura, we believe that premium eyewear should be accessible to everyone. We've reimagined the
-                traditional eyewear industry by combining exceptional craftsmanship with thoughtful design and fair pricing.
-              </p>
-              <p className="text-gray-600 mb-4">
-                Our journey began with a simple yet powerful idea: to create eyewear that not only enhances vision but
-                also elevates style. By designing our frames in-house and maintaining direct relationships with our
-                customers, we've created a new standard in the eyewear industry.
-              </p>
-              <p className="text-gray-600">
-                Today, we continue to push boundaries in eyewear design while staying true to our commitment to quality,
-                innovation, and customer satisfaction.
-              </p>
-            </div>
-          </AnimatedSection>
-          <AnimatedSection direction="up" delay={0.3}>
-            <div className="rounded-lg overflow-hidden shadow-xl">
-              <Image
-                src="/images/about-us.jpg"
-                alt="Lens Aura eyewear collection"
-                className="w-full h-full object-cover"
-                width={500}
-                height={500}
-                priority
-              />
-            </div>
-          </AnimatedSection>
+      {/* Vision Section */}
+      <div
+        className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10 md:gap-16 py-8 md:py-16"
+      >
+        <div
+          className="flex-1 max-w-xl"
+        >
+          <h2 className="text-2xl font-bold mb-4">Our Vision</h2>
+          <div
+            className="prose prose-gray text-gray-700 max-w-none"
+            dangerouslySetInnerHTML={{ __html: visionBody || "" }}
+          />
         </div>
 
-        <AnimatedSection direction="up" delay={0.4}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            {values.map((value, index) => (
-              <div key={index} className="bg-gray-50 p-8 rounded-lg">
-                <div className="mb-4">
-                  <value.icon className="h-8 w-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">{value.title}</h3>
-                <p className="text-gray-600">
-                  {value.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </AnimatedSection>
+        <div
+          className="flex-1 flex justify-center"
+        >
+          <Image
+            src="/images/about-us.jpg"
+            alt="Glasses and contact lens case"
+            width={400}
+            height={320}
+            className="rounded-xl shadow-lg object-contain"
+            style={{ maxWidth: "100%", height: "auto" }}
+          />
+        </div>
+      </div>
 
-        <AnimatedSection direction="up" delay={0.5}>
-          <div className="bg-gray-50 p-12 rounded-lg">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-6">Our Commitment to Excellence</h2>
-              <p className="text-gray-600 mb-6">
-                Every pair of Lens Aura glasses is crafted with precision and care. We use premium materials like
-                Italian acetate, German-engineered hinges, and scratch-resistant lenses to ensure your eyewear
-                stands the test of time.
-              </p>
-              <p className="text-gray-600">
-                Our commitment extends beyond the product. We're dedicated to providing exceptional service,
-                from helping you find the perfect frame to ensuring your complete satisfaction with every purchase.
-              </p>
-            </div>
+      {/* Values Section */}
+      <div
+        className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6 py-12"
+      >
+        {data.values.map((value, idx) => (
+          <div
+            key={value.title + idx}
+            className="hover:shadow-lg transition-all duration-300"
+          >
+            <Card className="flex flex-col items-start p-6 h-full">
+              <h3 className="font-semibold text-xl mb-2">{value.title}</h3>
+              <p className="text-gray-600 text-sm">{value.description}</p>
+            </Card>
           </div>
-        </AnimatedSection>
+        ))}
+      </div>
+
+      {/* Commitment Section */}
+      <div
+        className="container mx-auto px-4 py-12"
+      >
+        <Card className="p-8 bg-slate-50 text-center max-w-3xl mx-auto shadow-md">
+          <h2 className="text-2xl font-bold mb-4">Our Commitment to Excellence</h2>
+          <div
+            className="text-gray-700 text-base"
+            dangerouslySetInnerHTML={{ __html: data.commitment || "" }}
+          />
+        </Card>
       </div>
     </div>
   );
