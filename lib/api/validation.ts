@@ -39,7 +39,7 @@ export const baseProductSchema = z.object({
   stockQuantity: z.number().int().min(0, 'Stock quantity cannot be negative'),
   category: z.enum(['glasses', 'sunglasses', 'contacts']),
   colors: z.array(z.string()).optional(),
-  productType: z.enum(['Glasses', 'Sunglasses', 'ContactLenses']),
+  productType: z.enum(['Glasses', 'Sunglasses', 'ContactLenses', 'Accessory']),
 });
 
 export const glassesSchema = baseProductSchema.extend({
@@ -112,6 +112,11 @@ export const contactLensesSchema = baseProductSchema.extend({
   uvBlocking: z.boolean().optional(),
 });
 
+export const accessorySchema = baseProductSchema.extend({
+  type: z.enum(['glasses', 'sunglasses', 'contacts', 'accessory']),
+  colors: z.array(z.string()).optional(),
+});
+
 // Order validation schemas
 export const orderItemSchema = z.object({
   product: z.string(),
@@ -174,7 +179,7 @@ export const productSchema = z.object({
     .number({ invalid_type_error: 'Stock quantity must be a number' })
     .int({ message: 'Stock quantity must be a whole number' })
     .nonnegative({ message: 'Stock quantity cannot be negative' }),
-  productType: z.enum(['glasses', 'sunglasses', 'contacts'], {
+  productType: z.enum(['glasses', 'sunglasses', 'contacts', 'accessory'], {
     errorMap: () => ({ message: 'Please select a valid product type' }),
   }),
   colors: z.array(z.string()).optional().default([]),

@@ -3,6 +3,7 @@ import { Schema, type Document, type Model } from 'mongoose';
 import slugify from 'slugify';
 
 export interface IProduct extends Document {
+  _id: string;
   name: string;
   slug: string;
   description: string;
@@ -10,7 +11,7 @@ export interface IProduct extends Document {
   imageUrl: string;
   stockQuantity: number;
   inStock: boolean;
-  productType: 'glasses' | 'sunglasses' | 'contacts';
+  productType: 'glasses' | 'sunglasses' | 'contacts' | 'accessory';
   colors: string[];
   status: 'active' | 'inactive';
   createdAt: Date;
@@ -89,7 +90,7 @@ const ProductSchema = new Schema<IProduct>(
     productType: {
       type: String,
       required: true,
-      enum: ['glasses', 'sunglasses', 'contacts'],
+      enum: ['glasses', 'sunglasses', 'contacts', 'accessory'],
     },
     colors: { type: [String], default: [] },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
