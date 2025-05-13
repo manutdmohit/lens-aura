@@ -118,12 +118,15 @@ export default function AddProductPage() {
 
     try {
       let productData;
-      // Always send colors as an array of strings for all product types
+      // Handle colors based on product type
       productData = {
         ...data,
-        colors: colors, // array of strings for all types
-        ...(data.productType !== 'contacts' && { frameColor: colors }),
-        ...(data.productType === 'contacts' && { lensColor: colors[0] || '' }),
+        colors: colors, // Keep the colors array for all types
+        ...(data.productType !== 'contacts' && { frameColor: colors }), // For glasses and sunglasses
+        ...(data.productType === 'contacts' && { 
+          lensColor: colors[0] || '', // Set lensColor for contacts
+          colors: colors // Ensure colors array is set for contacts
+        }),
         category: data.productType.toLowerCase(),
       };
 
