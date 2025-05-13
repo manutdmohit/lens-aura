@@ -458,73 +458,75 @@ export default function ProductDetailPage() {
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="colors">
-                        {watchProductType !== 'contacts'
-                          ? 'Frame Colors'
-                          : 'Available Colors'}
-                        {watchProductType !== 'contacts' && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </Label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          id="colorInput"
-                          value={colorInput}
-                          onChange={(e) => setColorInput(e.target.value)}
-                          placeholder="Add a color (e.g., Black, Red, Blue)"
-                          className="flex-grow"
-                        />
-                        <Button
-                          type="button"
-                          onClick={handleAddColor}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Add
-                        </Button>
-                      </div>
-
-                      {colors.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {colors.map((color) => (
-                            <Badge
-                              key={color}
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {color}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveColor(color)}
-                                className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                              </button>
-                            </Badge>
-                          ))}
+                    {watchProductType !== 'accessory' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="colors">
+                          {watchProductType !== 'contacts'
+                            ? 'Frame Colors'
+                            : 'Available Colors'}
+                          {watchProductType !== 'contacts' && (
+                            <span className="text-red-500">*</span>
+                          )}
+                        </Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            id="colorInput"
+                            value={colorInput}
+                            onChange={(e) => setColorInput(e.target.value)}
+                            placeholder="Add a color (e.g., Black, Red, Blue)"
+                            className="flex-grow"
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleAddColor}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Add
+                          </Button>
                         </div>
-                      )}
-                      {watchProductType !== 'contacts' &&
-                        colors.length === 0 && (
-                          <p className="text-red-500 text-sm">
-                            At least one frame color is required
-                          </p>
+
+                        {colors.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {colors.map((color) => (
+                              <Badge
+                                key={color}
+                                variant="secondary"
+                                className="flex items-center gap-1"
+                              >
+                                {color}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveColor(color)}
+                                  className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                  </svg>
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
                         )}
-                    </div>
+                        {watchProductType !== 'contacts' &&
+                          colors.length === 0 && (
+                            <p className="text-red-500 text-sm">
+                              At least one frame color is required
+                            </p>
+                          )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
