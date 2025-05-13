@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const accessories = await Accessory.find().sort({ createdAt: -1 });
 
-    console.log(accessories);
+ 
     return NextResponse.json({ accessories });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch accessories' }, { status: 500 });
