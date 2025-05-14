@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { mockNotifications } from '@/lib/admin-data';
+import Image from 'next/image';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -41,6 +42,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { session, signOut } = useAdminAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hideNotifications = [
+    '/admin',
+    '/admin/orders',
+    '/admin/products',
+    '/admin/users',
+  ].includes(pathname as string);
 
   const user = session?.user;
 
@@ -188,120 +195,117 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-30">
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
-            {/* Search */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
-                />
-              </div>
+            {/* Left: Welcome message with logo */}
+            <div className="flex items-center space-x-3 min-w-0">
+              <Image src="/images/logo.png" alt="Lens Aura Logo" width={36} height={36} className="rounded-full" priority />
+              <span className="font-semibold text-lg text-gray-800 truncate">Welcome Admin</span>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    {unreadNotifications > 0 && (
-                      <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
-                        {unreadNotifications}
-                      </span>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {mockNotifications.slice(0, 5).map((notification) => (
-                    <DropdownMenuItem
-                      key={notification.id}
-                      className="py-3 px-4 cursor-pointer"
-                    >
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          {notification.type === 'info' && (
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                              <Bell className="h-4 w-4 text-blue-600" />
+            {/* Center: Search and notifications (hidden on /admin, /admin/orders, /admin/products, /admin/users) */}
+            {!hideNotifications && (
+              <div className="flex-1 flex items-center justify-center max-w-md">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white w-full"
+                  />
+                </div>
+                {/* Notifications */}
+                <div className="ml-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="relative">
+                        <Bell className="h-5 w-5" />
+                        {unreadNotifications > 0 && (
+                          <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                            {unreadNotifications}
+                          </span>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-80">
+                      <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {mockNotifications.slice(0, 5).map((notification) => (
+                        <DropdownMenuItem
+                          key={notification.id}
+                          className="py-3 px-4 cursor-pointer"
+                        >
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                              {notification.type === 'info' && (
+                                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <Bell className="h-4 w-4 text-blue-600" />
+                                </div>
+                              )}
+                              {notification.type === 'success' && (
+                                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                                  <Bell className="h-4 w-4 text-green-600" />
+                                </div>
+                              )}
+                              {notification.type === 'warning' && (
+                                <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                                  <Bell className="h-4 w-4 text-yellow-600" />
+                                </div>
+                              )}
+                              {notification.type === 'error' && (
+                                <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                                  <Bell className="h-4 w-4 text-red-600" />
+                                </div>
+                              )}
                             </div>
-                          )}
-                          {notification.type === 'success' && (
-                            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                              <Bell className="h-4 w-4 text-green-600" />
+                            <div className="ml-3 flex-1">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium">
+                                  {notification.title}
+                                </p>
+                                {!notification.read && (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-blue-50 text-blue-700 border-blue-200"
+                                  >
+                                    New
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-500 mt-1">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {new Date(notification.createdAt).toLocaleString()}
+                              </p>
                             </div>
-                          )}
-                          {notification.type === 'warning' && (
-                            <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                              <Bell className="h-4 w-4 text-yellow-600" />
-                            </div>
-                          )}
-                          {notification.type === 'error' && (
-                            <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                              <Bell className="h-4 w-4 text-red-600" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-3 flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">
-                              {notification.title}
-                            </p>
-                            {!notification.read && (
-                              <Badge
-                                variant="outline"
-                                className="bg-blue-50 text-blue-700 border-blue-200"
-                              >
-                                New
-                              </Badge>
-                            )}
                           </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="py-2 justify-center">
-                    <Link
-                      href="/admin/notifications"
-                      className="text-sm text-blue-600 hover:text-blue-800"
-                    >
-                      View all notifications
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="py-2 justify-center">
+                        <Link
+                          href="/admin/notifications"
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          View all notifications
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            )}
 
-              {/* User menu */}
+            {/* Right: User dropdown always right-aligned */}
+            <div className="flex items-center space-x-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={user.avatar || '/placeholder.svg'}
-                        alt={user.name}
-                      />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    <Image src="/images/logo.png" alt="Lens Aura Logo" width={32} height={32} className="rounded-full" priority />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link href="/admin/profile" className="flex w-full">
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link href="/admin/settings" className="flex w-full">
                       Settings
@@ -318,7 +322,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="p-4 md:p-6 lg:p-8 pt-header">{children}</main>
       </div>
     </div>
   );

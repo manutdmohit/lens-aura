@@ -8,7 +8,6 @@ import {
   Edit,
   Trash,
   UserPlus,
-  Download,
   Filter,
 } from 'lucide-react';
 import {
@@ -209,10 +208,6 @@ export default function AdminUsersPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button variant="outline" className="flex items-center gap-1">
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
               <Button
                 className="flex items-center gap-1"
                 onClick={() => setIsModalOpen(true)}

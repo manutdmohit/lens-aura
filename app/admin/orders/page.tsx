@@ -192,16 +192,6 @@ export default function AdminOrdersPage() {
               <h1 className="text-3xl font-bold">Orders</h1>
               <p className="text-gray-500">Manage customer orders</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button variant="outline" className="flex items-center gap-1">
-                <Download className="h-4 w-4" />
-                Export Orders
-              </Button>
-              <Button variant="outline" className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
-                Generate Report
-              </Button>
-            </div>
           </div>
 
           <Card>

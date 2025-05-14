@@ -7,6 +7,7 @@ import { SessionProvider } from 'next-auth/react';
 import { AdminAuthProvider } from '@/context/admin-auth-context';
 import { Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 /**
  * AdminLayout is a layout component for the admin section.
@@ -21,17 +22,20 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
 
   // This ensures hydration errors are avoided
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  const noHeaderPadding = pathname === '/admin/login';
+
   return (
     <SessionProvider refetchInterval={5} refetchOnWindowFocus={true}>
       <AdminAuthProvider>
         {isClient ? (
-          <main>{children}</main>
+          <div className={noHeaderPadding ? '' : 'pt-header'}>{children}</div>
         ) : (
           <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
