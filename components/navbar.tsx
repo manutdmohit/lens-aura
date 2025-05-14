@@ -526,7 +526,7 @@ export default function Navbar() {
       {/* Main Navigation */}
       <div className="border-b border-gray-800 shadow-sm relative">
         {/* Gradient background - complementing the gold/beige logo color */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1E1C1D] from-0% via-[#1E1C1D] via-35% via-[#3A2B3D] via-65% to-[#362A59] to-100% opacity-95"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[black] from-0% via-[#1E1C1D] via-35% via-[#3A2B3D] via-65% to-[#362A59] to-100% opacity-95"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(242,211,153,0.07),transparent_50%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(138,106,209,0.15),transparent_60%)]"></div>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_20%,rgba(242,211,153,0.04)_40%,rgba(138,106,209,0.08)_60%,transparent_95%)] shimmer"></div>
@@ -539,7 +539,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center py-3 space-x-4 sm:space-x-5 relative z-10">
               <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
                 <Image
-                  src="/images/lens-aura-logo-bg-removed.png"
+                  src="/images/logo.png"
                   alt="Lens Aura Logo"
                   width={160}
                   height={160} 
@@ -551,7 +551,7 @@ export default function Navbar() {
                 <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[#B48E4A!important]">
                   Lens Aura
                 </span>
-                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline text-[#B48E4A!important]">Vision Perfected</span>
+                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline text-[#B48E4A!important]">Where Vision Meets Aura</span>
               </div>
             </Link>
 
