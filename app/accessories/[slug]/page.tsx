@@ -14,6 +14,7 @@ import { useCart } from '@/context/cart-context';
 import { formatCurrency } from '@/lib/utils';
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Check,
   ChevronRight,
@@ -24,8 +25,11 @@ import {
   Info,
   Package,
   Settings,
+  ShoppingCart,
   Sun,
 } from 'lucide-react';
+import AddToCartButton from '@/components/add-to-cart-button';
+import { IProduct } from '@/models';
 
 // Animation variants
 const fadeIn = {
@@ -88,6 +92,8 @@ export default function AccessoryProductPage() {
 
       try {
         const response = await fetch(`/api/accessories/${slug}`);
+
+        console.log(response);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -351,12 +357,47 @@ export default function AccessoryProductPage() {
 
             {/* Add to Cart Button */}
             <motion.div variants={slideUp} className="pt-4">
-              <Button
-                className="w-full bg-black text-white hover:bg-gray-800"
-                disabled={!isInStock}
-              >
-                {isInStock ? 'Add to Cart' : 'Out of Stock'}
-              </Button>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  {!isInStock ? (
+                    <Button
+                      className="w-full bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center h-12 rounded-xl"
+                      disabled
+                    >
+                      <AlertCircle className="mr-2 h-5 w-5" />
+                      Out of Stock
+                    </Button>
+                  ) : quantityInCart + quantityToAdd > product.stockQuantity ? (
+                    <Button
+                      className="w-full bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center h-12 rounded-xl"
+                      disabled
+                    >
+                      <AlertTriangle className="mr-2 h-5 w-5" />
+                      Max Stock Limit Reached
+                    </Button>
+                  ) : (
+                    <motion.div
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full"
+                    >
+                      <AddToCartButton product={product as unknown as IProduct} selectedColor={selectedColor} />
+                    </motion.div>
+                  )}
+                </div>
+                
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-12 border-gray-300 rounded-xl transition-all hover:border-blue-600 hover:text-blue-600"
+                  >
+                    <Heart className="h-6 w-6" />
+                  </Button>
+                </motion.div>
+              </div>
             </motion.div>
 
             {/* Product Features */}
