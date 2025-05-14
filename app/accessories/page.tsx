@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductGrid from '@/components/product-grid';
 import { ProductFormValues as Product } from '@/lib/api/validation';
@@ -168,5 +168,9 @@ function AccessoriesContent() {
 }
 
 export default function AccessoriesPage() {
-  return <AccessoriesContent />;
+  return (
+    <Suspense fallback={<LoadingPage loading={true} />}>
+      <AccessoriesContent />
+    </Suspense>
+  );
 } 
