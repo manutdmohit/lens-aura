@@ -116,13 +116,11 @@ export default function ProductDetailPage() {
 
         reset(formData);
 
-        // Set colors
-        if (data.product.colors) {
-          setColors(data.product.colors);
-        }
-
-        if (data.product.frameColor) {
-          setColors(data.product.frameColor);
+        // Set colors based on product type
+        if (data.product.productType === 'contacts') {
+          setColors(data.product.colors || []);
+        } else {
+          setColors(data.product.frameColor || data.product.colors || []);
         }
       } catch (error: any) {
         console.error('Error fetching product:', error);
@@ -164,12 +162,20 @@ export default function ProductDetailPage() {
       if (!productId) {
         throw new Error('Product ID is missing');
       }
+
+      // Validate colors for contact products
+      if (data.productType === 'contacts' && colors.length === 0) {
+        throw new Error('At least one color is required for contact lenses');
+      }
+
       // Add colors to the data
       const productData = {
         ...data,
         colors,
         // For glasses and sunglasses, add frameColor
         ...(data.productType !== 'contacts' && { frameColor: colors }),
+        // For contacts, ensure colors are set
+        ...(data.productType === 'contacts' && { colors }),
       };
 
       // Determine the API endpoint based on product type
@@ -464,9 +470,7 @@ export default function ProductDetailPage() {
                           {watchProductType !== 'contacts'
                             ? 'Frame Colors'
                             : 'Available Colors'}
-                          {watchProductType !== 'contacts' && (
-                            <span className="text-red-500">*</span>
-                          )}
+                          <span className="text-red-500">*</span>
                         </Label>
                         <div className="flex items-center space-x-2">
                           <Input
@@ -1284,6 +1288,20 @@ export default function ProductDetailPage() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Add a section to display available colors when productType is 'contacts' */}
+              {watchProductType === 'contacts' && colors.length > 0 && (
+                <div>
+                  <Label>Colors</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <Badge key={color} className="bg-gray-200 text-gray-800">
+                        {color}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Form Actions */}
               <div className="mt-6 flex justify-between">
