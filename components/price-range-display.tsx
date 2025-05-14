@@ -21,20 +21,20 @@ interface PriceRange {
 interface PriceRanges {
   glasses: PriceRange;
   sunglasses: PriceRange;
-  contacts: PriceRange;
+  accessories: PriceRange;
 }
 
 const defaultPriceRanges: PriceRanges = {
   glasses: { lowest: null, highest: null },
   sunglasses: { lowest: null, highest: null },
-  contacts: { lowest: null, highest: null }
+  accessories: { lowest: null, highest: null }
 };
 
 // Product images for each category
 const productImages = {
   glasses: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?q=80&w=500&auto=format&fit=crop',
   sunglasses: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=500&auto=format&fit=crop',
-  contacts: 'https://images.unsplash.com/photo-1609189130830-94586b3d0167?q=80&w=500&auto=format&fit=crop'
+  accessories: '/images/accessories.jpg'
 };
 
 // SVG Icons
@@ -52,7 +52,7 @@ const SparklesIcon = () => (
 );
 
 const ShoppingBagIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
   </svg>
 );
@@ -86,7 +86,7 @@ export default function PriceRangeDisplay() {
           const validatedData: PriceRanges = {
             glasses: data.glasses || { lowest: null, highest: null },
             sunglasses: data.sunglasses || { lowest: null, highest: null },
-            contacts: data.contacts || { lowest: null, highest: null }
+            accessories: data.accessories || { lowest: null, highest: null }
           };
           
           setPriceRanges(validatedData);
@@ -272,60 +272,60 @@ export default function PriceRangeDisplay() {
           </CardContent>
         </Card>
 
-        {/* Contact Lenses Price Range */}
+        {/* Accessories Price Range */}
         <Card className="overflow-hidden rounded-lg shadow-lg transition-all hover:shadow-xl border-0">
           <div className="relative h-48 w-full overflow-hidden">
             <Image
-              src={productImages.contacts}
-              alt="Contact Lenses"
+              src={productImages.accessories}
+              alt="Accessories"
               fill
               style={{ objectFit: 'cover' }}
               className="transition-transform hover:scale-105 duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <h3 className="absolute bottom-4 left-4 text-xl font-bold text-white">Contact Lenses</h3>
+            <h3 className="absolute bottom-4 left-4 text-xl font-bold text-white">Accessories</h3>
           </div>
           <CardContent className="p-6 space-y-4">
-            {priceRanges.contacts?.lowest && (
+            {priceRanges.accessories?.lowest && (
               <div className="flex items-start space-x-3">
                 <TagIcon />
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="text-gray-600 text-sm">Starting from:</span>
-                    <span className="font-medium text-blue-600">${priceRanges.contacts.lowest.price.toFixed(2)}</span>
+                    <span className="font-medium text-blue-600">${priceRanges.accessories.lowest.price.toFixed(2)}</span>
                   </div>
                   <Link
-                    href={`/contacts/${priceRanges.contacts.lowest.slug}`}
+                    href={`/accessories/${priceRanges.accessories.lowest.slug}`}
                     className="text-sm text-gray-700 hover:text-blue-600 hover:underline block line-clamp-1"
                   >
-                    {priceRanges.contacts.lowest.name}
+                    {priceRanges.accessories.lowest.name}
                   </Link>
                 </div>
               </div>
             )}
-            {priceRanges.contacts?.highest && (
+            {priceRanges.accessories?.highest && (
               <div className="flex items-start space-x-3">
                 <SparklesIcon />
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="text-gray-600 text-sm">Premium options:</span>
-                    <span className="font-medium text-amber-600">${priceRanges.contacts.highest.price.toFixed(2)}</span>
+                    <span className="font-medium text-amber-600">${priceRanges.accessories.highest.price.toFixed(2)}</span>
                   </div>
                   <Link
-                    href={`/contacts/${priceRanges.contacts.highest.slug}`}
+                    href={`/accessories/${priceRanges.accessories.highest.slug}`}
                     className="text-sm text-gray-700 hover:text-amber-600 hover:underline block line-clamp-1"
                   >
-                    {priceRanges.contacts.highest.name}
+                    {priceRanges.accessories.highest.name}
                   </Link>
                 </div>
               </div>
             )}
             <Link
-              href="/contacts"
+              href="/accessories"
               className="flex items-center justify-center w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition mt-4 space-x-2"
             >
               <ShoppingBagIcon />
-              <span>Shop All Contact Lenses</span>
+              <span>Shop All Accessories</span>
             </Link>
           </CardContent>
         </Card>
@@ -339,6 +339,6 @@ function hasPriceData(priceRanges: PriceRanges): boolean {
   return !!(
     (priceRanges.glasses?.lowest || priceRanges.glasses?.highest) ||
     (priceRanges.sunglasses?.lowest || priceRanges.sunglasses?.highest) ||
-    (priceRanges.contacts?.lowest || priceRanges.contacts?.highest)
+    (priceRanges.accessories?.lowest || priceRanges.accessories?.highest)
   );
 } 

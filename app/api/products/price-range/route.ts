@@ -13,16 +13,15 @@ export async function GET(req: NextRequest) {
       // Get price ranges for sunglasses
       const sunglassesRange = await getPriceRange('sunglasses');
       
-      // Get price ranges for contacts
-      const contactsRange = await getPriceRange('contacts');
+      // Get price ranges for accessories
+      const accessoriesRange = await getPriceRange('accessory');
 
-      console.log(glassesRange);
       
 
       return NextResponse.json({
         glasses: glassesRange,
         sunglasses: sunglassesRange,
-        contacts: contactsRange
+        accessories: accessoriesRange
       }, { status: 200 });
     } finally {
       // Ensure we always disconnect from the database

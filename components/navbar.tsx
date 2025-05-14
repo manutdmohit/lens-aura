@@ -105,6 +105,33 @@ const contactsMenuData = {
   ],
 };
 
+const accessoriesMenuData = {
+  title: 'Accessories',
+  mainLink: '/accessories',
+  featuredLinks: [
+    {
+      title: 'New Arrivals',
+      href: '/accessories/new-arrivals',
+      image: '/images/accessories.jpg',
+    },
+    {
+      title: 'Cases & Storage',
+      href: '/accessories/cases',
+      image: '/images/accessories/cases.jpg',
+    },
+    {
+      title: 'Cleaning Products',
+      href: '/accessories/cleaning',
+      image: '/images/accessories/cleaning.jpg',
+    },
+  ],
+  additionalLinks: [
+    { title: 'All Accessories', href: '/accessories' },
+    { title: 'Cases & Storage', href: '/accessories/cases' },
+    { title: 'Cleaning Products', href: '/accessories/cleaning' },
+  ],
+};
+
 // Array of all menu data for easier iteration
 const allMenuData = [
   { id: 'glasses', ...glassesMenuData },
@@ -590,6 +617,9 @@ export default function Navbar() {
                   {renderNavItem('Sunglasses', '/sunglasses', 'sunglasses')}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
+                  {renderNavLink('Accessories', '/accessories')}
+                </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
                   {renderNavLink('Contacts', '/contacts')}
                 </motion.div>
               </div>
@@ -644,6 +674,18 @@ export default function Navbar() {
           >
             <div className="bg-[#2A2829] divide-y divide-gray-700">
               {allMenuData.map((menuData) => renderMobileMenuItem(menuData))}
+              <motion.div
+                variants={itemVariants}
+                className="border-b border-gray-700 last:border-b-0"
+              >
+                <Link
+                  href="/accessories"
+                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  Accessories
+                </Link>
+              </motion.div>
               <motion.div
                 variants={itemVariants}
                 className="border-b border-gray-700 last:border-b-0"
