@@ -1,79 +1,172 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import ProductGrid from '@/components/product-grid';
+import { ProductFormValues as Product } from '@/lib/api/validation';
+import { toast } from 'sonner';
+import LoadingPage from '@/components/loading';
+import { Pagination } from '@/components/ui/pagination';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
-interface Accessory {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  image: string;
-  stock: number;
-  category: string;
-  status: 'active' | 'inactive';
+interface PaginationData {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+interface PriceRange {
+  lowest: {
+    price: number;
+    slug: string;
+  };
+  highest: {
+    price: number;
+    slug: string;
+  };
+}
+
+// Separate the main content to a client component
+function AccessoriesContent() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
+  const [pagination, setPagination] = useState<PaginationData>({
+    total: 0,
+    page: 1,
+    limit: 12,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+  
+  // Use a ref to store the limit value
+  const limitRef = useRef(12);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = parseInt(searchParams?.get('page') || '1');
+
+  useEffect(() => {
+    const fetchPriceRange = async () => {
+      try {
+        const response = await fetch('/api/products/price-range');
+        const data = await response.json();
+        setPriceRange(data.accessories);
+      } catch (error) {
+        console.error('Error fetching price range:', error);
+      }
+    };
+
+    fetchPriceRange();
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch(`/api/accessories?page=${currentPage}&limit=${limitRef.current}`);
+        const data = await response.json();
+        
+        if (data && data.products) {
+          setProducts(data.products);
+          setPagination(data.pagination || {
+            total: 0,
+            page: 1,
+            limit: 12,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPrevPage: false,
+          });
+        } else {
+          // If no products are returned or data is malformed, set to empty array
+          setProducts([]);
+        }
+      } catch (error: any) {
+        console.error('Error fetching products:', error);
+        toast.error(`${error.message || "Failed to fetch products"}`);
+        // Set products to empty array on error
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [currentPage]); // Only depend on currentPage
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('page', page.toString());
+    router.push(`/accessories?${params.toString()}`);
+  };
+
+  // Check if products array is valid
+  const hasProducts = Array.isArray(products) && products.length > 0;
+
+  return (
+    <main className="flex flex-col min-h-screen">
+      <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Accessories</h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            {priceRange?.lowest ? (
+              <>
+                Our accessories start from just ${priceRange.lowest.price.toFixed(2)}. Choose from our wide range of styles and
+                colors.{' '}
+                {priceRange.lowest && (
+                  <Link 
+                    href={`/accessories/${priceRange.lowest.slug}`}
+                    className="text-indigo-600 hover:underline"
+                  >
+                    View our most affordable option
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                Discover our collection of high-quality accessories to complement your eyewear.
+              </>
+            )}
+          </p>
+        </div>
+
+        {loading && <LoadingPage loading={loading} />}
+        
+        {!loading && !hasProducts && (
+          <div className="text-center">
+            <p className="text-lg text-gray-600">
+              No accessories found. Try a different search.
+            </p>
+          </div>
+        )}
+
+        {!loading && hasProducts && (
+          <>
+            <ProductGrid products={products} />
+            
+            <div className="mt-8">
+              <Pagination 
+                currentPage={pagination.page} 
+                totalPages={pagination.totalPages} 
+                onPageChange={handlePageChange} 
+              />
+            </div>
+            
+            <div className="text-center text-sm text-gray-500 mt-4">
+              Showing {products.length} of {pagination.total} products
+            </div>
+          </>
+        )}
+      </div>
+    </main>
+  );
 }
 
 export default function AccessoriesPage() {
-  const [accessories, setAccessories] = useState<Accessory[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAccessories = async () => {
-      setLoading(true);
-      const res = await fetch('/api/accessories');
-      const data = await res.json();
-      setAccessories((data.accessories || []).filter((a: Accessory) => a.status === 'active'));
-      setLoading(false);
-    };
-    fetchAccessories();
-  }, []);
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-4xl font-bold text-center mb-2">Accessories</h1>
-      <p className="text-center text-gray-500 mb-10">Discover our curated collection of premium eyewear accessories to complement your style and vision.</p>
-      
-      {loading ? (
-        <div className="flex justify-center items-center min-h-[200px]">Loading...</div>
-      ) : accessories.length === 0 ? (
-        <div className="text-center text-gray-500 py-20 text-xl">No accessories available at the moment.</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {accessories.map((acc) => (
-            <Link href={`/accessories/${acc.slug}`} key={acc._id}>
-              <Card className="group transition-shadow hover:shadow-2xl hover:-translate-y-1 duration-200 cursor-pointer">
-                <div className="relative h-56 bg-gray-50 rounded-t-xl overflow-hidden flex items-center justify-center">
-                  {acc.image ? (
-                    <img src={acc.image} alt={acc.name} className="object-contain h-full w-full transition-transform group-hover:scale-105 duration-200" />
-                  ) : (
-                    <img src="/placeholder.svg" alt="No image" className="object-contain h-full w-full" />
-                  )}
-                  {acc.stock === 0 && (
-                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">Out of Stock</span>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="truncate text-lg font-semibold">{acc.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize">{acc.category || 'Accessory'}</Badge>
-                    <span className="text-gray-500 text-xs ml-auto">{acc.stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
-                  </div>
-                  <div className="text-xl font-bold text-blue-700">${acc.price.toFixed(2)}</div>
-                  {acc.description && <div className="text-gray-600 text-sm line-clamp-2">{acc.description}</div>}
-                  <Button className="w-full mt-2" variant="secondary" disabled={acc.stock === 0}>View Details</Button>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <AccessoriesContent />;
 } 

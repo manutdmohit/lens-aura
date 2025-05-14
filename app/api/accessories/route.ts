@@ -1,48 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Accessory from '@/models/Accessory';
-import { connectToDatabase } from '@/lib/api/db';
-export async function GET() {
+import { NextResponse } from 'next/server';
+import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { Product } from '@/models';
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const gender = searchParams.get('gender');
+
     await connectToDatabase();
 
-  try {
-    const accessories = await Accessory.find().sort({ createdAt: -1 });
+    // Build the query
+    const query: any = { productType: 'accessory', status: 'active' };
+    if (gender) {
+      query.gender = gender;
+    }
 
- 
-    return NextResponse.json({ accessories });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch accessories' }, { status: 500 });
-  }
-}
+    // Calculate skip value for pagination
+    const skip = (page - 1) * limit;
 
-export async function POST(req: NextRequest) {
-  try {
-    const data = await req.json();
-    const accessory = new Accessory(data);
-    await accessory.save();
-    return NextResponse.json({ accessory }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create accessory' }, { status: 500 });
-  }
-}
+    // Get total count of matching products
+    const total = await Product.countDocuments(query);
 
-export async function PATCH(req: NextRequest) {
-  try {
-    const { id, ...update } = await req.json();
-    const accessory = await Accessory.findByIdAndUpdate(id, update, { new: true });
-    if (!accessory) return NextResponse.json({ error: 'Accessory not found' }, { status: 404 });
-    return NextResponse.json({ accessory });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update accessory' }, { status: 500 });
-  }
-}
+    // Fetch products with pagination
+    const products = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-export async function DELETE(req: NextRequest) {
-  try {
-    const { id } = await req.json();
-    const accessory = await Accessory.findByIdAndDelete(id);
-    if (!accessory) return NextResponse.json({ error: 'Accessory not found' }, { status: 404 });
-    return NextResponse.json({ success: true });
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return NextResponse.json({
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete accessory' }, { status: 500 });
+    console.error('Error fetching accessories:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch accessories' },
+      { status: 500 }
+    );
+  } finally {
+    await disconnectFromDatabase();
   }
 } 

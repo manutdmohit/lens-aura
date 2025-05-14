@@ -73,25 +73,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       permission: { resource: 'products', action: 'read' as const },
     },
     {
-      name: 'Accessories',
-      href: '/admin/accessories',
-      icon: <ShoppingBag className="h-5 w-5" />,
-      active: pathname === '/admin/accessories',
-      permission: { resource: 'products', action: 'read' as const },
-    },
-    {
       name: 'Orders',
       href: '/admin/orders',
       icon: <FileText className="h-5 w-5" />,
       active: pathname === '/admin/orders',
       permission: { resource: 'orders', action: 'read' as const },
-    },
-    {
-      name: 'Analytics',
-      href: '/admin/analytics',
-      icon: <BarChart className="h-5 w-5" />,
-      active: pathname === '/admin/analytics',
-      permission: { resource: 'analytics', action: 'read' as const },
     },
     {
       name: 'About',
