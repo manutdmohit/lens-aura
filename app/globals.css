@@ -204,6 +204,11 @@ header {
   z-index: 50 !important;
 }
 
+/* Add padding to the main content to account for fixed header */
+main {
+  padding-top: 112px !important; /* Accounts for both top bar and main nav height */
+}
+
 /* Ensure mega menu is properly positioned */
 .mega-menu-container {
   position: static;

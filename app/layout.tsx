@@ -37,7 +37,7 @@ export default function RootLayout({
         <SessionProvider>
           <CartProvider>
             {!isAdminRoute && <Navbar />}
-            <main>{children}</main>
+            <main className="min-h-screen">{children}</main>
             {!isAdminRoute && <Footer />}
             <Toaster />
           </CartProvider>
