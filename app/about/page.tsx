@@ -17,6 +17,36 @@ async function getAboutData(): Promise<AboutApiData> {
   return result.data;
 }
 
+export const metadata = {
+  title: "About Us | Lens Aura",
+  description: "Learn about Lens Aura, our mission, and our commitment to providing premium eyewear in Australia.",
+  openGraph: {
+    title: "About Us | Lens Aura",
+    description: "Learn about Lens Aura, our mission, and our commitment to providing premium eyewear in Australia.",
+    url: "https://lensaura.com.au/about",
+    siteName: "Lens Aura",
+    images: [
+      {
+        url: "https://lensaura.com.au/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Lens Aura About",
+      },
+    ],
+    locale: "en_AU",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://lensaura.com.au/about",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Us | Lens Aura",
+    description: "Learn about Lens Aura, our mission, and our commitment to providing premium eyewear in Australia.",
+    images: ["https://lensaura.com.au/og-image.jpg"],
+  },
+};
+
 export default async function AboutPage() {
   let data: AboutApiData;
   try {

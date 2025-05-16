@@ -1,4 +1,32 @@
-'use client';
+export const metadata = {
+  title: "Returns Policy | Lens Aura",
+  description: "Read our returns policy for hassle-free eyewear returns and exchanges at Lens Aura.",
+  openGraph: {
+    title: "Returns Policy | Lens Aura",
+    description: "Read our returns policy for hassle-free eyewear returns and exchanges at Lens Aura.",
+    url: "https://lensaura.com.au/returns",
+    siteName: "Lens Aura",
+    images: [
+      {
+        url: "https://lensaura.com.au/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Lens Aura Returns",
+      },
+    ],
+    locale: "en_AU",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://lensaura.com.au/returns",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Returns Policy | Lens Aura",
+    description: "Read our returns policy for hassle-free eyewear returns and exchanges at Lens Aura.",
+    images: ["https://lensaura.com.au/og-image.jpg"],
+  },
+};
 
 import { motion } from 'framer-motion';
 import { Package, Clock, AlertCircle, CheckCircle, Heart } from 'lucide-react';

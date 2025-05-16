@@ -11,6 +11,36 @@ import Image from 'next/image';
 const playfair = Playfair_Display({ subsets: ['latin'] });
 const montserrat = Montserrat({ subsets: ['latin'] });
 
+export const metadata = {
+  title: "Lens Aura | Premium Eyewear Australia",
+  description: "Discover extraordinary eyewear at surprising prices. Shop glasses, sunglasses, and contact lenses online with fast shipping Australia-wide.",
+  openGraph: {
+    title: "Lens Aura | Premium Eyewear Australia",
+    description: "Discover extraordinary eyewear at surprising prices. Shop glasses, sunglasses, and contact lenses online with fast shipping Australia-wide.",
+    url: "https://lensaura.com.au/",
+    siteName: "Lens Aura",
+    images: [
+      {
+        url: "https://lensaura.com.au/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Lens Aura Eyewear",
+      },
+    ],
+    locale: "en_AU",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://lensaura.com.au/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lens Aura | Premium Eyewear Australia",
+    description: "Discover extraordinary eyewear at surprising prices. Shop glasses, sunglasses, and contact lenses online with fast shipping Australia-wide.",
+    images: ["https://lensaura.com.au/og-image.jpg"],
+  },
+};
+
 export default function Home() {
   return (
     <PageTransition>
