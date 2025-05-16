@@ -22,7 +22,7 @@ export default function HeroSection() {
   }
 
   return (
-    <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden">
+    <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden -mt-[112px]">
       {/* Background image with subtle continuous zoom */}
       <motion.div
         className="absolute inset-0 z-0"

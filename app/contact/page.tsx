@@ -41,7 +41,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f2ee] pt-24">
+    <div className="min-h-screen bg-[#f5f2ee]">
       {/* Hero Section */}
       <section className="relative py-20 bg-[#F2D399]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

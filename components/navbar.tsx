@@ -511,7 +511,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-[#1E1C1D]">
+    <header className="bg-[#1E1C1D] pt-0">
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-sm h-10 text-white font-medium shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
