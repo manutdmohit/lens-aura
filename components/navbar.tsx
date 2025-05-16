@@ -622,6 +622,9 @@ export default function Navbar() {
                 <motion.div variants={itemVariants} className="h-full">
                   {renderNavLink('Contacts', '/contacts')}
                 </motion.div>
+                <motion.div variants={itemVariants} className="h-full">
+                  {renderNavLink('Contact Us', '/contact')}
+                </motion.div>
               </div>
             </motion.nav>
 
@@ -696,6 +699,18 @@ export default function Navbar() {
                   onClick={toggleMobileMenu}
                 >
                   Contacts
+                </Link>
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                className="border-b border-gray-700 last:border-b-0"
+              >
+                <Link
+                  href="/contact"
+                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  Contact Us
                 </Link>
               </motion.div>
             </div>
