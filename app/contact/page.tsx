@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,7 +41,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f2ee]">
+    <div className="min-h-screen bg-[#f5f2ee] pt-24">
       {/* Hero Section */}
       <section className="relative py-20 bg-[#F2D399]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,47 +66,49 @@ export default function ContactPage() {
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Your Name
-                    </label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Email Address
-                    </label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full"
-                      placeholder="john@example.com"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Your Name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Email Address <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="w-full"
+                        placeholder="john@example.com"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label
                       htmlFor="subject"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Subject
+                      Subject <span className="text-red-500">*</span>
                     </label>
                     <Input
                       id="subject"
@@ -123,7 +125,7 @@ export default function ContactPage() {
                       htmlFor="message"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Message
+                      Message <span className="text-red-500">*</span>
                     </label>
                     <Textarea
                       id="message"
@@ -131,14 +133,14 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full min-h-[150px]"
+                      className="w-full min-h-[150px] resize-none"
                       placeholder="Your message here..."
                     />
                   </div>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-black text-white hover:bg-gray-800"
+                    className="w-full bg-black text-white hover:bg-gray-800 transition-colors duration-200"
                   >
                     {isSubmitting ? (
                       <motion.div
@@ -148,7 +150,9 @@ export default function ContactPage() {
                           duration: 1,
                           ease: 'linear',
                         }}
+                        className="flex items-center justify-center"
                       >
+                        <Loader2 className="w-4 h-4 mr-2" />
                         Sending...
                       </motion.div>
                     ) : (
@@ -167,25 +171,31 @@ export default function ContactPage() {
               <div className="space-y-8">
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                   <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-                  <div className="space-y-6">
-                    <div className="flex items-start">
-                      <Phone className="h-6 w-6 text-gray-600 mr-4 mt-1" />
+                  <div className="space-y-8">
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-gray-50 p-3 rounded-full">
+                        <Phone className="h-6 w-6 text-gray-600" />
+                      </div>
                       <div>
-                        <h3 className="font-medium text-gray-900">Phone</h3>
+                        <h3 className="font-medium text-gray-900 mb-1">Phone</h3>
                         <p className="text-gray-600">+61 0402 564 501</p>
                       </div>
                     </div>
-                    <div className="flex items-start">
-                      <Mail className="h-6 w-6 text-gray-600 mr-4 mt-1" />
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-gray-50 p-3 rounded-full">
+                        <Mail className="h-6 w-6 text-gray-600" />
+                      </div>
                       <div>
-                        <h3 className="font-medium text-gray-900">Email</h3>
+                        <h3 className="font-medium text-gray-900 mb-1">Email</h3>
                         <p className="text-gray-600">info@lensaura.com.au</p>
                       </div>
                     </div>
-                    <div className="flex items-start">
-                      <Clock className="h-6 w-6 text-gray-600 mr-4 mt-1" />
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-gray-50 p-3 rounded-full">
+                        <Clock className="h-6 w-6 text-gray-600" />
+                      </div>
                       <div>
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-gray-900 mb-1">
                           Business Hours
                         </h3>
                         <p className="text-gray-600">
@@ -195,6 +205,8 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </div>
+
+              
               </div>
             </AnimatedSection>
           </div>
