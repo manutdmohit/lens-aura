@@ -76,9 +76,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
+    const { id } = context.params;
     const session = await authenticate(req);
 
     if (session instanceof NextResponse) {
@@ -86,7 +87,7 @@ export async function DELETE(
     }
 
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid review ID format' },
         { status: 400 }
@@ -96,7 +97,7 @@ export async function DELETE(
     await connectToDatabase();
 
     // Get review
-    const review = await Review.findById(params.id);
+    const review = await Review.findById(id);
 
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
@@ -115,7 +116,7 @@ export async function DELETE(
     }
 
     // Delete review
-    await Review.findByIdAndDelete(params.id);
+    await Review.findByIdAndDelete(id);
 
     return NextResponse.json({
       message: 'Review deleted successfully',
