@@ -14,13 +14,14 @@ import {
   useState,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import type { UserRole } from '@/types/admin';
 
 interface AdminSession {
   user: {
     id: string;
     email: string | null;
     name: string;
-    role: string;
+    role: UserRole;
     avatar: string;
     createdAt: Date;
     lastLogin: Date;
@@ -64,7 +65,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         id: sessionData.user.id ?? '',
         email: sessionData.user.email ?? '',
         name: sessionData.user.name ?? '',
-        role: sessionData.user.role ?? 'admin',
+        role: (sessionData.user.role ?? 'admin') as UserRole,
         avatar:
           sessionData.user.image ??
           'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
