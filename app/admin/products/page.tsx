@@ -58,34 +58,12 @@ export default function AdminProductsPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // const data = await getProducts()
-        // setProducts(data)
         setLoading(true);
-
-        const response = await fetch('/api/admin/products');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-
-        const data = await response.json();
-
-        setProducts(
-          data.products.map((product: any) => ({
-            id: product._id,
-            name: product.name,
-            productType: product.productType,
-            price: product.price,
-            imageUrl: product.imageUrl,
-            description: product.description,
-            colors: product.colors,
-            stockQuantity: product.stockQuantity,
-          }))
-        );
+        const data = await getProducts();
+        setProducts(data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
-      } finally {
         setLoading(false);
       }
     };
