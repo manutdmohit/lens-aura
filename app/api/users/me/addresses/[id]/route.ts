@@ -10,9 +10,10 @@ import User from '@/lib/mongoose/models/user.model';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
+    const { id } = context.params;
     const session = await authenticate(req);
 
     if (session instanceof NextResponse) {
@@ -36,7 +37,7 @@ export async function PUT(
 
     // Find the address to update
     const addressIndex = user.addresses.findIndex(
-      (addr) => addr._id.toString() === params.id
+      (addr) => addr._id.toString() === id
     );
     s;
 
@@ -47,7 +48,7 @@ export async function PUT(
     // If this is a default address, unset any existing default of the same type
     if (data.isDefault) {
       user.addresses.forEach((addr) => {
-        if (addr.type === data.type && addr._id.toString() !== params.id) {
+        if (addr.type === data.type && addr._id.toString() !== id) {
           addr.isDefault = false;
         }
       });
@@ -75,9 +76,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
+    const { id } = context.params;
     const session = await authenticate(req);
 
     if (session instanceof NextResponse) {
@@ -94,7 +96,7 @@ export async function DELETE(
 
     // Find the address to delete
     const addressIndex = user.addresses.findIndex(
-      (addr) => addr._id.toString() === params.id
+      (addr) => addr._id.toString() === id
     );
 
     if (addressIndex === -1) {

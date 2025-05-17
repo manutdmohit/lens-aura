@@ -32,8 +32,10 @@ export async function GET(
       return session; // This is an error response
     }
 
+    const { id } = context.params;
+
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid order ID format' },
         { status: 400 }
@@ -42,7 +44,7 @@ export async function GET(
 
     await connectToDatabase();
 
-    const order = await Order.findById(context.params.id);
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -77,8 +79,10 @@ export async function PUT(
       return session; // This is an error response
     }
 
+    const { id } = context.params;
+
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid order ID format' },
         { status: 400 }
@@ -101,7 +105,7 @@ export async function PUT(
 
     await connectToDatabase();
 
-    const order = await Order.findById(context.params.id);
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });

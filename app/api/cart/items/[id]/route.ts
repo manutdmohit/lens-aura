@@ -33,8 +33,12 @@ async function getCart(req: NextRequest) {
   return { userId: session.id };
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  context: any
+) {
   try {
+    const { id } = context.params;
     const { userId, error } = await getCart(req);
 
     if (error) {
@@ -85,8 +89,12 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+  context: any
+) {
   try {
+    const { id } = context.params;
     const { userId, error } = await getCart(req);
 
     if (error) {
@@ -164,8 +172,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PUT(
+  req: NextRequest,
+  context: any
+) {
   try {
+    const { id } = context.params;
     const { userId, error } = await getCart(req);
 
     if (error) {
@@ -210,8 +222,12 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  context: any
+) {
   try {
+    const { id } = context.params;
     const { userId, error } = await getCart(req);
 
     if (error) {

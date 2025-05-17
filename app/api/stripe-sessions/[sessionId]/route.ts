@@ -11,14 +11,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function GET(
-  request: Request,
-  { params }: { params: { sessionId: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     await connectToDatabase();
 
-    // Get the session ID from params and ensure it's a string
-    const sessionId = params.sessionId;
+    const { sessionId } = context.params;
 
     // Clean the session ID - handle various formats
     const cleanSessionId = sessionId
@@ -135,13 +134,13 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
-  { params }: { params: { sessionId: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     await connectToDatabase();
-    const { checkStock } = await request.json();
-    const { sessionId } = params;
+    const { checkStock } = await req.json();
+    const { sessionId } = context.params;
 
     // Find the order by session ID
     const order = await Order.findOne({ stripeSessionId: sessionId });
