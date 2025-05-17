@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/cart-context';
 import { Pagination } from '@/components/ui/pagination';
+import { IProduct } from '@/models';
 
 interface PaginationData {
   total: number;
@@ -137,7 +138,7 @@ export default function ContactLensProducts() {
       return;
     }
     
-    addItem(product, 1, 'default');
+    addItem(product as unknown as IProduct & { _id: string }, 1, 'default');
     toast.success(`Added ${product.name} to cart`);
   };
   
