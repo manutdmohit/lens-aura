@@ -39,6 +39,7 @@ import {
 import type { ProductFormValues } from '@/lib/api/validation';
 import { useCart } from '@/context/cart-context';
 import LoadingPage from '@/components/loading';
+import { type IProduct } from '@/models';
 
 // Animation variants
 const fadeIn = {
@@ -69,10 +70,17 @@ const formatText = (text: string) => {
     .join(' ');
 };
 
+interface Props {
+  params: {
+    slug: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
 export default function ContactsProductPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
 
   const [product, setProduct] = useState<ProductFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -564,7 +572,10 @@ export default function ContactsProductPage() {
                       whileTap={{ scale: 0.98 }}
                       className="w-full"
                     >
-                      <AddToCartButton product={product} selectedColor={selectedColor} />
+                      <AddToCartButton 
+                        product={product as unknown as IProduct}
+                        selectedColor={selectedColor} 
+                      />
                     </motion.div>
                   )}
                 </div>
