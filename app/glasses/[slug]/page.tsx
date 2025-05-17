@@ -39,6 +39,7 @@ import {
 import type { ProductFormValues } from '@/lib/api/validation';
 import { useCart } from '@/context/cart-context';
 import LoadingPage from '@/components/loading';
+import { type IProduct } from '@/models';
 
 // Animation variants
 const fadeIn = {
@@ -566,7 +567,10 @@ export default function GlassesProductPage() {
                       whileTap={{ scale: 0.98 }}
                       className="w-full"
                     >
-                      <AddToCartButton product={product} selectedColor={selectedColor} />
+                      <AddToCartButton 
+                        product={product as unknown as IProduct}
+                        selectedColor={selectedColor} 
+                      />
                     </motion.div>
                   )}
                 </div>

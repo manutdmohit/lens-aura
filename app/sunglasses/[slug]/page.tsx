@@ -43,6 +43,7 @@ import { Metadata } from 'next';
 import { Span } from 'next/dist/trace';
 import LoadingPage from '@/components/loading';
 import { useCart } from '@/context/cart-context';
+import { type IProduct } from '@/models';
 
 // Animation variants
 const fadeIn = {
@@ -76,7 +77,7 @@ const formatText = (text: string) => {
 export default function SunGlassesProductPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
 
   const [product, setProduct] = useState<ProductFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -572,7 +573,10 @@ export default function SunGlassesProductPage() {
                       whileTap={{ scale: 0.98 }}
                       className="w-full"
                     >
-                      <AddToCartButton product={product} selectedColor={selectedColor} />
+                      <AddToCartButton 
+                        product={product as unknown as IProduct}
+                        selectedColor={selectedColor} 
+                      />
                     </motion.div>
                   )}
                 </div>
