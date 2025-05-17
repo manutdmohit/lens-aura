@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase} from '@/lib/api/db';
+import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
 import { v2 as cloudinary } from 'cloudinary';
+import mongoose from 'mongoose';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -29,23 +30,39 @@ export async function GET(
     return NextResponse.json({ product });
   } catch (error: any) {
     return NextResponse.json(
-      { error: `${error.message || 'Failed to fetch product'}` },
+      { error: error.message || 'Failed to fetch product' },
       { status: 500 }
     );
+  } finally {
+    await disconnectFromDatabase();
   }
 }
 
-export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    const { id } = await ctx.params;
-    const body = await req.json();
+
+    const { id } = params;
+    
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: 'Invalid product ID format' },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
     await connectToDatabase();
 
     let { imageUrl, ...rest } = body;
+    
     // If imageUrl is base64, upload to Cloudinary
     if (imageUrl && imageUrl.startsWith('data:image')) {
       const uploadRes = await cloudinary.uploader.upload(imageUrl, {
@@ -55,10 +72,14 @@ export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
     }
 
     // Find And Update The Product
-    const product = await Product.findByIdAndUpdate(id, { ...rest, imageUrl }, {
-      new: true,
-      runValidators: true,
-    });
+    const product = await Product.findByIdAndUpdate(
+      id,
+      { ...rest, imageUrl },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -73,112 +94,51 @@ export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { error: `${error.message || 'Failed to fetch product'}` },
+      { error: error.message || 'Failed to update product' },
       { status: 500 }
     );
+  } finally {
+    await disconnectFromDatabase();
   }
 }
-// export async function PUT(
-//   req: NextRequest,
-//   { params }: { params: { id: string } }
-// ) {
-//   try {
-//     // const session = await authenticateAdmin(req);
 
-//     // if (session instanceof NextResponse) {
-//     //   return session; // This is an error response
-//     // }
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
 
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-//       return NextResponse.json(
-//         { error: 'Invalid product ID format' },
-//         { status: 400 }
-//       );
-//     }
+    const { id } = params;
 
-//     const body = await req.json();
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: 'Invalid product ID format' },
+        { status: 400 }
+      );
+    }
 
-//     // Validate based on product type
-//     let validationResult;
+    await connectToDatabase();
 
-//     switch (body.productType) {
-//       case 'Glasses':
-//         validationResult = validateRequest(glassesSchema, body);
-//         break;
-//       case 'Sunglasses':
-//         validationResult = validateRequest(sunglassesSchema, body);
-//         break;
-//       case 'ContactLenses':
-//         validationResult = validateRequest(contactLensesSchema, body);
-//         break;
-//       default:
-//         validationResult = validateRequest(baseProductSchema, body);
-//     }
+    const product = await Product.findByIdAndDelete(id);
 
-//     const { data, error } = validationResult;
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
 
-//     if (error) {
-//       return NextResponse.json({ error }, { status: 400 });
-//     }
-
-//     await connectToDatabase();
-
-//     // Find and update the product
-//     const product = await Product.findByIdAndUpdate(
-//       params.id,
-//       { $set: data },
-//       { new: true, runValidators: true }
-//     );
-
-//     if (!product) {
-//       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-//     }
-
-//     return NextResponse.json({
-//       message: 'Product updated successfully',
-//       product,
-//     });
-//   } catch (error) {
-//     return handleError(error);
-//   } finally {
-//     await disconnectFromDatabase();
-//   }
-// }
-
-// export async function DELETE(
-//   req: NextRequest,
-//   { params }: { params: { id: string } }
-// ) {
-//   try {
-//     const session = await authenticateAdmin(req);
-
-//     if (session instanceof NextResponse) {
-//       return session; // This is an error response
-//     }
-
-//     // Validate ID format
-//     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-//       return NextResponse.json(
-//         { error: 'Invalid product ID format' },
-//         { status: 400 }
-//       );
-//     }
-
-//     await connectToDatabase();
-
-//     const product = await Product.findByIdAndDelete(params.id);
-
-//     if (!product) {
-//       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-//     }
-
-//     return NextResponse.json({
-//       message: 'Product deleted successfully',
-//     });
-//   } catch (error) {
-//     return handleError(error);
-//   } finally {
-//     await disconnectFromDatabase();
-//   }
-// }
+    return NextResponse.json({
+      message: 'Product deleted successfully',
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete product' },
+      { status: 500 }
+    );
+  } finally {
+    await disconnectFromDatabase();
+  }
+}
