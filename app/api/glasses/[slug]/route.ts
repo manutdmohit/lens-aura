@@ -3,12 +3,11 @@ import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(
-  request: NextRequest,
-   ctx : { params: { slug: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
-    //await the params first
-    const { slug } =  await ctx.params;
+    const { slug } = context.params;
 
     if (!slug) {
       return NextResponse.json(

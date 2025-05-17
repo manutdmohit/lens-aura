@@ -13,11 +13,11 @@ cloudinary.config({
 });
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     await connectToDatabase();
 
@@ -39,8 +39,8 @@ export async function GET(
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +48,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = context.params;
     
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -58,7 +58,7 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
+    const body = await req.json();
     await connectToDatabase();
 
     let { imageUrl, ...rest } = body;
@@ -103,8 +103,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -112,7 +112,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {

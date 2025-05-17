@@ -3,7 +3,7 @@ import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(
-  request: NextRequest,
+  req: NextRequest,
   context: any
 ) {
   try {
