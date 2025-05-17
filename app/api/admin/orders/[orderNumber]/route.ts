@@ -94,7 +94,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  context: any
 ) {
   try {
     // Check authentication
@@ -121,7 +121,7 @@ export async function PATCH(
 
     // Update order
     const order = await Order.findOneAndUpdate(
-      { orderNumber: params.orderNumber },
+      { orderNumber: context.params.orderNumber },
       { 
         $set: { 
           deliveryStatus,
