@@ -6,7 +6,7 @@ import { authOptions } from '@/utils/authOptions';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  context: any
 ) {
   try {
     // Check authentication
@@ -22,7 +22,7 @@ export async function GET(
     await connectToDatabase();
 
     // Find order by orderNumber
-    const order = await Order.findOne({ orderNumber: params.orderNumber })
+    const order = await Order.findOne({ orderNumber: context.params.orderNumber })
       .lean() as unknown as IOrder;
 
     if (!order) {
