@@ -33,6 +33,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { mockNotifications } from '@/lib/admin-data';
 import Image from 'next/image';
+import type { UserRole } from '@/types/admin';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -103,7 +104,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   const filteredNavItems = navItems.filter((item) =>
-    hasPermission(user.role, item.permission.resource, item.permission.action)
+    hasPermission(user.role as UserRole, item.permission.resource, item.permission.action)
   );
 
   return (
