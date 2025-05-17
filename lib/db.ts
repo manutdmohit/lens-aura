@@ -1,13 +1,13 @@
-import { connectToDatabase } from '@/lib/api/db';
 import type { ProductFormValues } from './api/validation';
-import { Product } from '@/models';
 
 export async function getProducts() {
   try {
-    await connectToDatabase();
-    const products = await Product.find({});
-    
-    return products.map((product) => ({
+    const response = await fetch('/api/admin/products');
+    if (!response.ok) {
+      throw new Error('Failed to fetch products');
+    }
+    const data = await response.json();
+    return data.products.map((product: any) => ({
       id: product._id.toString(),
       name: product.name,
       productType: product.productType,

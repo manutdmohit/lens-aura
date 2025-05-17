@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
     <ProtectedRoute resource="analytics" action="read">
       <AdminLayout>
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center]">
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <Tabs defaultValue={timeRange} onValueChange={setTimeRange} className="w-[300px]">
               <TabsList className="grid w-full grid-cols-4">

@@ -36,16 +36,4 @@ export async function connectToDatabase() {
   }
 }
 
-export async function disconnectFromDatabase() {
-  if (mongoose.connection.readyState === 0) {
-    return;
-  }
 
-  try {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
-  } catch (error) {
-    console.error('Error disconnecting from MongoDB:', error);
-    throw error;
-  }
-}

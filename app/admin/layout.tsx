@@ -35,7 +35,7 @@ export default function AdminLayout({
     <SessionProvider refetchInterval={5} refetchOnWindowFocus={true}>
       <AdminAuthProvider>
         {isClient ? (
-          <div className={noHeaderPadding ? '' : 'pt-header'}>{children}</div>
+          <div className={noHeaderPadding ? '' : 'pt-header -mt-[112px]'}>{children}</div>
         ) : (
           <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />

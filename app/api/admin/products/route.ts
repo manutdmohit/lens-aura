@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions'; // adjust path if different
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 // import {
 //   authenticateAdmin,
 //   validateRequest,
@@ -17,7 +17,7 @@ import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 // import Glasses from '@/lib/mongoose/models/glasses.model';
 // import Sunglasses from '@/lib/mongoose/models/sunglasses.model';
 // import ContactLenses from '@/lib/mongoose/models/contact-lenses-model';
-import { Product, Glasses, Sunglasses, ContactLenses } from '@/models';
+import { Product } from '@/models';
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({
@@ -88,9 +88,7 @@ export async function GET(req: NextRequest) {
       { message: error.message || 'Failed to fetch products' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function POST(req: NextRequest) {
@@ -133,7 +131,5 @@ export async function POST(req: NextRequest) {
       { message: error.message || 'Failed to create product' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }

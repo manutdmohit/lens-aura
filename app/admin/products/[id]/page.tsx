@@ -95,15 +95,11 @@ export default function ProductDetailPage() {
       setError(null);
 
       try {
-        // const token = localStorage.getItem('adminToken');
-        // if (!token) {
-        //   throw new Error('Authentication required');
-        // }
-
-        const response = await fetch(`/api/products/${productId}`);
+        const response = await fetch(`/api/admin/products/${productId}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch product');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch product');
         }
 
         const data = await response.json();
@@ -179,22 +175,18 @@ export default function ProductDetailPage() {
         ...(data.productType === 'contacts' && { colors }),
       };
 
-      // Determine the API endpoint based on product type
-      let endpoint = `/api/products/${productId}`;
-
       // Send the request
-      const response = await fetch(endpoint, {
+      const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          // Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(productData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error('Failed to update product');
+        throw new Error(errorData.error || 'Failed to update product');
       }
 
       const updatedProduct = await response.json();
@@ -211,8 +203,7 @@ export default function ProductDetailPage() {
       console.error('Error updating product:', error);
       setError(error.message || 'Failed to update product. Please try again.');
       toast('Error', {
-        description:
-          error.message || 'Failed to update product. Please try again.',
+        description: error.message || 'Failed to update product. Please try again.',
         style: {
           background: 'rgb(239, 68, 68)',
           color: 'white',
@@ -245,14 +236,17 @@ export default function ProductDetailPage() {
       }
 
       // Send the request
-      const response = await fetch(`/api/products/${productId}`, {
+      const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ status: productStatus }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete product');
+        throw new Error(errorData.error || 'Failed to update product status');
       }
 
       toast('Product Status Changed', {

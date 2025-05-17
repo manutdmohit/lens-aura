@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
@@ -38,10 +38,8 @@ export async function GET(req: NextRequest) {
     }
 
     if (status !== 'all') {
-      query.paymentStatus = status;
+      query.deliveryStatus = status;
     }
-
-    console.log('Query:', JSON.stringify(query, null, 2));
 
     // Execute query with pagination
     const orders = await Order.find(query)
@@ -50,36 +48,25 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean();
 
-    console.log('Found orders:', orders.length);
-
     // Get total count for pagination
     const total = await Order.countDocuments(query);
 
-    console.log('Total orders:', total);
-
     // Format orders data
     const formattedOrders = orders.map(order => {
-      try {
-        const shippingAddress = order.shippingAddress || {};
-        return {
-          id: order.orderNumber,
-          customer: shippingAddress.firstName && shippingAddress.lastName 
-            ? `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim() 
-            : 'Guest Customer',
-          email: order.customerEmail || 'No email',
-          date: order.createdAt || new Date(),
-          status: order.paymentStatus || 'pending',
-          payment: order.paymentMethod || 'Not specified',
-          total: typeof order.totalAmount === 'number' ? order.totalAmount : 0,
-          deliveryStatus: order.deliveryStatus || 'ORDER_PLACED'
-        };
-      } catch (error) {
-        console.error('Error formatting order:', error, order);
-        return null;
-      }
-    }).filter(Boolean);
-
-    console.log('Formatted orders:', formattedOrders.length);
+      const shippingAddress = order.shippingAddress || {};
+      return {
+        id: order.orderNumber,
+        customer: shippingAddress.firstName && shippingAddress.lastName 
+          ? `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim() 
+          : 'Guest Customer',
+        email: order.customerEmail || 'No email',
+        date: order.createdAt || new Date(),
+        status: order.paymentStatus || 'pending',
+        payment: order.paymentMethod || 'Not specified',
+        total: typeof order.totalAmount === 'number' ? order.totalAmount : 0,
+        deliveryStatus: order.deliveryStatus || 'ORDER_PLACED'
+      };
+    });
 
     return NextResponse.json({
       orders: formattedOrders,
@@ -96,7 +83,5 @@ export async function GET(req: NextRequest) {
       { error: error.message || 'Failed to fetch orders' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 } 
