@@ -3,6 +3,15 @@ import { getToken } from 'next-auth/jwt';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 
+// Define JWT payload type
+interface JWTPayload {
+  role: 'admin' | 'superadmin' | 'user';
+  email: string;
+  sub: string;
+  iat: number;
+  exp: number;
+}
+
 // Authentication middleware
 export async function authenticate(req: NextRequest) {
   const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -27,7 +36,7 @@ export async function authenticateAdmin(req: NextRequest) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!);
+    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!) as JWTPayload;
 
     if (decoded.role !== 'admin' && decoded.role !== 'superadmin') {
       return NextResponse.json(
@@ -36,7 +45,7 @@ export async function authenticateAdmin(req: NextRequest) {
       );
     }
 
-    return decoded; // or return { user: decoded }
+    return decoded;
   } catch (err) {
     console.error('JWT verification failed:', err);
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
