@@ -23,7 +23,7 @@ const updateOrderStatusSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const session = await authenticate(req);
@@ -33,7 +33,7 @@ export async function GET(
     }
 
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
       return NextResponse.json(
         { error: 'Invalid order ID format' },
         { status: 400 }
@@ -42,7 +42,7 @@ export async function GET(
 
     await connectToDatabase();
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(context.params.id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -68,7 +68,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const session = await authenticateAdmin(req);
@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
       return NextResponse.json(
         { error: 'Invalid order ID format' },
         { status: 400 }
@@ -101,7 +101,7 @@ export async function PUT(
 
     await connectToDatabase();
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(context.params.id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
