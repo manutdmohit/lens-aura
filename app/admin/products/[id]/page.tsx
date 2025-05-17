@@ -52,6 +52,7 @@ import {
 } from '@/lib/api/validation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -453,10 +454,38 @@ export default function ProductDetailPage() {
                         Product Image <span className="text-red-500">*</span>
                       </Label>
                       <input type="hidden" {...register('imageUrl')} />
-                      <ImageUpload
-                        currentImage={watch('imageUrl')}
-                        onImageUploaded={handleImageUpload}
-                      />
+                      {product?.imageUrl && (
+                        <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden mb-4">
+                          <Image
+                            src={watch('imageUrl') || product.imageUrl}
+                            alt={product.name}
+                            className="object-cover w-full h-full"
+                            width={500}
+                            height={500}
+                          />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute top-2 left-2 z-10 opacity-0 w-full h-full cursor-pointer"
+                            title="Update product image"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  if (event.target?.result) {
+                                    setValue('imageUrl', event.target.result as string, { shouldValidate: true });
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <div className="absolute top-2 left-2 bg-white/80 px-2 py-1 rounded text-xs z-20">
+                            Click to update image
+                          </div>
+                        </div>
+                      )}
                       {errors.imageUrl && (
                         <p className="text-red-500 text-sm">
                           {errors.imageUrl.message}

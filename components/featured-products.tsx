@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import StaggeredList from "@/components/staggered-list"
+import Image from "next/image"
 
 // Define the product type based on API response
 interface Product {
@@ -126,12 +127,12 @@ export default function FeaturedProducts() {
         >
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">
-              <motion.img
+              <Image
                 src={product.imageUrl || "/placeholder.svg"}
                 alt={product.name}
                 className="w-full h-full object-cover"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.5 }}
+                width={500}
+                height={500}
               />
             </div>
             <CardContent className="p-4">

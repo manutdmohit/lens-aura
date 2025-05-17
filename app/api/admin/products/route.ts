@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions'; // adjust path if different
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 // import {
 //   authenticateAdmin,
 //   validateRequest,
@@ -18,6 +18,13 @@ import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 // import Sunglasses from '@/lib/mongoose/models/sunglasses.model';
 // import ContactLenses from '@/lib/mongoose/models/contact-lenses-model';
 import { Product, Glasses, Sunglasses, ContactLenses } from '@/models';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -78,9 +85,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     // return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function POST(req: NextRequest) {
@@ -97,41 +102,20 @@ export async function POST(req: NextRequest) {
     // }
 
     const body = await req.json();
-
-    console.log({ body });
-
-    // Validate based on product type
-    // let validationResult;
-    // let ProductModel;
-
-    // switch (body.productType) {
-    //   case 'Glasses':
-    //     validationResult = validateRequest(glassesSchema, body);
-    //     ProductModel = Glasses;
-    //     break;
-    //   case 'Sunglasses':
-    //     validationResult = validateRequest(sunglassesSchema, body);
-    //     ProductModel = Sunglasses;
-    //     break;
-    //   case 'ContactLenses':
-    //     validationResult = validateRequest(contactLensesSchema, body);
-    //     ProductModel = ContactLenses;
-    //     break;
-    //   default:
-    //     validationResult = validateRequest(baseProductSchema, body);
-    //     ProductModel = Product;
-    // }
-
-    // const { data, error } = validationResult;
-
-    // if (error) {
-    //   return NextResponse.json({ error }, { status: 400 });
-    // }
+    let { imageUrl, ...rest } = body;
 
     await connectToDatabase();
 
-    // Create the product
-    const product = new Product(body);
+    // If imageUrl is base64, upload to Cloudinary
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+        folder: 'products',
+      });
+      imageUrl = uploadRes.secure_url;
+    }
+
+    // Save product to DB
+    const product = new Product({ ...rest, imageUrl });
     await product.save();
 
     return NextResponse.json(
@@ -146,7 +130,5 @@ export async function POST(req: NextRequest) {
         status: 500,
       }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 }

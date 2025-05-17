@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import { handleError } from '@/lib/api/middleware';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
@@ -44,9 +44,7 @@ export async function GET(req: NextRequest) {
       { success: false, error: 'Failed to fetch about us data' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function POST(req: NextRequest) {
@@ -94,9 +92,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: aboutUs });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function PUT(req: NextRequest) {
@@ -187,7 +183,5 @@ export async function PUT(req: NextRequest) {
       { error: 'An unexpected error occurred' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 } 

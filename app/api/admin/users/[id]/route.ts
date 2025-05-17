@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import { authenticateAdmin, handleError } from '@/lib/api/middleware';
 import User from '@/lib/mongoose/models/user.model';
 import Order from '@/lib/mongoose/models/order.model';
@@ -53,9 +53,7 @@ export async function GET(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+    } 
 }
 
 export async function PUT(
@@ -134,12 +132,10 @@ export async function PUT(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+    } 
 }
 
-export async function DELETE(
+export async function DELETE(   
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -191,7 +187,5 @@ export async function DELETE(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+        } 
 }

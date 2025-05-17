@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import {
   authenticate,
   validateRequest,
@@ -46,8 +46,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }
 
@@ -160,7 +158,5 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }

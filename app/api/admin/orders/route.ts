@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
@@ -99,8 +99,5 @@ export async function GET(req: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    // Disconnect from database
-    await disconnectFromDatabase();
   }
 } 

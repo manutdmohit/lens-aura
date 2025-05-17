@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import {
   authenticate,
   authenticateAdmin,
@@ -63,9 +63,7 @@ export async function GET(
     return NextResponse.json({ order });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function PUT(
@@ -125,7 +123,5 @@ export async function PUT(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }

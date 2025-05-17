@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from 'next-auth';
 import type { User as NextAuthUser } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase,  } from '@/lib/api/db';
 import User from '@/models/User';
 
 declare module 'next-auth' {
@@ -72,9 +72,7 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error('Authentication error:', error);
           return null;
-        } finally {
-          await disconnectFromDatabase();
-        }
+        } 
       },
     }),
   ],

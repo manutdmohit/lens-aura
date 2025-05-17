@@ -31,6 +31,7 @@ import { productSchema, type ProductFormValues } from '@/lib/api/validation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
+
 export default function AddProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [colors, setColors] = useState<string[]>([]);
@@ -117,23 +118,28 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
-      let productData;
-      // Handle colors based on product type
-      productData = {
+      // Prepare product data
+      const productData = {
         ...data,
-        colors: colors, // Keep the colors array for all types
-        ...(data.productType !== 'contacts' && { frameColor: colors }), // For glasses and sunglasses
-        ...(data.productType === 'contacts' && { 
-          lensColor: colors[0] || '', // Set lensColor for contacts
-          colors: colors // Ensure colors array is set for contacts
-        }),
+        colors,
         category: data.productType.toLowerCase(),
+        status: 'active',
       };
+
+      // Handle colors based on product type
+      productData.colors = colors; // Keep the colors array for all types
+      if (data.productType !== 'contacts') {
+        productData.frameColor = colors; // For glasses and sunglasses
+      }
+      if (data.productType === 'contacts') {
+        productData.lensColor = colors[0] || ''; // Set lensColor for contacts
+        productData.colors = colors; // Ensure colors array is set for contacts
+      }
 
       // Determine the API endpoint based on product type
       let endpoint = '/api/admin/products';
 
-      // Send the request
+      // Send the request (imageUrl may be base64 string)
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -148,8 +154,8 @@ export default function AddProductPage() {
       }
 
       toast({
-        title: 'Product created',
-        description: 'The product has been created successfully.',
+        title: 'Success',
+        description: 'Product created successfully',
       });
 
       // Redirect to products page
@@ -158,8 +164,7 @@ export default function AddProductPage() {
       console.error('Error creating product:', error);
       toast({
         title: 'Error',
-        description:
-          error.message || 'Failed to create product. Please try again.',
+        description: error.message || 'Failed to create product. Please try again.',
         variant: 'destructive',
       });
     } finally {

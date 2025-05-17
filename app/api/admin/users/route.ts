@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions'; // \
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import { handleError } from '@/lib/api/middleware';
 import User from '@/models/User';
 
@@ -52,7 +52,5 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }

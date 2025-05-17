@@ -33,13 +33,14 @@ export const addressSchema = z.object({
 // Product validation schemas
 export const baseProductSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
-  description: z.string().min(1, 'Product description is required'),
-  price: z.number().min(0, 'Price cannot be negative'),
-  imageUrl: z.string().url('Image URL must be a valid URL'),
-  stockQuantity: z.number().int().min(0, 'Stock quantity cannot be negative'),
+  description: z.string().min(1, 'Description is required'),
+  price: z.number().min(0, 'Price must be greater than or equal to 0'),
+  imageUrl: z.string().optional(),
+  stockQuantity: z.number().min(0, 'Stock quantity must be greater than or equal to 0'),
   category: z.enum(['glasses', 'sunglasses', 'contacts']),
   colors: z.array(z.string()).optional(),
-  productType: z.enum(['Glasses', 'Sunglasses', 'ContactLenses', 'Accessory']),
+  productType: z.enum(['glasses', 'sunglasses', 'contacts', 'accessory']),
+  status: z.enum(['active', 'inactive']).default('active'),
 });
 
 export const glassesSchema = baseProductSchema.extend({

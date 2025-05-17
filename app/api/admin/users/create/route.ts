@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import { handleError } from '@/lib/api/middleware';
 import User from '@/models/User';
 import type { IUser } from '@/models/index';
@@ -70,7 +70,5 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
