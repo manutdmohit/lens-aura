@@ -5,6 +5,8 @@ import User from '@/lib/mongoose/models/user.model';
 import Order from '@/lib/mongoose/models/order.model';
 import mongoose from 'mongoose';
 import { z } from 'zod';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // Update user schema
 const updateUserSchema = z.object({
@@ -16,34 +18,35 @@ const updateUserSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
-    const session = await authenticateAdmin(req);
-
-    if (session instanceof NextResponse) {
-      return session; // This is an error response
-    }
-
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Invalid user ID format' },
-        { status: 400 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
+    // Connect to database
     await connectToDatabase();
 
-    // Get user
-    const user = await User.findById(params.id).select('-password');
+    // Find user by ID
+    const user = await User.findById(context.params.id)
+      .select('-password')
+      .lean() as unknown as IUser;
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
     // Get user's orders
-    const orders = await Order.find({ user: params.id })
+    const orders = await Order.find({ user: context.params.id })
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -52,8 +55,15 @@ export async function GET(
       orders,
     });
   } catch (error) {
-    return handleError(error);
-    } 
+    console.error('Error fetching user:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch user',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  } 
 }
 
 export async function PUT(
