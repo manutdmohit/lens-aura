@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { CheckCircle2 } from "lucide-react"
 
 // Define the form schema with Zod
@@ -27,7 +27,6 @@ type FormValues = z.infer<typeof formSchema>
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const { toast } = useToast()
 
   const {
     register,
@@ -51,13 +50,19 @@ export default function ContactForm() {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-      console.log("Form submitted:", data)
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-      toast({
-        title: "Message sent",
+      toast.success("Message sent", {
         description: "We've received your message and will get back to you soon.",
       })
 
@@ -70,10 +75,8 @@ export default function ContactForm() {
       }, 5000)
     } catch (error) {
       console.error("Error submitting form:", error)
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "There was a problem sending your message. Please try again.",
-        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)
