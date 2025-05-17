@@ -1,9 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
-
+import { connectToDatabase} from '@/lib/api/db';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
@@ -24,32 +30,30 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       { error: `${error.message || 'Failed to fetch product'}` },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
   try {
-    // const product = await Product.findById(id);
-
-    // if (!product) {
-    //   return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    // }
-
     const session = await getServerSession(authOptions);
-
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
     const { id } = await ctx.params;
     const body = await req.json();
-
     await connectToDatabase();
 
+    let { imageUrl, ...rest } = body;
+    // If imageUrl is base64, upload to Cloudinary
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+        folder: 'products',
+      });
+      imageUrl = uploadRes.secure_url;
+    }
+
     // Find And Update The Product
-    const product = await Product.findByIdAndUpdate(id, body, {
+    const product = await Product.findByIdAndUpdate(id, { ...rest, imageUrl }, {
       new: true,
       runValidators: true,
     });
@@ -70,8 +74,6 @@ export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
       { error: `${error.message || 'Failed to fetch product'}` },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 }
 // export async function PUT(

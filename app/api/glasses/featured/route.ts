@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
@@ -25,22 +25,11 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error in featured glasses API:', error);
     
-    // Make sure the connection is closed even if there's an error
-    try {
-      await disconnectFromDatabase();
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError);
-    }
+  
     
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Unknown error occurred',
       success: false 
     }, { status: 500 });
-  } finally {
-    try {
-      await disconnectFromDatabase();
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError);
-    }
-  }
+  } 
 }

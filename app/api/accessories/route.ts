@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import { Product } from '@/models';
 
 export async function GET(request: Request) {
@@ -52,7 +52,5 @@ export async function GET(request: Request) {
       { error: 'Failed to fetch accessories' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 } 

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     const hasPrevPage = page > 1;
 
     // Disconnect from database
-    await disconnectFromDatabase();
+    // await disconnectFromDatabase();
 
     return NextResponse.json({
       products,
@@ -58,13 +58,6 @@ export async function GET(req: NextRequest) {
     }, { status: 200 });
   } catch (error) {
     console.error('Error fetching glasses products:', error);
-    
-    // Make sure to disconnect even on error
-    try {
-      await disconnectFromDatabase();
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError);
-    }
     
     return NextResponse.json({ 
       error: 'Failed to fetch glasses products' 

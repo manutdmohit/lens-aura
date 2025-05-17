@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase, } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    try {
+    
       // Get price ranges for glasses
       const glassesRange = await getPriceRange('glasses');
       
@@ -23,10 +23,7 @@ export async function GET(req: NextRequest) {
         sunglasses: sunglassesRange,
         accessories: accessoriesRange
       }, { status: 200 });
-    } finally {
-      // Ensure we always disconnect from the database
-      await disconnectFromDatabase();
-    }
+    
   } catch (error) {
     console.error('Error fetching price ranges:', error);
     return NextResponse.json({
