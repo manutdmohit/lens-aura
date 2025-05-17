@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const session = await authenticate(req);
@@ -21,7 +21,7 @@ export async function PUT(
     }
 
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
       return NextResponse.json(
         { error: 'Invalid review ID format' },
         { status: 400 }
@@ -38,7 +38,7 @@ export async function PUT(
     await connectToDatabase();
 
     // Get review
-    const review = await Review.findById(params.id);
+    const review = await Review.findById(context.params.id);
 
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
