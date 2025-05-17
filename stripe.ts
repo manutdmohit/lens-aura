@@ -67,14 +67,11 @@ export async function updateOrderPaymentStatus(sessionId: string) {
       
       // Create the shipping address object
       const shippingAddress = {
-        firstName: customerDetails.name?.split(' ')[0] || '',
-        lastName: customerDetails.name?.split(' ').slice(1).join(' ') || '',
-        address: customerDetails.address?.line1 || '',
+        line1: customerDetails.address?.line1 || '',
+        line2: customerDetails.address?.line2 || '',
         city: customerDetails.address?.city || '',
         state: customerDetails.address?.state || '',
         postalCode: customerDetails.address?.postal_code || '',
-        country: customerDetails.address?.country || '',
-        phone: customerDetails.phone || '',
       };
       
       // Update the order
