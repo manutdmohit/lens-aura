@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/api/db';
+import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
@@ -90,14 +90,13 @@ export async function GET(req: NextRequest) {
         pages: Math.ceil(total / limit)
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching orders:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch orders',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: error.message || 'Failed to fetch orders' },
       { status: 500 }
     );
+  } finally {
+    await disconnectFromDatabase();
   }
 } 

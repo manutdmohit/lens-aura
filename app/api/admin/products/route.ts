@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions'; // adjust path if different
-import { connectToDatabase } from '@/lib/api/db';
+import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
 // import {
 //   authenticateAdmin,
 //   validateRequest,
@@ -83,9 +83,14 @@ export async function GET(req: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
-    // return handleError(error);
-  } 
+  } catch (error: any) {
+    return NextResponse.json(
+      { message: error.message || 'Failed to fetch products' },
+      { status: 500 }
+    );
+  } finally {
+    await disconnectFromDatabase();
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -125,10 +130,10 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     // return handleError(error);
     return NextResponse.json(
-      { message: `${error.message} || Failed to create product` },
-      {
-        status: 500,
-      }
+      { message: error.message || 'Failed to create product' },
+      { status: 500 }
     );
+  } finally {
+    await disconnectFromDatabase();
   }
 }

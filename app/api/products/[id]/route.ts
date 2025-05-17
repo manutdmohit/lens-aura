@@ -11,10 +11,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Await the params first
-    const { id } = await ctx.params;
+    const { id } = params;
 
     await connectToDatabase();
 
@@ -30,7 +32,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       { error: `${error.message || 'Failed to fetch product'}` },
       { status: 500 }
     );
-  } 
+  }
 }
 
 export async function PUT(req: NextRequest, ctx: { params: { id: string } }) {
