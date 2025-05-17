@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import ContactLenses from '@/models/ContactLenses';
 
 /**
@@ -44,7 +44,5 @@ export async function GET(request: NextRequest) {
       success: false,
       message: error.message || 'Failed to fetch featured contact lenses'
     }, { status: 500 });
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 } 

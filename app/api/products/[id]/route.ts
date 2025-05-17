@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
@@ -33,8 +33,6 @@ export async function GET(
       { error: error.message || 'Failed to fetch product' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 }
 
@@ -97,8 +95,6 @@ export async function PUT(
       { error: error.message || 'Failed to update product' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 }
 
@@ -138,7 +134,5 @@ export async function DELETE(
       { error: error.message || 'Failed to delete product' },
       { status: 500 }
     );
-  } finally {
-    await disconnectFromDatabase();
   }
 }

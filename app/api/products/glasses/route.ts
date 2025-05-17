@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 import { productSchema } from '@/lib/api/validation';
 import { getServerSession } from 'next-auth';
@@ -10,8 +10,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    try {
-      // Parse query parameters
+    // Parse query parameters
       const url = new URL(req.url);
       const limit = Number.parseInt(url.searchParams.get('limit') || '10');
       const page = Number.parseInt(url.searchParams.get('page') || '1');
@@ -40,10 +39,7 @@ export async function GET(req: NextRequest) {
           pages: Math.ceil(total / limit),
         },
       });
-    } finally {
-      // Ensure we always disconnect from the database
-      await disconnectFromDatabase();
-    }
+    
   } catch (error) {
     console.error('Error fetching glasses:', error);
     return NextResponse.json(
@@ -68,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Connect to database
     await connectToDatabase();
 
-    try {
+     
       // Parse request body
       const body = await req.json();
 
@@ -105,11 +101,8 @@ export async function POST(req: NextRequest) {
         },
         { status: 201 }
       );
-    } finally {
-      // Ensure we always disconnect from the database
-      await disconnectFromDatabase();
-    }
-  } catch (error) {
+    } 
+  catch (error) {
     console.error('Error creating glasses product:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create glasses product' },

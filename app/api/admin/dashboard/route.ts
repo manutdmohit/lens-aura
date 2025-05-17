@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import { authenticateAdmin, handleError } from '@/lib/api/middleware';
 import User from '@/lib/mongoose/models/user.model';
 import Product from '@/lib/mongoose/models/product.model';
@@ -74,7 +74,5 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import { validateRequest, handleError } from '@/lib/api/middleware';
 import { registerUserSchema } from '@/lib/api/validation';
 import User from '@/lib/mongoose/models/user.model';
@@ -52,7 +52,5 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }

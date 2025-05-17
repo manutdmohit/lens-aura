@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import {
   authenticate,
   validateRequest,
@@ -69,9 +69,7 @@ export async function PUT(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
 
 export async function DELETE(
@@ -123,7 +121,5 @@ export async function DELETE(
     });
   } catch (error) {
     return handleError(error);
-  } finally {
-    await disconnectFromDatabase();
   }
 }

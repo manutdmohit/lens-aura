@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, disconnectFromDatabase } from '@/lib/api/db';
+import { connectToDatabase} from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
@@ -53,7 +53,5 @@ export async function GET(req: NextRequest) {
     }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
-  } finally {
-    await disconnectFromDatabase();
-  }
+  } 
 }
