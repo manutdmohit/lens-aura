@@ -8,6 +8,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { useCart } from '@/context/cart-context';
 import CheckoutButton from '@/components/checkout-button';
+import Image from 'next/image';
 
 export default function CartPage() {
   const { items, itemCount, removeItem, updateQuantity, subtotal } = useCart();
@@ -99,10 +100,13 @@ export default function CartPage() {
                       className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
                     >
                       <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={item.product.imageUrl || '/placeholder.svg'}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
+                          width={100}
+                          height={100}
+                          priority    
                         />
                       </div>
                       <div className="flex-grow">

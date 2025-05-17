@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart, type CartItem } from '@/context/cart-context';
 import { useOnClickOutside } from '@/hooks/use-click-outside';
+import Image from 'next/image';
 
 export default function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -117,10 +118,13 @@ export default function CartDropdown() {
                       className="flex gap-4 py-2 border-b last:border-0"
                     >
                       <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={item.product.imageUrl || '/placeholder.svg'}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
+                          width={100}
+                          height={100}
+                          priority
                         />
                       </div>
                       <div className="flex-grow">

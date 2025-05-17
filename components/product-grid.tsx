@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import StaggeredList from '@/components/staggered-list';
+import Image from 'next/image';
 
 interface ProductGridProps {
   products: Product[];
@@ -17,13 +18,16 @@ export default function ProductGrid({ products }: ProductGridProps) {
         <Link key={product.id} href={`/${product.productType === 'accessory' ? 'accessories' : product.productType}/${product.slug}`}>
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
             <div className="aspect-square relative overflow-hidden">
-              <motion.img
-                src={product.imageUrl || '/placeholder.svg'}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.5 }}
-              />
+              <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.5 }}>
+                <Image
+                  src={product.imageUrl || '/placeholder.svg'}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  width={500}
+                  height={500}
+                  priority
+                />
+              </motion.div>
             </div>
             <CardContent className="p-4">
               <h3 className="font-medium text-lg">{product.name}</h3>
