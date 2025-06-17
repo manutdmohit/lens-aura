@@ -17,7 +17,6 @@ const metadata: Metadata = {
   title: 'Lens Aura | Premium Eyewear at Surprising Prices',
   description:
     'Shop prescription glasses, sunglasses and contact lenses. Book an eye test online.',
-  generator: 'v0.dev',
 };
 
 export default function RootLayout({
