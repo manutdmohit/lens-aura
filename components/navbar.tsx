@@ -574,7 +574,7 @@ export default function Navbar() {
               >
                 <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
                   <Image
-                    src="/images/lens-aura-left.jpg"
+                    src="/images/5f15c03f-d5f5-4e0c-884e-f7942fc6be2a.png"
                     alt="Lens Aura Logo"
                     width={200}
                     height={200}
@@ -591,7 +591,7 @@ export default function Navbar() {
                 <Link href="/" className="flex items-center">
                   <div className="flex-shrink-0">
                     <Image
-                      src="/images/lens-aura-left.jpg"
+                      src="/images/5f15c03f-d5f5-4e0c-884e-f7942fc6be2a.png"
                       alt="Lens Aura Logo"
                       width={120}
                       height={120}
@@ -603,7 +603,7 @@ export default function Navbar() {
               </div>
               <div className="w-2/4 flex justify-center">
                 <span className="text-lg font-extrabold text-[#592F25] font-['Playfair_Display']">
-                  Lens Aura
+                  {/* Lens Aura */}
                 </span>
               </div>
               <div className="w-1/4 flex justify-end items-center space-x-4">
