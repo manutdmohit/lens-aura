@@ -1,12 +1,20 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from 'react';
 import ProductGrid from '@/components/product-grid';
 import LoadingPage from '@/components/loading';
 import { Pagination } from '@/components/ui/pagination';
 
 export default function MensGlassesPage() {
-  const [products, setProducts] = useState<Array<{ id: string; name: string; imageUrl: string; price: number; slug?: string }>>([]);
+  const [products, setProducts] = useState<
+    Array<{
+      id: string;
+      name: string;
+      imageUrl: string;
+      price: number;
+      slug?: string;
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -18,13 +26,14 @@ export default function MensGlassesPage() {
   });
 
   const limitRef = useRef(12);
-  
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const response = await fetch(`/api/glasses?gender=men&page=${pagination.page}&limit=${limitRef.current}`);
-      
+      const response = await fetch(
+        `/api/glasses?gender=men&page=${pagination.page}&limit=${limitRef.current}`
+      );
+
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -45,12 +54,13 @@ export default function MensGlassesPage() {
   const hasProducts = Array.isArray(products) && products.length > 0;
 
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex flex-col min-h-screen -mt-[64px]">
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Men&apos;s Glasses</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Discover our curated collection of men&apos;s glasses, combining style and comfort for every occasion.
+            Discover our curated collection of men&apos;s glasses, combining
+            style and comfort for every occasion.
           </p>
         </div>
         {loading && <LoadingPage loading={loading} />}
@@ -66,10 +76,10 @@ export default function MensGlassesPage() {
             <ProductGrid
               products={products.map((p) => ({
                 ...p,
-                description: "",
+                description: '',
                 stockQuantity: 0,
-                productType: "glasses",
-                status: "active",
+                productType: 'glasses',
+                status: 'active',
                 colors: [],
                 inStock: true,
               }))}
@@ -89,4 +99,4 @@ export default function MensGlassesPage() {
       </div>
     </main>
   );
-} 
+}

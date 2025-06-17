@@ -10,6 +10,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { Toaster } from 'sonner';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,7 +33,13 @@ export default function RootLayout({
       <head>
         <script src="https://js.stripe.com/v3/" async></script>
       </head>
-      <body className={inter.className}>
+      <body
+        className={cn(
+          'min-h-screen bg-background font-sans antialiased',
+          inter.className
+        )}
+        suppressHydrationWarning
+      >
         <SessionProvider>
           <CartProvider>
             {!isAdminRoute && <Navbar />}
