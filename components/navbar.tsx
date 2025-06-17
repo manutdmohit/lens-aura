@@ -20,20 +20,17 @@ const glassesMenuData = {
     {
       title: 'New Arrivals',
       href: '/glasses/new-arrivals',
-      image:
-        '/images/glasses/new-arrivals.jpg',
+      image: '/images/glasses/new-arrivals.jpg',
     },
     {
       title: "Women's Glasses",
       href: '/glasses/womens',
-      image:
-        '/images/glasses/womens-glasses.jpg',
+      image: '/images/glasses/womens-glasses.jpg',
     },
     {
       title: "Men's Glasses",
       href: '/glasses/mens',
-      image:
-        '/images/glasses/mens-glasses.jpg',
+      image: '/images/glasses/mens-glasses.jpg',
     },
   ],
   additionalLinks: [
@@ -62,8 +59,7 @@ const sunglassesMenuData = {
     {
       title: "Men's Sunglasses",
       href: '/sunglasses/mens',
-      image:
-        '/images/sunglasses/mens-sunglass.jpg',
+      image: '/images/sunglasses/mens-sunglass.jpg',
     },
   ],
   additionalLinks: [
@@ -80,20 +76,17 @@ const contactsMenuData = {
     {
       title: 'Daily Disposable',
       href: '/contacts/daily',
-      image:
-        '/images/contact-lens/daily-disposable.jpg',
+      image: '/images/contact-lens/daily-disposable.jpg',
     },
     {
       title: 'Monthly Lenses',
       href: '/contacts/monthly',
-      image:
-        '/images/contact-lens/monthly-disposable.jpg',
+      image: '/images/contact-lens/monthly-disposable.jpg',
     },
     {
       title: 'Colored Contacts',
       href: '/contacts/colored',
-      image:
-        '/images/contact-lens/colorful-contacts.jpg',
+      image: '/images/contact-lens/colorful-contacts.jpg',
     },
   ],
   additionalLinks: [
@@ -219,16 +212,16 @@ export default function Navbar() {
     >
       <Link
         href={href}
-        className="flex items-center h-full px-4 text-base text-white hover:text-[#F2D399] relative group drop-shadow-sm"
+        className="flex items-center h-full px-4 text-base text-[#2C3E50] hover:text-[#E67E22] relative group"
       >
         <span>{title}</span>
         <ChevronDown
           className={`ml-1 h-4 w-4 transition-transform ${
-            activeMenu === menuId ? 'rotate-180 text-[#F2D399]' : ''
-          } group-hover:text-[#F2D399]`}
+            activeMenu === menuId ? 'rotate-180 text-[#E67E22]' : ''
+          } group-hover:text-[#E67E22]`}
           aria-hidden="true"
         />
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#F2D399] group-hover:w-full transition-all duration-300"></span>
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#E67E22] group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
@@ -238,10 +231,10 @@ export default function Navbar() {
     <div className="h-full flex items-center">
       <Link
         href={href}
-        className="flex items-center h-full px-4 text-base text-white hover:text-[#F2D399] relative group drop-shadow-sm"
+        className="flex items-center h-full px-4 text-base text-[#2C3E50] hover:text-[#E67E22] relative group"
       >
         {title}
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#F2D399] group-hover:w-full transition-all duration-300"></span>
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#E67E22] group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
@@ -278,11 +271,11 @@ export default function Navbar() {
     exit: {
       opacity: 0,
       height: 0,
-      transition: { 
+      transition: {
         duration: 0.3,
-        when: "afterChildren",
+        when: 'afterChildren',
         staggerChildren: 0.05,
-        staggerDirection: -1
+        staggerDirection: -1,
       },
     },
   };
@@ -309,9 +302,9 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      transition={{ 
+      transition={{
         duration: 0.3,
-        staggerChildren: 0.05
+        staggerChildren: 0.05,
       }}
       className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8"
     >
@@ -323,12 +316,15 @@ export default function Navbar() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.3, 
-                delay: index * 0.1 
+              transition={{
+                duration: 0.3,
+                delay: index * 0.1,
               }}
             >
-              <Link href={link.href} className="group transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg overflow-hidden">
+              <Link
+                href={link.href}
+                className="group transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg overflow-hidden"
+              >
                 <div className="aspect-[4/3] h-24 sm:h-28 lg:h-32 overflow-hidden rounded-lg bg-gray-100 relative">
                   {link.image ? (
                     <img
@@ -342,10 +338,14 @@ export default function Navbar() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                    <h3 className="text-base font-medium text-white p-2">{link.title}</h3>
+                    <h3 className="text-base font-medium text-white p-2">
+                      {link.title}
+                    </h3>
                   </div>
                 </div>
-                <h3 className="mt-2 text-base font-medium group-hover:text-indigo-600 transition-colors duration-200">{link.title}</h3>
+                <h3 className="mt-2 text-base font-medium group-hover:text-indigo-600 transition-colors duration-200">
+                  {link.title}
+                </h3>
               </Link>
             </motion.div>
           ))}
@@ -353,15 +353,17 @@ export default function Navbar() {
 
         {/* Additional Links */}
         <div className="space-y-4">
-          <h3 className="font-medium text-lg text-gray-900 mb-4">Quick Links</h3>
+          <h3 className="font-medium text-lg text-gray-900 mb-4">
+            Quick Links
+          </h3>
           {data.additionalLinks.map((link, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.3, 
-                delay: 0.2 + (index * 0.05) 
+              transition={{
+                duration: 0.3,
+                delay: 0.2 + index * 0.05,
               }}
             >
               <Link
@@ -408,14 +410,11 @@ export default function Navbar() {
             aria-expanded={isExpanded}
             aria-label={`Toggle ${menuData.title} submenu`}
           >
-            <motion.div 
+            <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDown
-                className="h-5 w-5"
-                aria-hidden="true"
-              />
+              <ChevronDown className="h-5 w-5" aria-hidden="true" />
             </motion.div>
           </button>
         </div>
@@ -424,21 +423,21 @@ export default function Navbar() {
           {isExpanded && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ 
-                opacity: 1, 
+              animate={{
+                opacity: 1,
                 height: 'auto',
                 transition: {
                   height: { duration: 0.4 },
-                  opacity: { duration: 0.3, delay: 0.1 }
-                }
+                  opacity: { duration: 0.3, delay: 0.1 },
+                },
               }}
-              exit={{ 
-                opacity: 0, 
+              exit={{
+                opacity: 0,
                 height: 0,
                 transition: {
                   height: { duration: 0.3 },
-                  opacity: { duration: 0.2 }
-                }
+                  opacity: { duration: 0.2 },
+                },
               }}
               className="bg-gray-800 overflow-hidden"
             >
@@ -454,11 +453,14 @@ export default function Navbar() {
                   </h4>
                   <ul className="space-y-2">
                     {menuData.featuredLinks.map((link, index) => (
-                      <motion.li 
+                      <motion.li
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 + (index * 0.05), duration: 0.3 }}
+                        transition={{
+                          delay: 0.2 + index * 0.05,
+                          duration: 0.3,
+                        }}
                       >
                         <Link
                           href={link.href}
@@ -484,11 +486,14 @@ export default function Navbar() {
                   </h4>
                   <ul className="space-y-2">
                     {menuData.additionalLinks.map((link, index) => (
-                      <motion.li 
+                      <motion.li
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + (index * 0.05), duration: 0.3 }}
+                        transition={{
+                          delay: 0.3 + index * 0.05,
+                          duration: 0.3,
+                        }}
                       >
                         <Link
                           href={link.href}
@@ -511,22 +516,44 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-[#1E1C1D] pt-0">
+    <header className="bg-white">
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-sm h-10 text-white font-medium shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer">
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-sm h-10 text-white font-medium shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer md:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex justify-between items-center h-full">
             <div className="flex items-center space-x-4">
               <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
                 </svg>
                 Free shipping on orders over $50
               </span>
               <span className="hidden sm:inline">|</span>
-              <span className="hidden  md:flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              <span className="hidden sm:flex items-center">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  ></path>
                 </svg>
                 30-day returns, read our return policy for more info
               </span>
@@ -536,34 +563,31 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation */}
-      <div className="border-b border-gray-800 shadow-sm relative">
-        {/* Gradient background - complementing the gold/beige logo color */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[black] from-0% via-[#1E1C1D] via-35% via-[#3A2B3D] via-65% to-[#362A59] to-100% opacity-95"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(242,211,153,0.07),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(138,106,209,0.15),transparent_60%)]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_20%,rgba(242,211,153,0.04)_40%,rgba(138,106,209,0.08)_60%,transparent_95%)] shimmer"></div>
-        
+      <div className="border-b border-gray-200 shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center h-24 sm:h-28">
-            {/* No need for extra background elements */}
-            
+          <div className="flex justify-between items-center h-16 sm:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center py-3 space-x-4 sm:space-x-5 relative z-10">
+            <Link
+              href="/"
+              className="flex items-center py-2 space-x-3 sm:space-x-4 relative z-10"
+            >
               <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/lens-aura-updated- logo.jpg"
                   alt="Lens Aura Logo"
-                  width={160}
-                  height={160} 
-                  className="h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
+                  width={140}
+                  height={140}
+                  className="h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
                   priority
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[#B48E4A!important]">
+                <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#2C3E50]">
                   Lens Aura
                 </span>
-                <span className="text-base sm:text-lg text-gray-300 font-medium hidden sm:inline text-[#B48E4A!important]">Where Vision Meets Aura</span>
+                <span className="text-sm sm:text-base text-[#34495E] font-medium hidden sm:inline">
+                  Where Vision Meets Aura
+                </span>
               </div>
             </Link>
 
@@ -572,7 +596,7 @@ export default function Navbar() {
               <CartDropdown />
               <button
                 type="button"
-                className="inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-gray-800 hover:text-purple-300 transition-colors"
+                className="inline-flex items-center justify-center p-2 rounded-lg text-[#2C3E50] hover:bg-gray-100 hover:text-[#E67E22] transition-colors"
                 onClick={toggleMobileMenu}
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle menu"
@@ -594,7 +618,10 @@ export default function Navbar() {
               animate="visible"
               variants={navVariants}
             >
-              <div className="flex h-full space-x-3 lg:space-x-6" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex h-full space-x-3 lg:space-x-6"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <motion.div variants={itemVariants} className="h-full">
                   {renderNavItem('Glasses', '/glasses', 'glasses')}
                 </motion.div>
@@ -620,7 +647,10 @@ export default function Navbar() {
               animate="visible"
               variants={navVariants}
             >
-              <motion.div variants={itemVariants} className="h-full flex items-center">
+              <motion.div
+                variants={itemVariants}
+                className="h-full flex items-center"
+              >
                 <CartDropdown />
               </motion.div>
             </motion.div>
@@ -635,9 +665,9 @@ export default function Navbar() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            transition={{ 
+            transition={{
               duration: 0.3,
-              ease: "easeOut" 
+              ease: 'easeOut',
             }}
             className="absolute left-0 w-full z-50 bg-white shadow-lg border-t border-gray-100"
             onMouseEnter={handleMegaMenuMouseEnter}

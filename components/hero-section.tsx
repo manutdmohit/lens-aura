@@ -1,10 +1,17 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { motion } from "framer-motion"
-import AnimatedButton from "@/components/animated-button"
-import { Sparkles, Glasses, Sun, ArrowRight, BadgePercent, ShoppingBag } from "lucide-react"
-import Image from "next/image"
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import AnimatedButton from '@/components/animated-button';
+import {
+  Sparkles,
+  Glasses,
+  Sun,
+  ArrowRight,
+  BadgePercent,
+  ShoppingBag,
+} from 'lucide-react';
+import Image from 'next/image';
 
 export default function HeroSection() {
   // Animation variants
@@ -16,19 +23,19 @@ export default function HeroSection() {
       transition: {
         delay: 0.1 * i,
         duration: 0.7,
-        ease: "easeOut"
-      }
-    })
-  }
+        ease: 'easeOut',
+      },
+    }),
+  };
 
   return (
-    <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden -mt-[112px]">
+    <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden -mt-[152px]">
       {/* Background image with subtle continuous zoom */}
       <motion.div
         className="absolute inset-0 z-0"
         initial={{ scale: 1.1 }}
         animate={{ scale: [1.1, 1, 1.05, 1] }}
-        transition={{ duration: 30, ease: "easeInOut", repeat: Infinity }}
+        transition={{ duration: 30, ease: 'easeInOut', repeat: Infinity }}
       >
         <Image
           // src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
@@ -42,13 +49,13 @@ export default function HeroSection() {
       </motion.div>
 
       {/* Gradient overlays with animated entrance */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.5 }}
       ></motion.div>
-      
+
       {/* Animated accent element */}
       <motion.div
         className="absolute bottom-0 left-0 w-full h-1/4 md:h-1/3 z-5 bg-gradient-to-t from-teal-900/40 to-transparent"
@@ -71,7 +78,7 @@ export default function HeroSection() {
             <Sparkles className="h-5 w-5" />
             <span className="font-serif italic">Your Vision, Elevated</span>
           </motion.div>
-          
+
           {/* Main heading */}
           <motion.h1
             className="font-display text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 tracking-tight"
@@ -85,7 +92,7 @@ export default function HeroSection() {
               Beyond Vision
             </span>
           </motion.h1>
-          
+
           {/* Description */}
           <motion.p
             className="font-sans text-teal-100 text-base md:text-lg max-w-lg mb-8"
@@ -94,10 +101,11 @@ export default function HeroSection() {
             animate="visible"
             variants={fadeInUp}
           >
-            Embrace the perfect blend of fashion and functionality with our premium eyewear collection. 
-            Designed for those who appreciate quality craftsmanship and distinctive style.
+            Embrace the perfect blend of fashion and functionality with our
+            premium eyewear collection. Designed for those who appreciate
+            quality craftsmanship and distinctive style.
           </motion.p>
-          
+
           {/* CTA buttons */}
           <motion.div
             className="flex flex-wrap gap-4"
@@ -106,13 +114,19 @@ export default function HeroSection() {
             animate="visible"
             variants={fadeInUp}
           >
-            <AnimatedButton asChild className="bg-amber-400 text-gray-900 hover:bg-amber-300 font-medium gap-2 py-6">
+            <AnimatedButton
+              asChild
+              className="bg-amber-400 text-gray-900 hover:bg-amber-300 font-medium gap-2 py-6"
+            >
               <Link href="/glasses">
                 <Glasses className="h-5 w-5" />
                 <span>Shop Glasses</span>
               </Link>
             </AnimatedButton>
-            <AnimatedButton asChild className="bg-teal-600 text-white hover:bg-teal-500 font-medium gap-2 py-6">
+            <AnimatedButton
+              asChild
+              className="bg-teal-600 text-white hover:bg-teal-500 font-medium gap-2 py-6"
+            >
               <Link href="/sunglasses">
                 <Sun className="h-5 w-5" />
                 <span>Shop Sunglasses</span>
@@ -121,14 +135,19 @@ export default function HeroSection() {
           </motion.div>
         </div>
       </div>
-      
+
       {/* Decorative floating elements (only visible on larger screens) */}
       <div className="absolute right-10 bottom-10 hidden md:block z-10">
         <motion.div
           className="w-32 h-32 rounded-full border border-amber-400/30 backdrop-blur-sm"
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 0.6, x: [0, -15, 0, 15, 0] }}
-          transition={{ delay: 1.5, duration: 10, ease: "easeInOut", repeat: Infinity }}
+          transition={{
+            delay: 1.5,
+            duration: 10,
+            ease: 'easeInOut',
+            repeat: Infinity,
+          }}
         />
       </div>
       <div className="absolute left-1/4 top-1/4 hidden lg:block z-5">
@@ -136,9 +155,14 @@ export default function HeroSection() {
           className="w-16 h-16 rounded-full border border-teal-400/20 backdrop-blur-sm"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 0.4, y: [0, 20, 0, -20, 0] }}
-          transition={{ delay: 1.7, duration: 12, ease: "easeInOut", repeat: Infinity }}
+          transition={{
+            delay: 1.7,
+            duration: 12,
+            ease: 'easeInOut',
+            repeat: Infinity,
+          }}
         />
       </div>
     </section>
-  )
+  );
 }

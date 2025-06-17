@@ -67,10 +67,11 @@
 }
 
 @layer base {
-  html, body {
+  html,
+  body {
     overflow-x: hidden;
   }
-  
+
   * {
     border-color: hsl(var(--border));
   }
@@ -112,7 +113,7 @@
 
 .shimmer {
   animation: shimmer 12s infinite;
-  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Animation utilities */
