@@ -586,25 +586,27 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center justify-between w-full">
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="flex-shrink-0">
-                  <Image
-                    src="/images/logo-bg-removed.jpg"
-                    alt="Lens Aura Logo"
-                    width={40}
-                    height={40}
-                    className="h-10 w-auto object-contain"
-                    priority
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg font-extrabold text-[#592F25] font-['Playfair_Display']">
-                    Lens Aura
-                  </span>
-                </div>
-              </Link>
-              <div className="flex items-center space-x-4">
+            <div className="md:hidden flex items-center w-full">
+              <div className="w-1/4">
+                <Link href="/" className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <Image
+                      src="/images/logo-bg-removed.jpg"
+                      alt="Lens Aura Logo"
+                      width={60}
+                      height={60}
+                      className="h-16 w-auto object-contain"
+                      priority
+                    />
+                  </div>
+                </Link>
+              </div>
+              <div className="w-2/4 flex justify-center">
+                <span className="text-lg font-extrabold text-[#592F25] font-['Playfair_Display']">
+                  Lens Aura
+                </span>
+              </div>
+              <div className="w-1/4 flex justify-end items-center space-x-4">
                 <CartDropdown />
                 <button
                   type="button"

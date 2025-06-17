@@ -44,7 +44,7 @@ function GlassesContent() {
     hasNextPage: false,
     hasPrevPage: false,
   });
-  
+
   // Use a ref to store the limit value
   const limitRef = useRef(12);
 
@@ -71,26 +71,30 @@ function GlassesContent() {
       try {
         setLoading(true);
 
-        const response = await fetch(`/api/glasses?page=${currentPage}&limit=${limitRef.current}`);
+        const response = await fetch(
+          `/api/glasses?page=${currentPage}&limit=${limitRef.current}`
+        );
         const data = await response.json();
-        
+
         if (data && data.products) {
           setProducts(data.products);
-          setPagination(data.pagination || {
-            total: 0,
-            page: 1,
-            limit: 12,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPrevPage: false,
-          });
+          setPagination(
+            data.pagination || {
+              total: 0,
+              page: 1,
+              limit: 12,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPrevPage: false,
+            }
+          );
         } else {
           // If no products are returned or data is malformed, set to empty array
           setProducts([]);
         }
       } catch (error: any) {
         console.error('Error fetching products:', error);
-        toast.error(`${error.message || "Failed to fetch products"}`);
+        toast.error(`${error.message || 'Failed to fetch products'}`);
         // Set products to empty array on error
         setProducts([]);
       } finally {
@@ -110,18 +114,19 @@ function GlassesContent() {
   const hasProducts = Array.isArray(products) && products.length > 0;
 
   return (
-    <main className="flex flex-col min-h-screen">
-      <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col min-h-screen -mt-[64px]">
+      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Glasses</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             {priceRange?.lowest ? (
               <>
-                Our prescription glasses start from just ${priceRange.lowest.price.toFixed(2)}, including standard
+                Our prescription glasses start from just $
+                {priceRange.lowest.price.toFixed(2)}, including standard
                 single-vision lenses. Choose from our wide range of styles and
                 colors.{' '}
                 {priceRange.lowest && (
-                  <Link 
+                  <Link
                     href={`/glasses/${priceRange.lowest.slug}`}
                     className="text-indigo-600 hover:underline"
                   >
@@ -140,7 +145,7 @@ function GlassesContent() {
         </div>
 
         {loading && <LoadingPage loading={loading} />}
-        
+
         {!loading && !hasProducts && (
           <div className="text-center">
             <p className="text-lg text-gray-600">
@@ -152,15 +157,15 @@ function GlassesContent() {
         {!loading && hasProducts && (
           <>
             <ProductGrid products={products} />
-            
+
             <div className="mt-8">
-              <Pagination 
-                currentPage={pagination.page} 
-                totalPages={pagination.totalPages} 
-                onPageChange={handlePageChange} 
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
               />
             </div>
-            
+
             <div className="text-center text-sm text-gray-500 mt-4">
               Showing {products.length} of {pagination.total} products
             </div>
