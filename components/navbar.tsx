@@ -212,16 +212,16 @@ export default function Navbar() {
     >
       <Link
         href={href}
-        className="flex items-center h-full px-4 text-base text-[#2C3E50] hover:text-[#E67E22] relative group"
+        className="flex items-center h-full px-4 text-lg text-[#592F25] hover:text-[#8B4513] relative group font-['Poppins']"
       >
         <span>{title}</span>
         <ChevronDown
           className={`ml-1 h-4 w-4 transition-transform ${
-            activeMenu === menuId ? 'rotate-180 text-[#E67E22]' : ''
-          } group-hover:text-[#E67E22]`}
+            activeMenu === menuId ? 'rotate-180 text-[#8B4513]' : ''
+          } group-hover:text-[#8B4513]`}
           aria-hidden="true"
         />
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#E67E22] group-hover:w-full transition-all duration-300"></span>
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#8B4513] group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
@@ -231,10 +231,10 @@ export default function Navbar() {
     <div className="h-full flex items-center">
       <Link
         href={href}
-        className="flex items-center h-full px-4 text-base text-[#2C3E50] hover:text-[#E67E22] relative group"
+        className="flex items-center h-full px-4 text-lg text-[#592F25] hover:text-[#8B4513] relative group font-['Poppins']"
       >
         {title}
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#E67E22] group-hover:w-full transition-all duration-300"></span>
+        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#8B4513] group-hover:w-full transition-all duration-300"></span>
       </Link>
     </div>
   );
@@ -563,40 +563,42 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation */}
-      <div className="border-b border-gray-200 shadow-sm relative">
+      <div className=" shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center h-16 sm:h-20">
+          <div className="flex justify-between items-center h-20 sm:h-24 md:h-28">
             {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center py-2 space-x-3 sm:space-x-4 relative z-10"
-            >
-              <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
-                <Image
-                  src="/images/lens-aura-updated- logo.jpg"
-                  alt="Lens Aura Logo"
-                  width={140}
-                  height={140}
-                  className="h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#2C3E50]">
-                  Lens Aura
-                </span>
-                <span className="text-sm sm:text-base text-[#34495E] font-medium hidden sm:inline">
-                  Where Vision Meets Aura
-                </span>
-              </div>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="flex items-center py-2 space-x-3 sm:space-x-4 relative z-10"
+              >
+                <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
+                  <Image
+                    src="/images/logo-bg-removed.jpg"
+                    alt="Lens Aura Logo"
+                    width={200}
+                    height={200}
+                    className="h-24 sm:h-28 md:h-32 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
+                    priority
+                  />
+                </div>
+              </Link>
+            </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center h-full space-x-4">
               <CartDropdown />
+              <div className="flex flex-col">
+                <span className="text-xl font-extrabold text-[#592F25] font-['Playfair_Display']">
+                  Lens Aura
+                </span>
+                <span className="text-sm text-[#592F25] font-medium font-['Poppins']">
+                  Where Vision Meets Aura
+                </span>
+              </div>
               <button
                 type="button"
-                className="inline-flex items-center justify-center p-2 rounded-lg text-[#2C3E50] hover:bg-gray-100 hover:text-[#E67E22] transition-colors"
+                className="inline-flex items-center justify-center p-2 rounded-lg text-[#592F25] hover:bg-gray-100 hover:text-[#8B4513] transition-colors font-['Poppins']"
                 onClick={toggleMobileMenu}
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle menu"
@@ -649,9 +651,17 @@ export default function Navbar() {
             >
               <motion.div
                 variants={itemVariants}
-                className="h-full flex items-center"
+                className="h-full flex items-center gap-4"
               >
                 <CartDropdown />
+                <div className="flex flex-col">
+                  <span className="text-xl font-extrabold text-[#592F25] font-['Playfair_Display']">
+                    Lens Aura
+                  </span>
+                  <span className="text-sm text-[#592F25] font-medium font-['Poppins']">
+                    Where Vision Meets Aura
+                  </span>
+                </div>
               </motion.div>
             </motion.div>
           </div>

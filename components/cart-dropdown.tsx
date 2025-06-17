@@ -53,7 +53,11 @@ export default function CartDropdown() {
     setIsOpen(!isOpen);
   };
 
-  const handleQuantityChange = (productId: string, newQuantity: number, color: string) => {
+  const handleQuantityChange = (
+    productId: string,
+    newQuantity: number,
+    color: string
+  ) => {
     updateQuantity(productId, newQuantity, color);
   };
 
@@ -65,12 +69,12 @@ export default function CartDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="relative p-2 text-white hover:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-full"
+        className="relative p-2 text-[#592F25] hover:text-[#8B4513] focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-full"
         aria-label="Open cart"
       >
         <ShoppingBag className="h-6 w-6" />
         {itemCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-[#8B4513] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {itemCount}
           </span>
         )}
@@ -169,22 +173,22 @@ export default function CartDropdown() {
                                 )
                               }
                               className={`p-1 ${
-                                item.quantity >=
-                                item.product.stockQuantity
+                                item.quantity >= item.product.stockQuantity
                                   ? 'text-gray-300 cursor-not-allowed'
                                   : 'hover:bg-gray-100'
                               }`}
                               aria-label="Increase quantity"
                               disabled={
-                                item.quantity >=
-                                item.product.stockQuantity
+                                item.quantity >= item.product.stockQuantity
                               }
                             >
                               <Plus className="h-3 w-3" />
                             </button>
                           </div>
                           <button
-                            onClick={() => handleRemoveItem(item.product._id, item.color)}
+                            onClick={() =>
+                              handleRemoveItem(item.product._id, item.color)
+                            }
                             className="text-gray-500 hover:text-red-600 p-1"
                             aria-label="Remove item"
                           >
