@@ -567,7 +567,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex justify-between items-center h-20 sm:h-24 md:h-28">
             {/* Logo */}
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               <Link
                 href="/"
                 className="flex items-center py-2 space-x-3 sm:space-x-4 relative z-10"
@@ -578,7 +578,7 @@ export default function Navbar() {
                     alt="Lens Aura Logo"
                     width={200}
                     height={200}
-                    className="h-24 sm:h-28 md:h-32 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
+                    className="h-24 sm:h-28 md:h-30 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
                     priority
                   />
                 </div>
@@ -586,31 +586,42 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center h-full space-x-4">
-              <CartDropdown />
-              <div className="flex flex-col">
-                <span className="text-xl font-extrabold text-[#592F25] font-['Playfair_Display']">
-                  Lens Aura
-                </span>
-                <span className="text-sm text-[#592F25] font-medium font-['Poppins']">
-                  Where Vision Meets Aura
-                </span>
-              </div>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-lg text-[#592F25] hover:bg-gray-100 hover:text-[#8B4513] transition-colors font-['Poppins']"
-                onClick={toggleMobileMenu}
-                aria-expanded={mobileMenuOpen}
-                aria-label="Toggle menu"
-              >
-                <motion.div
-                  initial={{ rotate: 0 }}
-                  animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-                  transition={{ duration: 0.2 }}
+            <div className="md:hidden flex items-center justify-between w-full">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="flex-shrink-0">
+                  <Image
+                    src="/images/logo-bg-removed.jpg"
+                    alt="Lens Aura Logo"
+                    width={40}
+                    height={40}
+                    className="h-10 w-auto object-contain"
+                    priority
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg font-extrabold text-[#592F25] font-['Playfair_Display']">
+                    Lens Aura
+                  </span>
+                </div>
+              </Link>
+              <div className="flex items-center space-x-4">
+                <CartDropdown />
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center p-2 rounded-lg text-[#592F25] hover:bg-gray-100 hover:text-[#8B4513] transition-colors font-['Poppins']"
+                  onClick={toggleMobileMenu}
+                  aria-expanded={mobileMenuOpen}
+                  aria-label="Toggle menu"
                 >
-                  {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </motion.div>
-              </button>
+                  <motion.div
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                  </motion.div>
+                </button>
+              </div>
             </div>
 
             {/* Desktop navigation */}
