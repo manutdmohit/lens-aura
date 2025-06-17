@@ -574,7 +574,7 @@ export default function Navbar() {
               >
                 <div className="flex-shrink-0 ml-1 drop-shadow-[0_0_10px_rgba(242,211,153,0.1)]">
                   <Image
-                    src="/images/logo-bg-removed.jpg"
+                    src="/images/lens-aura-left.jpg"
                     alt="Lens Aura Logo"
                     width={200}
                     height={200}
@@ -591,11 +591,11 @@ export default function Navbar() {
                 <Link href="/" className="flex items-center">
                   <div className="flex-shrink-0">
                     <Image
-                      src="/images/logo-bg-removed.jpg"
+                      src="/images/lens-aura-left.jpg"
                       alt="Lens Aura Logo"
-                      width={60}
-                      height={60}
-                      className="h-16 w-auto object-contain"
+                      width={120}
+                      height={120}
+                      className="h-16 object-contain"
                       priority
                     />
                   </div>
