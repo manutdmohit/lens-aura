@@ -565,7 +565,7 @@ export default function Navbar() {
       {/* Main Navigation */}
       <div className=" shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center h-20 sm:h-24 md:h-28">
+          <div className="flex justify-between items-center h-20 sm:h-24 md:h-20">
             {/* Logo */}
             <div className="hidden md:flex items-center gap-4">
               <Link
@@ -576,9 +576,9 @@ export default function Navbar() {
                   <Image
                     src="/images/5f15c03f-d5f5-4e0c-884e-f7942fc6be2a.png"
                     alt="Lens Aura Logo"
-                    width={200}
-                    height={200}
-                    className="h-24 sm:h-28 md:h-30 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
+                    width={150}
+                    height={150}
+                    className="h-24 sm:h-28 md:h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(242,211,153,0.15)]"
                     priority
                   />
                 </div>
@@ -667,14 +667,6 @@ export default function Navbar() {
                 className="h-full flex items-center gap-4"
               >
                 <CartDropdown />
-                <div className="flex flex-col">
-                  <span className="text-xl font-extrabold text-[#592F25] font-['Playfair_Display']">
-                    Lens Aura
-                  </span>
-                  <span className="text-sm text-[#592F25] font-medium font-['Poppins']">
-                    Where Vision Meets Aura
-                  </span>
-                </div>
               </motion.div>
             </motion.div>
           </div>
