@@ -2,12 +2,9 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
-export async function GET(
-  req: NextRequest,
-  context: any
-) {
+export async function GET(req: NextRequest, context: any) {
   try {
-    const { slug } = context.params;
+    const { slug } = await context.params;
 
     if (!slug) {
       return NextResponse.json(
