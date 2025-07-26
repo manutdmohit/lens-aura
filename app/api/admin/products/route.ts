@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
       { message: error.message || 'Failed to fetch products' },
       { status: 500 }
     );
-  } 
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -105,20 +105,35 @@ export async function POST(req: NextRequest) {
     // }
 
     const body = await req.json();
-    let { imageUrl, ...rest } = body;
+    let { thumbnail, images, ...rest } = body;
 
     await connectToDatabase();
 
-    // If imageUrl is base64, upload to Cloudinary
-    if (imageUrl && imageUrl.startsWith('data:image')) {
-      const uploadRes = await cloudinary.uploader.upload(imageUrl, {
-        folder: 'products',
+    // If thumbnail is a base64 string, upload it to Cloudinary
+    if (thumbnail && thumbnail.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(thumbnail, {
+        folder: 'products/thumbnails',
       });
-      imageUrl = uploadRes.secure_url;
+      thumbnail = uploadRes.secure_url;
+    }
+
+    // If images is an array of base64 strings, upload them to Cloudinary
+    const uploadedImageUrls = [];
+    if (images && Array.isArray(images)) {
+      for (const image of images) {
+        const uploadRes = await cloudinary.uploader.upload(image, {
+          folder: 'products/images',
+        });
+        uploadedImageUrls.push(uploadRes.secure_url);
+      }
     }
 
     // Save product to DB
-    const product = new Product({ ...rest, imageUrl });
+    const product = new Product({
+      ...rest,
+      thumbnail,
+      images: uploadedImageUrls,
+    });
     await product.save();
 
     return NextResponse.json(
@@ -131,5 +146,5 @@ export async function POST(req: NextRequest) {
       { message: error.message || 'Failed to create product' },
       { status: 500 }
     );
-  } 
+  }
 }

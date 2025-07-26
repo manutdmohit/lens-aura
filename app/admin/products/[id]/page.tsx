@@ -9,6 +9,7 @@ import {
   Trash2,
   AlertCircle,
   Check,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,9 @@ import { toast } from 'sonner';
 import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
+import MultiImageUpload from '@/components/multi-image-upload';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +83,8 @@ export default function ProductDetailPage() {
       name: '',
       description: '',
       price: 0,
-      imageUrl: '',
+      thumbnail: '',
+      images: [],
       stockQuantity: 0,
       productType: 'glasses',
     } as any,
@@ -109,6 +113,7 @@ export default function ProductDetailPage() {
         const formData: any = {
           ...data.product,
           productType: data.product.productType.toLowerCase(),
+          images: data.product.images || [],
         };
 
         reset(formData);
@@ -134,7 +139,13 @@ export default function ProductDetailPage() {
 
   // Handle image upload
   const handleImageUpload = (url: string) => {
-    setValue('imageUrl', url, { shouldValidate: true });
+    setValue('thumbnail', url, { shouldValidate: true });
+  };
+
+  // Handle additional images upload
+  const handleAdditionalImagesUpload = (urls: string[]) => {
+    const currentImages = watch('images') || [];
+    setValue('images', [...currentImages, ...urls], { shouldValidate: true });
   };
 
   // Handle adding a color
@@ -168,6 +179,7 @@ export default function ProductDetailPage() {
       // Add colors to the data
       const productData = {
         ...data,
+        images: watch('images') || [],
         colors,
         // For glasses and sunglasses, add frameColor
         ...(data.productType !== 'contacts' && { frameColor: colors }),
@@ -203,7 +215,8 @@ export default function ProductDetailPage() {
       console.error('Error updating product:', error);
       setError(error.message || 'Failed to update product. Please try again.');
       toast('Error', {
-        description: error.message || 'Failed to update product. Please try again.',
+        description:
+          error.message || 'Failed to update product. Please try again.',
         style: {
           background: 'rgb(239, 68, 68)',
           color: 'white',
@@ -447,42 +460,64 @@ export default function ProductDetailPage() {
                       <Label>
                         Product Image <span className="text-red-500">*</span>
                       </Label>
-                      <input type="hidden" {...register('imageUrl')} />
-                      {product?.imageUrl && (
-                        <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden mb-4">
-                          <Image
-                            src={watch('imageUrl') || product.imageUrl}
-                            alt={product.name}
-                            className="object-cover w-full h-full"
-                            width={500}
-                            height={500}
-                          />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute top-2 left-2 z-10 opacity-0 w-full h-full cursor-pointer"
-                            title="Update product image"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  if (event.target?.result) {
-                                    setValue('imageUrl', event.target.result as string, { shouldValidate: true });
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                          <div className="absolute top-2 left-2 bg-white/80 px-2 py-1 rounded text-xs z-20">
-                            Click to update image
-                          </div>
+                      <input type="hidden" {...register('thumbnail')} />
+                      <ImageUpload
+                        currentImage={watch('thumbnail')}
+                        onImageUploaded={handleImageUpload}
+                      />
+                      {errors.thumbnail && (
+                        <p className="text-red-500 text-sm">
+                          {errors.thumbnail.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Additional Images</Label>
+                      {(watch('images') || []).length > 0 && (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4">
+                          {(watch('images') || []).map((image, index) => (
+                            <div key={index} className="relative group">
+                              <Image
+                                src={image}
+                                alt={`Product image ${index + 1}`}
+                                width={150}
+                                height={150}
+                                className="rounded-md object-cover w-full h-24"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentImages = watch('images') || [];
+                                  const newImages = currentImages.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setValue('images', newImages, {
+                                    shouldValidate: true,
+                                  });
+                                }}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
-                      {errors.imageUrl && (
+
+                      <input type="hidden" {...register('images')} />
+                      <MultiImageUpload
+                        onImagesUploaded={handleAdditionalImagesUpload}
+                        currentImageCount={(watch('images') || []).length}
+                      />
+
+                      {errors.images && (
                         <p className="text-red-500 text-sm">
-                          {errors.imageUrl.message}
+                          {Array.isArray(errors.images)
+                            ? (errors.images as any[])
+                                .map((e) => e.message)
+                                .join(', ')
+                            : (errors.images as any)?.message}
                         </p>
                       )}
                     </div>

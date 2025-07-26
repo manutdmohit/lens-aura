@@ -27,10 +27,11 @@ import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
+import MultiImageUpload from '@/components/multi-image-upload';
 import { productSchema, type ProductFormValues } from '@/lib/api/validation';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
 
 export default function AddProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,17 +47,20 @@ export default function AddProductPage() {
     setValue,
     watch,
     reset,
+    getValues,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
       description: '',
       price: 0,
-      imageUrl: '',
+      thumbnail: '',
+      images: [],
       stockQuantity: 0,
       productType: 'glasses',
       status: 'active',
-    } as any,
+      colors: [],
+    },
   });
 
   const watchProductType = watch('productType');
@@ -65,12 +69,15 @@ export default function AddProductPage() {
   const handleProductTypeChange = (
     value: 'glasses' | 'sunglasses' | 'contacts' | 'accessory'
   ) => {
+    const currentValues = getValues();
     setValue('productType', value);
+    setColors([]);
 
     // Reset form with appropriate defaults based on product type
     reset({
-      ...watch(),
+      ...currentValues,
       productType: value,
+      colors: [],
       frameType: undefined,
       frameMaterial: undefined,
       frameWidth: undefined,
@@ -92,12 +99,17 @@ export default function AddProductPage() {
       forAstigmatism: false,
       forPresbyopia: false,
       uvBlocking: false,
-    } as any);
+    });
   };
 
   // Handle image upload
   const handleImageUpload = (url: string) => {
-    setValue('imageUrl', url, { shouldValidate: true });
+    setValue('thumbnail', url, { shouldValidate: true });
+  };
+
+  // Handle additional images upload
+  const handleAdditionalImagesUpload = (urls: string[]) => {
+    setValue('images', urls, { shouldValidate: true });
   };
 
   // Handle adding a color
@@ -164,7 +176,8 @@ export default function AddProductPage() {
       console.error('Error creating product:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create product. Please try again.',
+        description:
+          error.message || 'Failed to create product. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -211,7 +224,11 @@ export default function AddProductPage() {
                     <Select
                       value={watchProductType}
                       onValueChange={(
-                        value: 'glasses' | 'sunglasses' | 'contacts' | 'accessory'
+                        value:
+                          | 'glasses'
+                          | 'sunglasses'
+                          | 'contacts'
+                          | 'accessory'
                       ) => handleProductTypeChange(value)}
                     >
                       <SelectTrigger
@@ -317,24 +334,46 @@ export default function AddProductPage() {
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label>
-                      Product Image <span className="text-red-500">*</span>
+                      Thumbnail Image <span className="text-red-500">*</span>
                     </Label>
-                    <input type="hidden" {...register('imageUrl')} />
+                    <input type="hidden" {...register('thumbnail')} />
                     <ImageUpload
-                      currentImage={watch('imageUrl')}
+                      currentImage={watch('thumbnail')}
                       onImageUploaded={handleImageUpload}
                     />
-                    {errors.imageUrl && (
+                    {errors.thumbnail && (
                       <p className="text-red-500 text-sm">
-                        {errors.imageUrl.message}
+                        {errors.thumbnail.message}
                       </p>
                     )}
                   </div>
 
-                  {(watchProductType === 'glasses' || watchProductType === 'sunglasses' || watchProductType === 'contacts') && (
+                  <div className="space-y-2">
+                    <Label>Additional Images</Label>
+                    <input type="hidden" {...register('images')} />
+                    <MultiImageUpload
+                      onImagesUploaded={handleAdditionalImagesUpload}
+                    />
+                    {errors.images && (
+                      <p className="text-red-500 text-sm">
+                        {Array.isArray(errors.images)
+                          ? (errors.images as any[])
+                              .map((e) => e.message)
+                              .join(', ')
+                          : errors.images.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {(watchProductType === 'glasses' ||
+                    watchProductType === 'sunglasses' ||
+                    watchProductType === 'contacts') && (
                     <div className="space-y-2">
                       <Label htmlFor="colors">
-                        {watchProductType === 'contacts' ? 'Available Colors' : 'Frame Colors'} <span className="text-red-500">*</span>
+                        {watchProductType === 'contacts'
+                          ? 'Available Colors'
+                          : 'Frame Colors'}{' '}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <div className="flex items-center space-x-2">
                         <Input
@@ -343,6 +382,12 @@ export default function AddProductPage() {
                           onChange={(e) => setColorInput(e.target.value)}
                           placeholder="Add a color (e.g., Black, Red, Blue)"
                           className="flex-grow"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddColor();
+                            }
+                          }}
                         />
                         <Button
                           type="button"
@@ -420,7 +465,9 @@ export default function AddProductPage() {
                                 <SelectValue placeholder="Select frame type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="full-rim">Full Rim</SelectItem>
+                                <SelectItem value="full-rim">
+                                  Full Rim
+                                </SelectItem>
                                 <SelectItem value="semi-rimless">
                                   Semi-Rimless
                                 </SelectItem>
@@ -456,7 +503,9 @@ export default function AddProductPage() {
                               <SelectContent>
                                 <SelectItem value="acetate">Acetate</SelectItem>
                                 <SelectItem value="metal">Metal</SelectItem>
-                                <SelectItem value="titanium">Titanium</SelectItem>
+                                <SelectItem value="titanium">
+                                  Titanium
+                                </SelectItem>
                                 <SelectItem value="plastic">Plastic</SelectItem>
                                 <SelectItem value="mixed">Mixed</SelectItem>
                               </SelectContent>
@@ -470,7 +519,8 @@ export default function AddProductPage() {
 
                           <div className="space-y-2">
                             <Label htmlFor="frameWidth">
-                              Frame Width <span className="text-red-500">*</span>
+                              Frame Width{' '}
+                              <span className="text-red-500">*</span>
                             </Label>
                             <Select
                               value={watch('frameWidth')}
@@ -554,13 +604,17 @@ export default function AddProductPage() {
                               <SelectTrigger
                                 id="prescriptionType"
                                 className={
-                                  errors.prescriptionType ? 'border-red-500' : ''
+                                  errors.prescriptionType
+                                    ? 'border-red-500'
+                                    : ''
                                 }
                               >
                                 <SelectValue placeholder="Select prescription type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="distance">Distance</SelectItem>
+                                <SelectItem value="distance">
+                                  Distance
+                                </SelectItem>
                                 <SelectItem value="reading">Reading</SelectItem>
                                 <SelectItem value="multifocal">
                                   Multifocal
@@ -589,7 +643,9 @@ export default function AddProductPage() {
                             >
                               <SelectTrigger
                                 id="gender"
-                                className={errors.gender ? 'border-red-500' : ''}
+                                className={
+                                  errors.gender ? 'border-red-500' : ''
+                                }
                               >
                                 <SelectValue placeholder="Select gender" />
                               </SelectTrigger>
@@ -632,7 +688,9 @@ export default function AddProductPage() {
                                 <SelectValue placeholder="Select frame type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="full-rim">Full Rim</SelectItem>
+                                <SelectItem value="full-rim">
+                                  Full Rim
+                                </SelectItem>
                                 <SelectItem value="semi-rimless">
                                   Semi-Rimless
                                 </SelectItem>
@@ -668,7 +726,9 @@ export default function AddProductPage() {
                               <SelectContent>
                                 <SelectItem value="acetate">Acetate</SelectItem>
                                 <SelectItem value="metal">Metal</SelectItem>
-                                <SelectItem value="titanium">Titanium</SelectItem>
+                                <SelectItem value="titanium">
+                                  Titanium
+                                </SelectItem>
                                 <SelectItem value="plastic">Plastic</SelectItem>
                                 <SelectItem value="mixed">Mixed</SelectItem>
                               </SelectContent>
@@ -682,7 +742,8 @@ export default function AddProductPage() {
 
                           <div className="space-y-2">
                             <Label htmlFor="frameWidth">
-                              Frame Width <span className="text-red-500">*</span>
+                              Frame Width{' '}
+                              <span className="text-red-500">*</span>
                             </Label>
                             <Select
                               value={watch('frameWidth')}
@@ -719,7 +780,9 @@ export default function AddProductPage() {
                               id="lensColor"
                               placeholder="e.g., Black, Brown, Green"
                               {...register('lensColor')}
-                              className={errors.lensColor ? 'border-red-500' : ''}
+                              className={
+                                errors.lensColor ? 'border-red-500' : ''
+                              }
                             />
                             {errors.lensColor && (
                               <p className="text-red-500 text-sm">
@@ -748,7 +811,9 @@ export default function AddProductPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="aviator">Aviator</SelectItem>
-                                <SelectItem value="wayfarer">Wayfarer</SelectItem>
+                                <SelectItem value="wayfarer">
+                                  Wayfarer
+                                </SelectItem>
                                 <SelectItem value="round">Round</SelectItem>
                                 <SelectItem value="square">Square</SelectItem>
                                 <SelectItem value="cat-eye">Cat Eye</SelectItem>
@@ -778,7 +843,9 @@ export default function AddProductPage() {
                             >
                               <SelectTrigger
                                 id="gender"
-                                className={errors.gender ? 'border-red-500' : ''}
+                                className={
+                                  errors.gender ? 'border-red-500' : ''
+                                }
                               >
                                 <SelectValue placeholder="Select gender" />
                               </SelectTrigger>
@@ -1003,7 +1070,9 @@ export default function AddProductPage() {
                               type="number"
                               step="0.1"
                               {...register('diameter')}
-                              className={errors.diameter ? 'border-red-500' : ''}
+                              className={
+                                errors.diameter ? 'border-red-500' : ''
+                              }
                             />
                             {errors.diameter && (
                               <p className="text-red-500 text-sm">
@@ -1022,7 +1091,9 @@ export default function AddProductPage() {
                               type="number"
                               step="0.1"
                               {...register('baseCurve')}
-                              className={errors.baseCurve ? 'border-red-500' : ''}
+                              className={
+                                errors.baseCurve ? 'border-red-500' : ''
+                              }
                             />
                             {errors.baseCurve && (
                               <p className="text-red-500 text-sm">
@@ -1040,7 +1111,9 @@ export default function AddProductPage() {
                               id="quantity"
                               type="number"
                               {...register('quantity')}
-                              className={errors.quantity ? 'border-red-500' : ''}
+                              className={
+                                errors.quantity ? 'border-red-500' : ''
+                              }
                             />
                             {errors.quantity && (
                               <p className="text-red-500 text-sm">
@@ -1057,7 +1130,10 @@ export default function AddProductPage() {
                                   id="forAstigmatism"
                                   checked={watch('forAstigmatism')}
                                   onCheckedChange={(checked) =>
-                                    setValue('forAstigmatism', checked as boolean)
+                                    setValue(
+                                      'forAstigmatism',
+                                      checked as boolean
+                                    )
                                   }
                                 />
                                 <Label
@@ -1072,7 +1148,10 @@ export default function AddProductPage() {
                                   id="forPresbyopia"
                                   checked={watch('forPresbyopia')}
                                   onCheckedChange={(checked) =>
-                                    setValue('forPresbyopia', checked as boolean)
+                                    setValue(
+                                      'forPresbyopia',
+                                      checked as boolean
+                                    )
                                   }
                                 />
                                 <Label

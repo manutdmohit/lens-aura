@@ -4,11 +4,15 @@ import { Product } from '@/models';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions';
 import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
 
-export async function GET(
-  req: NextRequest,
-  context: any
-) {
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export async function GET(req: NextRequest, context: any) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -43,10 +47,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  context: any
-) {
+export async function PUT(req: NextRequest, context: any) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -54,7 +55,7 @@ export async function PUT(
     }
 
     const { id } = context.params;
-    
+
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -75,16 +76,45 @@ export async function PUT(
       ).lean();
 
       if (!product) {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        return NextResponse.json(
+          { error: 'Product not found' },
+          { status: 404 }
+        );
       }
 
       return NextResponse.json({ product });
     }
 
     // Full product update
+    const updateData: { [key: string]: any } = { ...body };
+
+    // Handle thumbnail upload
+    if (body.thumbnail && body.thumbnail.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(body.thumbnail, {
+        folder: 'products/thumbnails',
+      });
+      updateData.thumbnail = uploadRes.secure_url;
+    }
+
+    // Handle additional images upload
+    if (body.images && Array.isArray(body.images)) {
+      const newImageUrls = await Promise.all(
+        body.images.map(async (image: string) => {
+          if (image.startsWith('data:image')) {
+            const uploadRes = await cloudinary.uploader.upload(image, {
+              folder: 'products/images',
+            });
+            return uploadRes.secure_url;
+          }
+          return image; // It's an existing URL
+        })
+      );
+      updateData.images = newImageUrls;
+    }
+
     const product = await Product.findByIdAndUpdate(
       id,
-      { $set: body },
+      { $set: updateData },
       {
         new: true,
         runValidators: true,
@@ -103,4 +133,4 @@ export async function PUT(
       { status: 500 }
     );
   }
-} 
+}

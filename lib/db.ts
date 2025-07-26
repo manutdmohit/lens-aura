@@ -12,7 +12,7 @@ export async function getProducts() {
       name: product.name,
       productType: product.productType,
       price: product.price,
-      imageUrl: product.imageUrl,
+      thumbnail: product.thumbnail,
       description: product.description,
       colors: product.colors,
       stockQuantity: product.stockQuantity,
@@ -21,4 +21,4 @@ export async function getProducts() {
     console.error('Error fetching products:', error);
     throw error;
   }
-} 
+}

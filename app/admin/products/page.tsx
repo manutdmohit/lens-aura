@@ -71,6 +71,7 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
+  // Filter products based on search query and category
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -184,7 +185,7 @@ export default function AdminProductsPage() {
                         <div className="w-12">
                           <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden">
                             <Image
-                              src={product.imageUrl || '/placeholder.svg'}
+                              src={product.thumbnail || '/placeholder.svg'}
                               alt={product.name}
                               className="h-full w-full object-cover"
                               height={100}
@@ -220,7 +221,9 @@ export default function AdminProductsPage() {
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => router.push(`/admin/products/${product.id}`)}
+                            onClick={() =>
+                              router.push(`/admin/products/${product.id}`)
+                            }
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

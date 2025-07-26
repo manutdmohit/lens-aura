@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase} from '@/lib/api/db';
+import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     // Fetch products with pagination
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug productType price imageUrl gender')
+      .select('name slug thumbnail  productType price imageUrl gender')
       .skip(skip)
       .limit(limit);
 
@@ -40,18 +40,21 @@ export async function GET(req: NextRequest) {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return NextResponse.json({
-      products,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-      }
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        products,
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
-  } 
+  }
 }

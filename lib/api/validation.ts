@@ -36,7 +36,9 @@ export const baseProductSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   price: z.number().min(0, 'Price must be greater than or equal to 0'),
   imageUrl: z.string().optional(),
-  stockQuantity: z.number().min(0, 'Stock quantity must be greater than or equal to 0'),
+  stockQuantity: z
+    .number()
+    .min(0, 'Stock quantity must be greater than or equal to 0'),
   category: z.enum(['glasses', 'sunglasses', 'contacts']),
   colors: z.array(z.string()).optional(),
   productType: z.enum(['glasses', 'sunglasses', 'contacts', 'accessory']),
@@ -175,7 +177,8 @@ export const productSchema = z.object({
   price: z.coerce
     .number({ invalid_type_error: 'Price must be a number' })
     .positive({ message: 'Price must be positive' }),
-  imageUrl: z.string().min(1, { message: 'Please provide an image URL' }),
+  thumbnail: z.string().min(1, { message: 'Please provide an image URL' }),
+  images: z.array(z.string()).optional().default([]),
   stockQuantity: z.coerce
     .number({ invalid_type_error: 'Stock quantity must be a number' })
     .int({ message: 'Stock quantity must be a whole number' })

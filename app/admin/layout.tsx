@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import type React from 'react';
 import { SessionProvider } from 'next-auth/react';
 import { AdminAuthProvider } from '@/context/admin-auth-context';
-import { Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -35,13 +34,14 @@ export default function AdminLayout({
     <SessionProvider refetchInterval={5} refetchOnWindowFocus={true}>
       <AdminAuthProvider>
         {isClient ? (
-          <div className={noHeaderPadding ? '' : 'pt-header -mt-[112px]'}>{children}</div>
+          <div className={noHeaderPadding ? '' : 'pt-header -mt-[112px]'}>
+            {children}
+          </div>
         ) : (
           <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
         )}
-        <Toaster />
       </AdminAuthProvider>
     </SessionProvider>
   );
