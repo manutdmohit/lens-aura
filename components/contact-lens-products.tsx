@@ -71,7 +71,7 @@ export default function ContactLensProducts() {
     hasNextPage: false,
     hasPrevPage: false,
   });
-  
+
   // Use a ref to store the limit value
   const limitRef = useRef(8); // Show fewer products on homepage
 
@@ -94,26 +94,30 @@ export default function ContactLensProducts() {
       try {
         setLoading(true);
 
-        const response = await fetch(`/api/contacts?page=${currentPage}&limit=${limitRef.current}`);
+        const response = await fetch(
+          `/api/contacts?page=${currentPage}&limit=${limitRef.current}`
+        );
         const data = await response.json();
-        
+
         if (data && data.products) {
           setProducts(data.products);
-          setPagination(data.pagination || {
-            total: 0,
-            page: 1,
-            limit: limitRef.current,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPrevPage: false,
-          });
+          setPagination(
+            data.pagination || {
+              total: 0,
+              page: 1,
+              limit: limitRef.current,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPrevPage: false,
+            }
+          );
         } else {
           // If no products are returned or data is malformed, set to empty array
           setProducts([]);
         }
       } catch (error: any) {
         console.error('Error fetching products:', error);
-        toast.error(`${error.message || "Failed to fetch products"}`);
+        toast.error(`${error.message || 'Failed to fetch products'}`);
         // Set products to empty array on error
         setProducts([]);
       } finally {
@@ -127,27 +131,29 @@ export default function ContactLensProducts() {
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Find this product in cart to check current quantity
-    const cartItem = items.find(item => item.product.id === product.id);
+    const cartItem = items.find((item) => item.product.id === product.id);
     const currentQuantity = cartItem ? cartItem.quantity : 0;
-    
+
     // Check if adding one more would exceed stock
     if (currentQuantity >= (product.stockQuantity || 0)) {
-      toast.error(`Maximum available quantity reached (${product.stockQuantity})`);
+      toast.error(
+        `Maximum available quantity reached (${product.stockQuantity})`
+      );
       return;
     }
-    
+
     addItem(product as unknown as IProduct & { _id: string }, 1, 'default');
     toast.success(`Added ${product.name} to cart`);
   };
-  
+
   const isOutOfStock = (product: Product) => {
     return !product.stockQuantity || product.stockQuantity <= 0;
   };
-  
+
   const isMaxLimitReached = (product: Product) => {
-    const cartItem = items.find(item => item.product.id === product.id);
+    const cartItem = items.find((item) => item.product.id === product.id);
     return cartItem && cartItem.quantity >= (product.stockQuantity || 0);
   };
 
@@ -167,8 +173,9 @@ export default function ContactLensProducts() {
       {priceRange?.lowest && (
         <div className="mb-8 text-center">
           <p className="text-lg text-gray-600">
-            Contact lenses start from just ${priceRange.lowest.price.toFixed(2)}.{' '}
-            <Link 
+            Contact lenses start from just ${priceRange.lowest.price.toFixed(2)}
+            .{' '}
+            <Link
               href={`/contacts/${priceRange.lowest.slug}`}
               className="text-indigo-600 hover:underline"
             >
@@ -177,7 +184,7 @@ export default function ContactLensProducts() {
           </p>
         </div>
       )}
-      
+
       {!hasProducts && (
         <div className="text-center py-8">
           <p className="text-lg text-gray-600">
@@ -185,7 +192,7 @@ export default function ContactLensProducts() {
           </p>
         </div>
       )}
-      
+
       {hasProducts && (
         <>
           <motion.div
@@ -207,7 +214,7 @@ export default function ContactLensProducts() {
                   <Link href={`/contacts/${product.slug}`} className="block">
                     <div className="aspect-[3/2] overflow-hidden relative bg-gray-50">
                       <Image
-                        src={product.imageUrl || '/placeholder.svg'}
+                        src={product.thumbnail || '/placeholder.svg'}
                         alt={product.name}
                         fill
                         className="object-cover transition-transform duration-300 hover:scale-105"
@@ -224,9 +231,13 @@ export default function ContactLensProducts() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Tag className="h-3 w-3 text-gray-500" />
-                          <p className="text-xs text-gray-500">{product.brand}</p>
+                          <p className="text-xs text-gray-500">
+                            {product.brand}
+                          </p>
                         </div>
-                        <h3 className="font-bold text-lg line-clamp-1 text-gray-900">{product.name}</h3>
+                        <h3 className="font-bold text-lg line-clamp-1 text-gray-900">
+                          {product.name}
+                        </h3>
                         <p className="text-gray-600 text-xs line-clamp-2 mt-1">
                           {product.description}
                         </p>
@@ -248,21 +259,21 @@ export default function ContactLensProducts() {
                   </Link>
                   <div className="px-4 pb-4">
                     {isOutOfStock(product) ? (
-                      <Button 
+                      <Button
                         className="w-full bg-gray-100 text-gray-400 cursor-not-allowed"
                         disabled
                       >
                         Out of Stock
                       </Button>
                     ) : isMaxLimitReached(product) ? (
-                      <Button 
+                      <Button
                         className="w-full bg-amber-50 text-amber-600 border border-amber-200 cursor-not-allowed"
                         disabled
                       >
                         Max Limit Reached
                       </Button>
                     ) : (
-                      <Button 
+                      <Button
                         className="w-full bg-black text-white hover:bg-gray-800 transition-colors duration-200"
                         onClick={(e) => handleAddToCart(e, product)}
                       >
@@ -275,17 +286,17 @@ export default function ContactLensProducts() {
               </motion.div>
             ))}
           </motion.div>
-          
+
           {pagination.totalPages > 1 && (
             <div className="mt-8">
-              <Pagination 
-                currentPage={pagination.page} 
-                totalPages={pagination.totalPages} 
-                onPageChange={handlePageChange} 
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
               />
             </div>
           )}
-          
+
           <div className="text-center text-sm text-gray-500 mt-4">
             Showing {products.length} of {pagination.total} products
           </div>
