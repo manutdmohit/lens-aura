@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
       productType: 'contacts',
     })
       .sort({ createdAt: -1 })
-      .select('name brand description slug productType price imageUrl stockQuantity inStock')
+      .select(
+        'name brand description slug productType price thumbnail stockQuantity inStock'
+      )
       .skip(skip)
       .limit(limit);
 
@@ -33,17 +35,20 @@ export async function GET(req: NextRequest) {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return NextResponse.json({
-      products,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-      }
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        products,
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
   }
