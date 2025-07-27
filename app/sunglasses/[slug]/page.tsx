@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -100,7 +100,6 @@ export default function SunGlassesProductPage() {
   // Generate dynamic SEO metadata
   const pageTitle = `${product?.name} - Lens Aura`;
   const pageDescription = `${product?.description} - Lens Aura`;
-  // const pageUrl = `https://lensaura.com/sunglasses/${slug}`;
 
   interface RelatedProduct {
     id: string;
@@ -160,30 +159,6 @@ export default function SunGlassesProductPage() {
       fetchProduct();
     }
   }, [slug, router]);
-
-  // Fetch related products
-  // useEffect(() => {
-  //   const fetchRelatedProducts = async () => {
-  //     if (!product?.productType) return;
-  //     try {
-  //       const response = await fetch(
-  //         `/api/glasses/related/<span class="math-inline">\{slug\}?category\=</span>{product.category}`
-  //       ); // Example API endpoint
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         setRelatedProducts(data.relatedProducts);
-  //       } else {
-  //         console.error('Failed to fetch related products');
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching related products:', error);
-  //     }
-  //   };
-
-  //   if (product?.productType) {
-  //     fetchRelatedProducts();
-  //   }
-  // }, [slug, product?.productType]);
 
   // Handle color selection
   const handleColorSelect = (color: string) => {
@@ -265,7 +240,7 @@ export default function SunGlassesProductPage() {
             variants={slideUp}
           >
             {/* Main Image */}
-            <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="relative w-full rounded-2xl overflow-hidden transition-all duration-300">
               <Image
                 src={
                   productImages[activeImageIndex] ||
@@ -273,12 +248,11 @@ export default function SunGlassesProductPage() {
                   '/placeholder.svg'
                 }
                 alt={product.name}
-                // sizes="(max-width: 768px) 100vw, 50vw"
-                height={500}
-                width={500}
+                width={500} // Explicit width for optimization
+                height={500} // Explicit height, adjust based on common image ratio
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px" // Refined sizes for responsiveness
                 priority
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwQzIyMC45MTEgMTUwIDIzNy41IDE2Ni41ODkgMjM3LjUgMTg3LjVDMjM3LjUgMjA4LjQxMSAyMjAuOTExIDIyNSAyMDAgMjI1QzE3OS4wODkgMjI1IDE2Mi41IDIwOC40MTEgMTYyLjUgMTg3LjVDMTYyLjUgMTY2LjU4OSAxNzkuMDg5IDE1MCAyMDAgMTUwWiIgZmlsbD0iI0Q2RDhEQSIvPgo8L3N2Zz4K"
+                className="object-contain w-full h-auto" // Preserve aspect ratio
               />
 
               {/* Product badges */}
@@ -300,20 +274,24 @@ export default function SunGlassesProductPage() {
               </div>
 
               {/* Image zoom overlay effect */}
-              <div className="absolute inset-0 bg-black opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
+              <div
+                className="absolute inset-0 bg-black opacity-0 hover:opacity-10 transition-opacity duration-300 cursor-zoom-in"
+                onClick={() => handleImageSelect(activeImageIndex)} // Optional: Add click for zoom/lightbox
+              />
             </div>
 
             {/* Thumbnail Images */}
             {productImages.length > 1 && (
-              <div className="grid grid-cols-5 gap-2 mt-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-4">
                 {productImages.map((image, index) => (
                   <motion.button
                     key={index}
-                    className={`relative aspect-square bg-gray-50 rounded-lg overflow-hidden transition-all duration-200 ${
-                      activeImageIndex === index
-                        ? 'ring-2 ring-blue-600 ring-offset-2 ring-offset-white'
-                        : 'hover:ring-1 hover:ring-gray-300 hover:ring-offset-1'
-                    }`}
+                    className={`relative rounded-lg overflow-hidden transition-all duration-200 border-2
+                      ${
+                        activeImageIndex === index
+                          ? 'border-blue-500'
+                          : 'border-transparent'
+                      }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleImageSelect(index)}
@@ -322,12 +300,11 @@ export default function SunGlassesProductPage() {
                     <Image
                       src={image || '/placeholder.svg'}
                       alt={`${product.name} - View ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 20vw, 10vw"
-                      className="object-cover"
-                      quality={80}
-                      placeholder="blur"
-                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ1NyA3NSAxMTguNzUgODMuMjk4OSAxMTguNzUgOTMuNzVDMTE4Ljc1IDEwNC4yMDEgMTEwLjQ1NyAxMTIuNSAxMDAgMTEyLjVDODkuNTQzMSAxMTIuNSA4MS4yNSAxMDQuMjAxIDgxLjI1IDkzLjc1QzgxLjI1IDgzLjI5ODkgODkuNTQzMSA3NSAxMDAgNzVaIiBmaWxsPSIjRDZEOERBIi8+Cjwvc3ZnPgo="
+                      width={100} // Explicit width for thumbnails
+                      height={100} // Explicit height for thumbnails
+                      sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 15vw" // Adjusted for thumbnail grid
+                      className="object-contain w-full h-auto" // Preserve aspect ratio
+                      loading="lazy" // Lazy load for performance
                     />
                   </motion.button>
                 ))}
@@ -425,7 +402,6 @@ export default function SunGlassesProductPage() {
                       </span>
                     </div>
                   )}
-
                   {product.frameMaterial && (
                     <div className="flex justify-between">
                       <span className="text-gray-500 text-sm">
@@ -436,7 +412,6 @@ export default function SunGlassesProductPage() {
                       </span>
                     </div>
                   )}
-
                   {product.style && (
                     <div className="flex justify-between">
                       <span className="text-gray-500 text-sm">Style</span>
@@ -455,7 +430,6 @@ export default function SunGlassesProductPage() {
                       </span>
                     </div>
                   )}
-
                   {product.frameWidth && (
                     <div className="flex justify-between">
                       <span className="text-gray-500 text-sm">Frame Width</span>
@@ -464,7 +438,6 @@ export default function SunGlassesProductPage() {
                       </span>
                     </div>
                   )}
-
                   {product.gender && (
                     <div className="flex justify-between">
                       <span className="text-gray-500 text-sm">Gender</span>
@@ -502,7 +475,6 @@ export default function SunGlassesProductPage() {
                     </span>
                   </div>
                 )}
-
                 {product.uvProtection !== undefined && (
                   <div
                     className={`flex flex-col items-center justify-center p-4 rounded-xl ${
@@ -518,7 +490,6 @@ export default function SunGlassesProductPage() {
                     </span>
                   </div>
                 )}
-
                 {product.style && (
                   <div
                     className={`flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 text-green-700`}
@@ -552,11 +523,7 @@ export default function SunGlassesProductPage() {
                       <motion.button
                         key={index}
                         className={`relative p-1 rounded-full cursor-pointer transition-all 
-                          ${
-                            selectedColor === color
-                              ? 'ring-2 ring-blue-600 ring-offset-2'
-                              : 'hover:ring-1 hover:ring-gray-300 hover:ring-offset-1'
-                          }`}
+                        `}
                         onClick={() => handleColorSelect(color)}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -665,17 +632,6 @@ export default function SunGlassesProductPage() {
                 </div>
               </div>
             </motion.div>
-
-            {/* Virtual Try-On */}
-            {/* <motion.div variants={slideUp}>
-              <Button
-                variant="outline"
-                className="w-full py-5 border-gray-300 rounded-lg"
-              >
-                <Eye className="mr-2 h-5 w-5" />
-                Virtual Try-On
-              </Button>
-            </motion.div> */}
 
             {/* Shipping & Returns */}
             <motion.div
@@ -788,7 +744,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     )}
-
                     {product.frameMaterial && (
                       <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div className="flex items-start">
@@ -806,7 +761,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     )}
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
@@ -822,7 +776,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     </div>
-
                     {product.uvProtection && (
                       <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div className="flex items-start">
@@ -862,7 +815,6 @@ export default function SunGlassesProductPage() {
                         {product.name} with premium lenses
                       </p>
                     </div>
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center text-center">
                       <div className="bg-blue-100 rounded-full p-3 mb-3">
                         <Package className="h-5 w-5 text-blue-600" />
@@ -874,7 +826,6 @@ export default function SunGlassesProductPage() {
                         Durable case to protect your sunglasses
                       </p>
                     </div>
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center text-center">
                       <div className="bg-blue-100 rounded-full p-3 mb-3">
                         <FileText className="h-5 w-5 text-blue-600" />
@@ -918,7 +869,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     </div>
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
@@ -935,7 +885,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     </div>
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
@@ -952,7 +901,6 @@ export default function SunGlassesProductPage() {
                         </div>
                       </div>
                     </div>
-
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
@@ -1020,7 +968,6 @@ export default function SunGlassesProductPage() {
                         </li>
                       </ul>
                     </div>
-
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
                       <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                         <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
@@ -1069,7 +1016,6 @@ export default function SunGlassesProductPage() {
                       If you're not happy with your sunglasses for any reason,
                       we offer a simple return and exchange policy.
                     </p>
-
                     <div className="space-y-3">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
