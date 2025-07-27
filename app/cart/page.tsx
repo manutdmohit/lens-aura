@@ -43,7 +43,11 @@ export default function CartPage() {
     }
   };
 
-  const handleUpdateQuantity = (productId: string | undefined, quantity: number, color: string) => {
+  const handleUpdateQuantity = (
+    productId: string | undefined,
+    quantity: number,
+    color: string
+  ) => {
     if (productId) {
       updateQuantity(productId, quantity, color);
     }
@@ -101,12 +105,12 @@ export default function CartPage() {
                     >
                       <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                         <Image
-                          src={item.product.imageUrl || '/placeholder.svg'}
+                          src={item.product.thumbnail || '/placeholder.svg'}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                           width={100}
                           height={100}
-                          priority    
+                          priority
                         />
                       </div>
                       <div className="flex-grow">
@@ -154,7 +158,9 @@ export default function CartPage() {
                             </button>
                           </div>
                           <button
-                            onClick={() => handleRemoveItem(item.product.id, item.color)}
+                            onClick={() =>
+                              handleRemoveItem(item.product.id, item.color)
+                            }
                             className="text-gray-500 hover:text-red-600"
                             aria-label="Remove item"
                           >
