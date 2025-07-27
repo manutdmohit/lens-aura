@@ -10,7 +10,8 @@ export default function MensGlassesNewArrivalsPage() {
     Array<{
       id: string;
       name: string;
-      imageUrl: string;
+      thumbnail: string;
+      images: string[];
       price: number;
       slug?: string;
     }>
@@ -61,12 +62,11 @@ export default function MensGlassesNewArrivalsPage() {
                 ...p,
                 description: '',
                 stockQuantity: 0,
-                productType: 'glasses',
+                productType: 'sunglasses',
                 status: 'active',
                 colors: [],
                 inStock: true,
-                thumbnail: p.imageUrl,
-                images: p.imageUrl ? [p.imageUrl] : [],
+                thumbnail: p.thumbnail,
               }))}
             />
           </>

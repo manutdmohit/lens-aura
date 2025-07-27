@@ -10,7 +10,8 @@ export default function MensSunglassesPage() {
     Array<{
       id: string;
       name: string;
-      imageUrl: string;
+      thumbnail: string;
+      images: string[];
       price: number;
       slug?: string;
     }>
@@ -80,8 +81,7 @@ export default function MensSunglassesPage() {
                 status: 'active',
                 colors: [],
                 inStock: true,
-                thumbnail: p.imageUrl,
-                images: p.imageUrl ? [p.imageUrl] : [],
+                thumbnail: p.thumbnail,
               }))}
             />
             <div className="mt-8">

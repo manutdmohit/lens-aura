@@ -177,6 +177,7 @@ export const productSchema = z.object({
   price: z.coerce
     .number({ invalid_type_error: 'Price must be a number' })
     .positive({ message: 'Price must be positive' }),
+  isFeatured: z.boolean().optional(),
   thumbnail: z.string().min(1, { message: 'Please provide an image URL' }),
   images: z.array(z.string()).optional().default([]),
   stockQuantity: z.coerce

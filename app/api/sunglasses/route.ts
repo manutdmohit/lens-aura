@@ -31,7 +31,10 @@ export async function GET(req: NextRequest) {
     // Fetch products with pagination
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug thumbnail  productType price gender')
+      .select(
+        'name slug thumbnail inStock stockQuantity productType price colors gender'
+      )
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 

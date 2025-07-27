@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import StaggeredList from '@/components/staggered-list';
 import Image from 'next/image';
+import { Badge } from './ui/badge';
 
 interface ProductGridProps {
   products: Product[];
@@ -39,9 +40,27 @@ export default function ProductGrid({ products }: ProductGridProps) {
                 />
               </motion.div>
             </div>
-            <CardContent className="p-4">
+            <CardContent className="p-4 flex flex-col justify-between">
               <h3 className="font-medium text-lg">{product.name}</h3>
-              <p className="text-gray-600">${product.price.toFixed(2)}</p>
+              <div>
+                <p className="text-gray-600 font-bold">
+                  ${product.price.toFixed(2)}
+                </p>
+                {/* <Badge>{product.productType}</Badge>
+              <p className="text-gray-600 text-sm capitalize">
+                {product.gender}
+              </p> */}
+                <div className="flex items-center justify-between mt-2">
+                  <Badge className="text-center">{product.gender}</Badge>
+                  {product.inStock === true ? ( // Hide out of stock products
+                    <Badge className="px-3 py-1 rounded-full">In Stock</Badge>
+                  ) : (
+                    <Badge className="px-3 py-1 rounded-full bg-red-500 text-white">
+                      Out of Stock
+                    </Badge>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Link>

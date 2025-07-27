@@ -8,6 +8,7 @@ export interface IProduct extends Document {
   slug: string;
   description: string;
   price: number;
+  isFeatured?: boolean;
   thumbnail: string;
   images?: string[];
   stockQuantity: number;
@@ -80,6 +81,7 @@ const ProductSchema = new Schema<IProduct>(
     slug: { type: String, required: true, trim: true, index: true },
     description: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
+    isFeatured: { type: Boolean, default: false },
     thumbnail: { type: String, required: true },
     images: { type: [String], default: [] },
     stockQuantity: { type: Number, required: true, min: 0, default: 0 },
