@@ -123,7 +123,7 @@ export default function CartDropdown() {
                     >
                       <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                         <Image
-                          src={item.product.imageUrl || '/placeholder.svg'}
+                          src={item.product.thumbnail || '/placeholder.svg'}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                           width={100}
