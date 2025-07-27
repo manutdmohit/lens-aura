@@ -80,6 +80,8 @@ export default function WomensSunglassesPage() {
                 status: 'active',
                 colors: [],
                 inStock: true,
+                thumbnail: p.imageUrl,
+                images: p.imageUrl ? [p.imageUrl] : [],
               }))}
             />
             <div className="mt-8">
