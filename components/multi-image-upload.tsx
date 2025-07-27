@@ -1,8 +1,10 @@
 'use client';
 
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface MultiImageUploadProps {
   onImagesUploaded: (urls: string[]) => void;
@@ -16,6 +18,8 @@ export default function MultiImageUpload({
   currentImageCount = 0,
 }: MultiImageUploadProps) {
   const { toast } = useToast();
+  const pathname = usePathname();
+  const [previews, setPreviews] = useState<string[]>([]);
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (currentImageCount + acceptedFiles.length > maxImages) {
@@ -44,7 +48,9 @@ export default function MultiImageUpload({
 
     try {
       const base64Strings = await Promise.all(filePromises);
-      onImagesUploaded(base64Strings);
+      const newPreviews = [...previews, ...base64Strings];
+      setPreviews(newPreviews);
+      onImagesUploaded(newPreviews);
     } catch (error) {
       console.error('Error reading files:', error);
       toast({
@@ -53,6 +59,12 @@ export default function MultiImageUpload({
         variant: 'destructive',
       });
     }
+  };
+
+  const removeImage = (index: number) => {
+    const newPreviews = previews.filter((_, i) => i !== index);
+    setPreviews(newPreviews);
+    onImagesUploaded(newPreviews);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -86,6 +98,30 @@ export default function MultiImageUpload({
           </p>
         </div>
       </div>
+
+      {pathname === '/admin/products/add' && previews.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm font-medium mb-2">Uploaded Images:</p>
+          <div className="grid grid-cols-3 gap-2">
+            {previews.map((preview, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={preview}
+                  alt={`Uploaded ${index + 1}`}
+                  className="w-full h-20 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
