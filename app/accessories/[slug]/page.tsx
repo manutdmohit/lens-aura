@@ -203,13 +203,16 @@ export default function AccessoryProductPage() {
         {/* Product Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
-          <motion.div className="space-y-4 lg:sticky lg:top-24" variants={slideUp}>
+          <motion.div
+            className="space-y-4 lg:sticky lg:top-24"
+            variants={slideUp}
+          >
             {/* Main Image */}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300">
               <Image
                 src={
                   productImages[activeImageIndex] ||
-                  product.imageUrl ||
+                  product.thumbnail ||
                   '/placeholder.svg'
                 }
                 alt={product.name}
@@ -236,7 +239,7 @@ export default function AccessoryProductPage() {
                     </Badge>
                   )}
               </div>
-              
+
               {/* Image zoom overlay effect */}
               <div className="absolute inset-0 bg-black opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
             </div>
@@ -268,7 +271,10 @@ export default function AccessoryProductPage() {
           </motion.div>
 
           {/* Product Details */}
-          <motion.div className="space-y-6 md:space-y-8" variants={staggerChildren}>
+          <motion.div
+            className="space-y-6 md:space-y-8"
+            variants={staggerChildren}
+          >
             {/* Product Title and Price */}
             <motion.div variants={slideUp} className="border-b pb-5">
               <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
@@ -282,17 +288,19 @@ export default function AccessoryProductPage() {
               <div className="flex items-center mt-2">
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg 
-                      key={star} 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 text-yellow-400" 
-                      viewBox="0 0 20 20" 
+                    <svg
+                      key={star}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-yellow-400"
+                      viewBox="0 0 20 20"
                       fill="currentColor"
                     >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <span className="ml-2 text-gray-600 text-sm">4.8 (120 reviews)</span>
+                  <span className="ml-2 text-gray-600 text-sm">
+                    4.8 (120 reviews)
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -318,10 +326,15 @@ export default function AccessoryProductPage() {
             </motion.div>
 
             {/* Description */}
-            <motion.div variants={slideUp} className="bg-gray-50 p-5 rounded-xl">
+            <motion.div
+              variants={slideUp}
+              className="bg-gray-50 p-5 rounded-xl"
+            >
               <div className="flex items-center mb-2">
                 <Info className="h-5 w-5 mr-2 text-blue-600" />
-                <h3 className="font-medium text-gray-900">About this product</h3>
+                <h3 className="font-medium text-gray-900">
+                  About this product
+                </h3>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 {product.description}
@@ -332,9 +345,13 @@ export default function AccessoryProductPage() {
             {product.colors && product.colors.length > 0 && (
               <motion.div variants={slideUp} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">Available Colors</h3>
+                  <h3 className="font-medium text-gray-900">
+                    Available Colors
+                  </h3>
                   <span className="text-sm text-gray-500">
-                    {selectedColor ? `Selected: ${selectedColor}` : 'Select a color'}
+                    {selectedColor
+                      ? `Selected: ${selectedColor}`
+                      : 'Select a color'}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -376,19 +393,16 @@ export default function AccessoryProductPage() {
                       Max Stock Limit Reached
                     </Button>
                   ) : (
-                    <motion.div
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full"
-                    >
-                      <AddToCartButton product={product as unknown as IProduct} selectedColor={selectedColor} />
+                    <motion.div whileTap={{ scale: 0.98 }} className="w-full">
+                      <AddToCartButton
+                        product={product as unknown as IProduct}
+                        selectedColor={selectedColor}
+                      />
                     </motion.div>
                   )}
                 </div>
-                
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ y: -2 }}
-                >
+
+                <motion.div whileTap={{ scale: 0.9 }} whileHover={{ y: -2 }}>
                   <Button
                     variant="outline"
                     size="icon"
@@ -401,7 +415,10 @@ export default function AccessoryProductPage() {
             </motion.div>
 
             {/* Product Features */}
-            <motion.div variants={slideUp} className="bg-gray-50 rounded-xl overflow-hidden">
+            <motion.div
+              variants={slideUp}
+              className="bg-gray-50 rounded-xl overflow-hidden"
+            >
               <div className="flex items-center bg-gray-50 p-4 border-b">
                 <Settings className="h-5 w-5 mr-2 text-blue-600" />
                 <h3 className="font-medium text-gray-900">Features</h3>
@@ -411,14 +428,19 @@ export default function AccessoryProductPage() {
                   <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 text-green-700">
                     <Settings className="h-6 w-6 mb-2" />
                     <span className="text-sm font-medium">Gender</span>
-                    <span className="text-xs">{formatText(product.gender)}</span>
+                    <span className="text-xs">
+                      {formatText(product.gender)}
+                    </span>
                   </div>
                 )}
               </div>
             </motion.div>
 
             {/* What's Included */}
-            <motion.div variants={slideUp} className="bg-gray-50 rounded-xl p-6">
+            <motion.div
+              variants={slideUp}
+              className="bg-gray-50 rounded-xl p-6"
+            >
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Package className="h-5 w-5 mr-2 text-blue-600" />
                 What's Included
@@ -429,16 +451,16 @@ export default function AccessoryProductPage() {
                     <Package className="h-5 w-5 text-blue-600" />
                   </div>
                   <h4 className="font-medium text-gray-900 text-sm">Product</h4>
-                  <p className="text-gray-600 text-xs mt-1">
-                    {product.name}
-                  </p>
+                  <p className="text-gray-600 text-xs mt-1">{product.name}</p>
                 </div>
-                
+
                 <div className="bg-white rounded-xl p-4 border border-gray-100 flex flex-col items-center text-center">
                   <div className="bg-blue-100 rounded-full p-3 mb-3">
                     <Package className="h-5 w-5 text-blue-600" />
                   </div>
-                  <h4 className="font-medium text-gray-900 text-sm">Protective Packaging</h4>
+                  <h4 className="font-medium text-gray-900 text-sm">
+                    Protective Packaging
+                  </h4>
                   <p className="text-gray-600 text-xs mt-1">
                     Secure packaging to protect your accessory
                   </p>
@@ -450,4 +472,4 @@ export default function AccessoryProductPage() {
       </div>
     </motion.div>
   );
-} 
+}

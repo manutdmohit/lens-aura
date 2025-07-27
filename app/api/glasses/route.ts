@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     // Add gender filter if present
     const gender = searchParams.get('gender');
-  
+
     const query: any = {
       status: 'active',
       productType: 'glasses',
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     // Fetch products with pagination
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug productType price imageUrl gender')
+      .select('name slug productType price thumbnail gender')
       .skip(skip)
       .limit(limit);
 
@@ -45,22 +45,28 @@ export async function GET(req: NextRequest) {
     // Disconnect from database
     // await disconnectFromDatabase();
 
-    return NextResponse.json({
-      products,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-      }
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        products,
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Error fetching glasses products:', error);
-    
-    return NextResponse.json({ 
-      error: 'Failed to fetch glasses products' 
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch glasses products',
+      },
+      { status: 500 }
+    );
   }
 }
