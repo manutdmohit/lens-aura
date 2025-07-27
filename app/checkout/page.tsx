@@ -54,12 +54,11 @@ export default function CheckoutPage() {
   if (!isClient) {
     return (
       <main className="flex flex-col min-h-screen">
-   
         <div className="flex-grow max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="h-96 flex items-center justify-center">
             Loading checkout...
           </div>
-        </div>  
+        </div>
       </main>
     );
   }
@@ -67,7 +66,6 @@ export default function CheckoutPage() {
   return (
     <PageTransition>
       <main className="flex flex-col min-h-screen">
-       
         <div className="flex-grow max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-8">
             <Link
@@ -103,7 +101,7 @@ export default function CheckoutPage() {
                       >
                         <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                           <img
-                            src={item.product.imageUrl || '/placeholder.svg'}
+                            src={item.product.thumbnail || '/placeholder.svg'}
                             alt={item.product.name}
                             className="w-full h-full object-cover"
                           />
@@ -210,7 +208,6 @@ export default function CheckoutPage() {
             </div>
           )}
         </div>
-        
       </main>
     </PageTransition>
   );
