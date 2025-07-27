@@ -260,20 +260,25 @@ export default function SunGlassesProductPage() {
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Product Images */}
-          <motion.div className="space-y-4 lg:sticky lg:top-24" variants={slideUp}>
+          <motion.div
+            className="space-y-4 lg:sticky lg:top-24"
+            variants={slideUp}
+          >
             {/* Main Image */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300">
               <Image
                 src={
                   productImages[activeImageIndex] ||
-                  product.imageUrl ||
+                  product.thumbnail ||
                   '/placeholder.svg'
                 }
                 alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover object-center"
+                // sizes="(max-width: 768px) 100vw, 50vw"
+                height={500}
+                width={500}
                 priority
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwQzIyMC45MTEgMTUwIDIzNy41IDE2Ni41ODkgMjM3LjUgMTg3LjVDMjM3LjUgMjA4LjQxMSAyMjAuOTExIDIyNSAyMDAgMjI1QzE3OS4wODkgMjI1IDE2Mi41IDIwOC40MTEgMTYyLjUgMTg3LjVDMTYyLjUgMTY2LjU4OSAxNzkuMDg5IDE1MCAyMDAgMTUwWiIgZmlsbD0iI0Q2RDhEQSIvPgo8L3N2Zz4K"
               />
 
               {/* Product badges */}
@@ -293,7 +298,7 @@ export default function SunGlassesProductPage() {
                     </Badge>
                   )}
               </div>
-              
+
               {/* Image zoom overlay effect */}
               <div className="absolute inset-0 bg-black opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
             </div>
@@ -320,6 +325,9 @@ export default function SunGlassesProductPage() {
                       fill
                       sizes="(max-width: 768px) 20vw, 10vw"
                       className="object-cover"
+                      quality={80}
+                      placeholder="blur"
+                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ1NyA3NSAxMTguNzUgODMuMjk4OSAxMTguNzUgOTMuNzVDMTE4Ljc1IDEwNC4yMDEgMTEwLjQ1NyAxMTIuNSAxMDAgMTEyLjVDODkuNTQzMSAxMTIuNSA4MS4yNSAxMDQuMjAxIDgxLjI1IDkzLjc1QzgxLjI1IDgzLjI5ODkgODkuNTQzMSA3NSAxMDAgNzVaIiBmaWxsPSIjRDZEOERBIi8+Cjwvc3ZnPgo="
                     />
                   </motion.button>
                 ))}
@@ -328,7 +336,10 @@ export default function SunGlassesProductPage() {
           </motion.div>
 
           {/* Product Info */}
-          <motion.div className="space-y-6 md:space-y-8" variants={staggerChildren}>
+          <motion.div
+            className="space-y-6 md:space-y-8"
+            variants={staggerChildren}
+          >
             {/* Product Title and Price */}
             <motion.div variants={slideUp} className="border-b pb-5">
               <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
@@ -342,17 +353,19 @@ export default function SunGlassesProductPage() {
               <div className="flex items-center mt-2">
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg 
-                      key={star} 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 text-yellow-400" 
-                      viewBox="0 0 20 20" 
+                    <svg
+                      key={star}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-yellow-400"
+                      viewBox="0 0 20 20"
                       fill="currentColor"
                     >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <span className="ml-2 text-gray-600 text-sm">4.8 (120 reviews)</span>
+                  <span className="ml-2 text-gray-600 text-sm">
+                    4.8 (120 reviews)
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -378,10 +391,15 @@ export default function SunGlassesProductPage() {
             </motion.div>
 
             {/* Description */}
-            <motion.div variants={slideUp} className="bg-gray-50 p-5 rounded-xl">
+            <motion.div
+              variants={slideUp}
+              className="bg-gray-50 p-5 rounded-xl"
+            >
               <div className="flex items-center mb-2">
                 <Info className="h-5 w-5 mr-2 text-blue-600" />
-                <h3 className="font-medium text-gray-900">About this product</h3>
+                <h3 className="font-medium text-gray-900">
+                  About this product
+                </h3>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 {product.description}
@@ -389,7 +407,10 @@ export default function SunGlassesProductPage() {
             </motion.div>
 
             {/* Specifications */}
-            <motion.div variants={slideUp} className="border border-gray-200 rounded-xl overflow-hidden">
+            <motion.div
+              variants={slideUp}
+              className="border border-gray-200 rounded-xl overflow-hidden"
+            >
               <div className="flex items-center bg-gray-50 p-4 border-b">
                 <FileText className="h-5 w-5 mr-2 text-blue-600" />
                 <h3 className="font-medium text-gray-900">Specifications</h3>
@@ -407,7 +428,9 @@ export default function SunGlassesProductPage() {
 
                   {product.frameMaterial && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500 text-sm">Frame Material</span>
+                      <span className="text-gray-500 text-sm">
+                        Frame Material
+                      </span>
                       <span className="font-medium text-sm text-gray-900">
                         {formatText(product.frameMaterial)}
                       </span>
@@ -455,30 +478,51 @@ export default function SunGlassesProductPage() {
             </motion.div>
 
             {/* Features */}
-            <motion.div variants={slideUp} className="border border-gray-200 rounded-xl overflow-hidden">
+            <motion.div
+              variants={slideUp}
+              className="border border-gray-200 rounded-xl overflow-hidden"
+            >
               <div className="flex items-center bg-gray-50 p-4 border-b">
                 <Settings className="h-5 w-5 mr-2 text-blue-600" />
                 <h3 className="font-medium text-gray-900">Features</h3>
               </div>
               <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {product.polarized !== undefined && (
-                  <div className={`flex flex-col items-center justify-center p-4 rounded-xl ${product.polarized ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
+                  <div
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl ${
+                      product.polarized
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-gray-50 text-gray-500'
+                    }`}
+                  >
                     <Sun className="h-6 w-6 mb-2" />
                     <span className="text-sm font-medium">Polarized</span>
-                    <span className="text-xs">{product.polarized ? 'Yes' : 'No'}</span>
+                    <span className="text-xs">
+                      {product.polarized ? 'Yes' : 'No'}
+                    </span>
                   </div>
                 )}
 
                 {product.uvProtection !== undefined && (
-                  <div className={`flex flex-col items-center justify-center p-4 rounded-xl ${product.uvProtection ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
+                  <div
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl ${
+                      product.uvProtection
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-gray-50 text-gray-500'
+                    }`}
+                  >
                     <Sun className="h-6 w-6 mb-2" />
                     <span className="text-sm font-medium">UV Protection</span>
-                    <span className="text-xs">{product.uvProtection ? 'Yes' : 'No'}</span>
+                    <span className="text-xs">
+                      {product.uvProtection ? 'Yes' : 'No'}
+                    </span>
                   </div>
                 )}
 
                 {product.style && (
-                  <div className={`flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 text-green-700`}>
+                  <div
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 text-green-700`}
+                  >
                     <Settings className="h-6 w-6 mb-2" />
                     <span className="text-sm font-medium">Style</span>
                     <span className="text-xs">{formatText(product.style)}</span>
@@ -489,7 +533,10 @@ export default function SunGlassesProductPage() {
 
             {/* Color Selection */}
             {displayColors.length > 0 && (
-              <motion.div variants={slideUp} className="border border-gray-200 rounded-xl overflow-hidden">
+              <motion.div
+                variants={slideUp}
+                className="border border-gray-200 rounded-xl overflow-hidden"
+              >
                 <div className="flex items-center justify-between bg-gray-50 p-4 border-b">
                   <div className="flex items-center">
                     <Palette className="h-5 w-5 mr-2 text-blue-600" />
@@ -505,16 +552,24 @@ export default function SunGlassesProductPage() {
                       <motion.button
                         key={index}
                         className={`relative p-1 rounded-full cursor-pointer transition-all 
-                          ${selectedColor === color ? 'ring-2 ring-blue-600 ring-offset-2' : 'hover:ring-1 hover:ring-gray-300 hover:ring-offset-1'}`}
+                          ${
+                            selectedColor === color
+                              ? 'ring-2 ring-blue-600 ring-offset-2'
+                              : 'hover:ring-1 hover:ring-gray-300 hover:ring-offset-1'
+                          }`}
                         onClick={() => handleColorSelect(color)}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
-                        <div 
+                        <div
                           className="w-8 h-8 rounded-full"
-                          style={{ 
+                          style={{
                             backgroundColor: color.toLowerCase(),
-                            border: color.toLowerCase() === 'white' || color.toLowerCase() === '#ffffff' ? '1px solid #e5e5e5' : 'none'
+                            border:
+                              color.toLowerCase() === 'white' ||
+                              color.toLowerCase() === '#ffffff'
+                                ? '1px solid #e5e5e5'
+                                : 'none',
                           }}
                         />
                         {selectedColor === color && (
@@ -523,7 +578,18 @@ export default function SunGlassesProductPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                           >
-                            <Check className={`h-4 w-4 ${['white', '#ffffff', 'yellow', '#ffff00'].includes(color.toLowerCase()) ? 'text-black' : 'text-white'}`} />
+                            <Check
+                              className={`h-4 w-4 ${
+                                [
+                                  'white',
+                                  '#ffffff',
+                                  'yellow',
+                                  '#ffff00',
+                                ].includes(color.toLowerCase())
+                                  ? 'text-black'
+                                  : 'text-white'
+                              }`}
+                            />
                           </motion.div>
                         )}
                       </motion.button>
@@ -534,8 +600,8 @@ export default function SunGlassesProductPage() {
             )}
 
             {/* Add to Cart */}
-            <motion.div 
-              variants={slideUp} 
+            <motion.div
+              variants={slideUp}
               className="flex flex-col space-y-4 mt-6 sticky bottom-0 bg-white pt-4 pb-2 border-t border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 sm:border-0 sm:static"
             >
               <div className="flex items-center justify-between mb-2">
@@ -545,11 +611,13 @@ export default function SunGlassesProductPage() {
                 </div>
                 {isInStock && product.stockQuantity && (
                   <span className="text-sm text-gray-500">
-                    {product.stockQuantity < 10 ? `Only ${product.stockQuantity} left` : `${product.stockQuantity} in stock`}
+                    {product.stockQuantity < 10
+                      ? `Only ${product.stockQuantity} left`
+                      : `${product.stockQuantity} in stock`}
                   </span>
                 )}
               </div>
-              
+
               <div className="flex space-x-4">
                 <div className="flex-1">
                   {!isInStock ? (
@@ -569,22 +637,16 @@ export default function SunGlassesProductPage() {
                       Max Stock Limit Reached
                     </Button>
                   ) : (
-                    <motion.div
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full"
-                    >
-                      <AddToCartButton 
+                    <motion.div whileTap={{ scale: 0.98 }} className="w-full">
+                      <AddToCartButton
                         product={product as unknown as IProduct}
-                        selectedColor={selectedColor} 
+                        selectedColor={selectedColor}
                       />
                     </motion.div>
                   )}
                 </div>
-                
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ y: -2 }}
-                >
+
+                <motion.div whileTap={{ scale: 0.9 }} whileHover={{ y: -2 }}>
                   <Button
                     variant="outline"
                     size="icon"
@@ -594,7 +656,7 @@ export default function SunGlassesProductPage() {
                   </Button>
                 </motion.div>
               </div>
-              
+
               {/* Quick shipping badge */}
               <div className="mt-4 flex justify-center">
                 <div className="flex items-center text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-full">
@@ -624,22 +686,34 @@ export default function SunGlassesProductPage() {
                 <div className="rounded-full bg-blue-100 p-3 mb-3">
                   <Truck className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-sm font-medium text-center">Free Shipping</h3>
-                <p className="text-xs text-gray-500 text-center">On orders over $50</p>
+                <h3 className="text-sm font-medium text-center">
+                  Free Shipping
+                </h3>
+                <p className="text-xs text-gray-500 text-center">
+                  On orders over $50
+                </p>
               </div>
               <div className="flex flex-col items-center p-4 rounded-xl border border-gray-200 bg-gray-50">
                 <div className="rounded-full bg-blue-100 p-3 mb-3">
                   <ShieldCheck className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-sm font-medium text-center">1-Year Warranty</h3>
-                <p className="text-xs text-gray-500 text-center">Against defects</p>
+                <h3 className="text-sm font-medium text-center">
+                  1-Year Warranty
+                </h3>
+                <p className="text-xs text-gray-500 text-center">
+                  Against defects
+                </p>
               </div>
               <div className="flex flex-col items-center p-4 rounded-xl border border-gray-200 bg-gray-50">
                 <div className="rounded-full bg-blue-100 p-3 mb-3">
                   <ArrowLeft className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-sm font-medium text-center">30-Day Returns</h3>
-                <p className="text-xs text-gray-500 text-center">Hassle-free returns</p>
+                <h3 className="text-sm font-medium text-center">
+                  30-Day Returns
+                </h3>
+                <p className="text-xs text-gray-500 text-center">
+                  Hassle-free returns
+                </p>
               </div>
             </motion.div>
           </motion.div>
@@ -672,7 +746,10 @@ export default function SunGlassesProductPage() {
             </TabsList>
 
             {/* Product Details Tab */}
-            <TabsContent value="details" className="focus-visible:outline-none focus-visible:ring-0">
+            <TabsContent
+              value="details"
+              className="focus-visible:outline-none focus-visible:ring-0"
+            >
               <div className="space-y-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -701,13 +778,17 @@ export default function SunGlassesProductPage() {
                             <Check className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900 text-sm">Polarized Lenses</h4>
-                            <p className="text-gray-600 text-xs mt-1">Reduces glare and eye strain in bright conditions</p>
+                            <h4 className="font-medium text-gray-900 text-sm">
+                              Polarized Lenses
+                            </h4>
+                            <p className="text-gray-600 text-xs mt-1">
+                              Reduces glare and eye strain in bright conditions
+                            </p>
                           </div>
                         </div>
                       </div>
                     )}
-                    
+
                     {product.frameMaterial && (
                       <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div className="flex items-start">
@@ -715,25 +796,33 @@ export default function SunGlassesProductPage() {
                             <Check className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900 text-sm">Durable {formatText(product.frameMaterial)} Frame</h4>
-                            <p className="text-gray-600 text-xs mt-1">Built to last with comfortable wear</p>
+                            <h4 className="font-medium text-gray-900 text-sm">
+                              Durable {formatText(product.frameMaterial)} Frame
+                            </h4>
+                            <p className="text-gray-600 text-xs mt-1">
+                              Built to last with comfortable wear
+                            </p>
                           </div>
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
                           <Heart className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 text-sm">Ergonomic Design</h4>
-                          <p className="text-gray-600 text-xs mt-1">Comfortable fit for all-day wear</p>
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            Ergonomic Design
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Comfortable fit for all-day wear
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {product.uvProtection && (
                       <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div className="flex items-start">
@@ -741,8 +830,12 @@ export default function SunGlassesProductPage() {
                             <Sun className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900 text-sm">UV Protection</h4>
-                            <p className="text-gray-600 text-xs mt-1">Complete UV400 protection against harmful rays</p>
+                            <h4 className="font-medium text-gray-900 text-sm">
+                              UV Protection
+                            </h4>
+                            <p className="text-gray-600 text-xs mt-1">
+                              Complete UV400 protection against harmful rays
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -762,27 +855,33 @@ export default function SunGlassesProductPage() {
                       <div className="bg-blue-100 rounded-full p-3 mb-3">
                         <Eye className="h-5 w-5 text-blue-600" />
                       </div>
-                      <h4 className="font-medium text-gray-900 text-sm">Sunglasses</h4>
+                      <h4 className="font-medium text-gray-900 text-sm">
+                        Sunglasses
+                      </h4>
                       <p className="text-gray-600 text-xs mt-1">
                         {product.name} with premium lenses
                       </p>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center text-center">
                       <div className="bg-blue-100 rounded-full p-3 mb-3">
                         <Package className="h-5 w-5 text-blue-600" />
                       </div>
-                      <h4 className="font-medium text-gray-900 text-sm">Protective Case</h4>
+                      <h4 className="font-medium text-gray-900 text-sm">
+                        Protective Case
+                      </h4>
                       <p className="text-gray-600 text-xs mt-1">
                         Durable case to protect your sunglasses
                       </p>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center text-center">
                       <div className="bg-blue-100 rounded-full p-3 mb-3">
                         <FileText className="h-5 w-5 text-blue-600" />
                       </div>
-                      <h4 className="font-medium text-gray-900 text-sm">Cleaning Cloth</h4>
+                      <h4 className="font-medium text-gray-900 text-sm">
+                        Cleaning Cloth
+                      </h4>
                       <p className="text-gray-600 text-xs mt-1">
                         Microfiber cloth for lens cleaning
                       </p>
@@ -793,7 +892,10 @@ export default function SunGlassesProductPage() {
             </TabsContent>
 
             {/* Care & Warranty Tab */}
-            <TabsContent value="care" className="focus-visible:outline-none focus-visible:ring-0">
+            <TabsContent
+              value="care"
+              className="focus-visible:outline-none focus-visible:ring-0"
+            >
               <div className="space-y-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -807,44 +909,63 @@ export default function SunGlassesProductPage() {
                           <Hand className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 text-sm">Clean Regularly</h4>
-                          <p className="text-gray-600 text-xs mt-1">Clean your lenses with the provided microfiber cloth</p>
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            Clean Regularly
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Clean your lenses with the provided microfiber cloth
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
                           <Droplets className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 text-sm">Use Proper Solutions</h4>
-                          <p className="text-gray-600 text-xs mt-1">Only use lens cleaning solution recommended for your lens type</p>
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            Use Proper Solutions
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Only use lens cleaning solution recommended for your
+                            lens type
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
                           <Ban className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 text-sm">Avoid Heat</h4>
-                          <p className="text-gray-600 text-xs mt-1">Keep sunglasses away from extreme heat which can damage frames and lenses</p>
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            Avoid Heat
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Keep sunglasses away from extreme heat which can
+                            damage frames and lenses
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
                           <Package className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 text-sm">Store Properly</h4>
-                          <p className="text-gray-600 text-xs mt-1">Always store your sunglasses in their case when not in use</p>
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            Store Properly
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Always store your sunglasses in their case when not
+                            in use
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -860,7 +981,9 @@ export default function SunGlassesProductPage() {
                   </h3>
                   <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
                     <p className="text-gray-700 text-sm">
-                      All sunglasses come with a 1-year manufacturer warranty against defects. Contact us immediately if you encounter any issues with your sunglasses.
+                      All sunglasses come with a 1-year manufacturer warranty
+                      against defects. Contact us immediately if you encounter
+                      any issues with your sunglasses.
                     </p>
                   </div>
 
@@ -875,19 +998,25 @@ export default function SunGlassesProductPage() {
                           <div className="bg-green-100 rounded-full p-1 mr-2 mt-0.5">
                             <Check className="h-3 w-3 text-green-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Manufacturing defects</span>
+                          <span className="text-gray-700 text-xs">
+                            Manufacturing defects
+                          </span>
                         </li>
                         <li className="flex items-start text-sm">
                           <div className="bg-green-100 rounded-full p-1 mr-2 mt-0.5">
                             <Check className="h-3 w-3 text-green-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Frame material defects</span>
+                          <span className="text-gray-700 text-xs">
+                            Frame material defects
+                          </span>
                         </li>
                         <li className="flex items-start text-sm">
                           <div className="bg-green-100 rounded-full p-1 mr-2 mt-0.5">
                             <Check className="h-3 w-3 text-green-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Lens coating issues (if applicable)</span>
+                          <span className="text-gray-700 text-xs">
+                            Lens coating issues (if applicable)
+                          </span>
                         </li>
                       </ul>
                     </div>
@@ -902,19 +1031,25 @@ export default function SunGlassesProductPage() {
                           <div className="bg-red-100 rounded-full p-1 mr-2 mt-0.5">
                             <X className="h-3 w-3 text-red-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Physical damage from misuse</span>
+                          <span className="text-gray-700 text-xs">
+                            Physical damage from misuse
+                          </span>
                         </li>
                         <li className="flex items-start text-sm">
                           <div className="bg-red-100 rounded-full p-1 mr-2 mt-0.5">
                             <X className="h-3 w-3 text-red-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Normal wear and tear</span>
+                          <span className="text-gray-700 text-xs">
+                            Normal wear and tear
+                          </span>
                         </li>
                         <li className="flex items-start text-sm">
                           <div className="bg-red-100 rounded-full p-1 mr-2 mt-0.5">
                             <X className="h-3 w-3 text-red-600" />
                           </div>
-                          <span className="text-gray-700 text-xs">Products purchased from unauthorized retailers</span>
+                          <span className="text-gray-700 text-xs">
+                            Products purchased from unauthorized retailers
+                          </span>
                         </li>
                       </ul>
                     </div>
@@ -930,7 +1065,9 @@ export default function SunGlassesProductPage() {
                   </h3>
                   <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                     <p className="text-gray-700 text-sm mb-4">
-                      We want you to be completely satisfied with your purchase. If you're not happy with your sunglasses for any reason, we offer a simple return and exchange policy.
+                      We want you to be completely satisfied with your purchase.
+                      If you're not happy with your sunglasses for any reason,
+                      we offer a simple return and exchange policy.
                     </p>
 
                     <div className="space-y-3">
@@ -938,19 +1075,26 @@ export default function SunGlassesProductPage() {
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
                           <Check className="h-4 w-4 text-blue-600" />
                         </div>
-                        <span className="text-gray-700 text-sm">30-day free returns on unopened products</span>
+                        <span className="text-gray-700 text-sm">
+                          30-day free returns on unopened products
+                        </span>
                       </div>
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
                           <Check className="h-4 w-4 text-blue-600" />
                         </div>
-                        <span className="text-gray-700 text-sm">Free shipping on all exchanges</span>
+                        <span className="text-gray-700 text-sm">
+                          Free shipping on all exchanges
+                        </span>
                       </div>
                       <div className="flex items-start">
                         <div className="bg-blue-100 rounded-full p-1 mr-3 mt-0.5">
                           <Check className="h-4 w-4 text-blue-600" />
                         </div>
-                        <span className="text-gray-700 text-sm">Contact our customer service team for assistance with returns</span>
+                        <span className="text-gray-700 text-sm">
+                          Contact our customer service team for assistance with
+                          returns
+                        </span>
                       </div>
                     </div>
                   </div>
