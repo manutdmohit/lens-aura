@@ -265,7 +265,7 @@ export default function GlassesProductPage() {
               <Image
                 src={
                   productImages[activeImageIndex] ||
-                  product.imageUrl ||
+                  product.thumbnail ||
                   '/placeholder.svg'
                 }
                 alt={product.name}
