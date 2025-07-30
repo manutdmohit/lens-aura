@@ -4,10 +4,10 @@ import Product from '@/models/Product';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  context: { params: { slug: string } }
 ) {
   try {
-    const { slug } = await params;
+    const { slug } = context.params;
 
     if (!slug) {
       return NextResponse.json(
