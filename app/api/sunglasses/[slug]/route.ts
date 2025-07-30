@@ -1,9 +1,11 @@
-import { type NextRequest, NextResponse } from 'next/server';
+// app/api/sunglasses/[slug]/route.ts
+
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   context: { params: { slug: string } }
 ) {
   try {
@@ -19,7 +21,7 @@ export async function GET(
     await connectToDatabase();
 
     const product = await Product.findOne({
-      slug: slug,
+      slug,
       productType: 'sunglasses',
       status: 'active',
     }).lean();
