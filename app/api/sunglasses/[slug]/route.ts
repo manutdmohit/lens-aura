@@ -4,10 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Product from '@/models/Product';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
     const { slug } = context.params;
 
