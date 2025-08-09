@@ -6,6 +6,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // CSP is now handled in middleware.ts instead of here
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -18,9 +19,9 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
         pathname: '**',
-      },  
+      },
     ],
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

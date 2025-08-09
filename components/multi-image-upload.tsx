@@ -99,29 +99,32 @@ export default function MultiImageUpload({
         </div>
       </div>
 
-      {pathname === '/admin/products/add' && previews.length > 0 && (
-        <div className="mt-4">
-          <p className="text-sm font-medium mb-2">Uploaded Images:</p>
-          <div className="grid grid-cols-3 gap-2">
-            {previews.map((preview, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={preview}
-                  alt={`Uploaded ${index + 1}`}
-                  className="w-full h-20 object-cover rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+      {/* Show uploaded images preview only for non-variant uploads (like contacts/accessories) */}
+      {pathname === '/admin/products/add' &&
+        currentImageCount === 0 &&
+        previews.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium mb-2">Uploaded Images:</p>
+            <div className="grid grid-cols-3 gap-2">
+              {previews.map((preview, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Uploaded ${index + 1}`}
+                    className="w-full h-20 object-cover rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

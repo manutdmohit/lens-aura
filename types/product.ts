@@ -1,3 +1,11 @@
+// Frame color variant interface for organizing products by frame colors
+export interface FrameColorVariant {
+  color: string;
+  lensColor: string;
+  stockQuantity: number | undefined; // Allow undefined for empty state
+  images: string[];
+}
+
 // Base product interface
 export interface Product {
   id: string;
@@ -13,6 +21,7 @@ export interface Product {
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
+  frameColorVariants?: FrameColorVariant[];
 }
 
 // Glasses specific interface
@@ -35,10 +44,12 @@ export interface GlassesProduct extends Product {
 // Sunglasses specific interface
 export interface SunglassesProduct extends Product {
   productType: 'sunglasses';
+  category: 'premium' | 'standard';
   frameType: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth: 'narrow' | 'medium' | 'wide';
   frameColor: string[];
+  frameColorVariants: FrameColorVariant[];
   lensColor: string;
   uvProtection: boolean;
   polarized: boolean;

@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
@@ -13,140 +13,81 @@ import CartDropdown from '@/components/cart-dropdown';
 import Image from 'next/image';
 
 // Mega menu data
-const glassesMenuData = {
-  title: 'Glasses',
-  mainLink: '/glasses',
+const premiumSunglassesMenuData = {
+  title: 'Premium Sunglasses',
+  mainLink: '/sunglasses/premium',
   featuredLinks: [
     {
       title: 'New Arrivals',
-      href: '/glasses/new-arrivals',
-      image: '/images/glasses/new-arrivals.jpg',
+      href: '/sunglasses/premium/new-arrivals',
+      image: '/images/sunglasses/new-arrivals.jpg',
     },
     {
-      title: "Women's Glasses",
-      href: '/glasses/womens',
-      image: '/images/glasses/womens-glasses.jpg',
+      title: "Women's",
+      href: '/sunglasses/premium/womens',
+      image: '/images/sunglasses/womens-premium.jpg',
     },
     {
-      title: "Men's Glasses",
-      href: '/glasses/mens',
-      image: '/images/glasses/mens-glasses.jpg',
+      title: "Men's",
+      href: '/sunglasses/premium/mens',
+      image: '/images/sunglasses/mens-premium.jpg',
     },
   ],
   additionalLinks: [
-    { title: 'All Glasses', href: '/glasses' },
-    { title: "Men's Glasses", href: '/glasses/mens' },
-    { title: "Women's Glasses", href: '/glasses/womens' },
+    { title: 'All Glasses', href: '/sunglasses/premium' },
+    { title: 'Womens', href: '/sunglasses/premium/womens' },
+    { title: 'Mens', href: '/sunglasses/premium/mens' },
   ],
 };
 
-const sunglassesMenuData = {
-  title: 'Sunglasses',
-  mainLink: '/sunglasses',
+const standardSunglassesMenuData = {
+  title: 'Standard Sunglasses',
+  mainLink: '/sunglasses/standard',
   featuredLinks: [
     {
       title: 'New Arrivals',
-      href: '/sunglasses/new-arrivals',
-      image:
-        'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1000&auto=format&fit=crop',
+      href: '/sunglasses/standard/new-arrivals',
+      image: '/images/sunglasses/standard-new-arrivals.jpg',
     },
     {
-      title: "Women's Sunglasses",
-      href: '/sunglasses/womens',
-      image:
-        'https://images.unsplash.com/photo-1584036553516-bf83210aa16c?q=80&w=1000&auto=format&fit=crop',
+      title: "Women's",
+      href: '/sunglasses/standard/womens',
+      image: '/images/sunglasses/womens-standard.jpg',
     },
     {
-      title: "Men's Sunglasses",
-      href: '/sunglasses/mens',
-      image: '/images/sunglasses/mens-sunglass.jpg',
+      title: "Men's",
+      href: '/sunglasses/standard/mens',
+      image: '/images/sunglasses/mens-standard.jpg',
     },
   ],
   additionalLinks: [
-    { title: 'All Sunglasses', href: '/sunglasses' },
-    { title: "Men's Sunglasses", href: '/sunglasses/mens' },
-    { title: "Women's Sunglasses", href: '/sunglasses/womens' },
-  ],
-};
-
-const contactsMenuData = {
-  title: 'Contacts',
-  mainLink: '/contacts',
-  featuredLinks: [
-    {
-      title: 'Daily Disposable',
-      href: '/contacts/daily',
-      image: '/images/contact-lens/daily-disposable.jpg',
-    },
-    {
-      title: 'Monthly Lenses',
-      href: '/contacts/monthly',
-      image: '/images/contact-lens/monthly-disposable.jpg',
-    },
-    {
-      title: 'Colored Contacts',
-      href: '/contacts/colored',
-      image: '/images/contact-lens/colorful-contacts.jpg',
-    },
-  ],
-  additionalLinks: [
-    { title: 'All Contact Lenses', href: '/contacts' },
-    { title: 'Contact Lens Care', href: '/contacts/care' },
-    { title: 'For Astigmatism', href: '/contacts/astigmatism' },
-    { title: 'Multifocal Contacts', href: '/contacts/multifocal' },
-    { title: 'Contact Lens Brands', href: '/contacts/brands' },
-  ],
-};
-
-const accessoriesMenuData = {
-  title: 'Accessories',
-  mainLink: '/accessories',
-  featuredLinks: [
-    {
-      title: 'New Arrivals',
-      href: '/accessories/new-arrivals',
-      image: '/images/accessories.jpg',
-    },
-    {
-      title: 'Cases & Storage',
-      href: '/accessories/cases',
-      image: '/images/accessories/cases.jpg',
-    },
-    {
-      title: 'Cleaning Products',
-      href: '/accessories/cleaning',
-      image: '/images/accessories/cleaning.jpg',
-    },
-  ],
-  additionalLinks: [
-    { title: 'All Accessories', href: '/accessories' },
-    { title: 'Cases & Storage', href: '/accessories/cases' },
-    { title: 'Cleaning Products', href: '/accessories/cleaning' },
+    { title: 'All Glasses', href: '/sunglasses/standard' },
+    { title: 'Womens', href: '/sunglasses/standard/womens' },
+    { title: 'Mens', href: '/sunglasses/standard/mens' },
   ],
 };
 
 // Array of all menu data for easier iteration
 const allMenuData = [
-  { id: 'glasses', ...glassesMenuData },
-  { id: 'sunglasses', ...sunglassesMenuData },
+  { id: 'premium-sunglasses', ...premiumSunglassesMenuData },
+  { id: 'standard-sunglasses', ...standardSunglassesMenuData },
 ];
 
 export default function Navbar() {
-  // First, let's modify the state management to track both the active menu and whether we're hovering the mega menu
+  // Simplified state management with stable hover control
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [isHoveringMegaMenu, setIsHoveringMegaMenu] = useState(false);
   const [expandedMobileMenus, setExpandedMobileMenus] = useState<string[]>([]);
   const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Update the toggleMobileMenu function to also reset the mega menu state
+  // Update the toggleMobileMenu function
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
     // Reset expanded menus and mega menu state when closing the mobile menu
     if (mobileMenuOpen) {
       setExpandedMobileMenus([]);
       setActiveMenu(null);
-      setIsHoveringMegaMenu(false);
     }
   };
 
@@ -162,67 +103,55 @@ export default function Navbar() {
 
   // Close mega menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (activeMenu && !isHoveringMegaMenu) {
-        setActiveMenu(null);
-      }
+    const handleClickOutside = () => {
+      setActiveMenu(null);
     };
 
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [activeMenu, isHoveringMegaMenu]);
+  }, []);
 
-  // Update the handleMenuMouseEnter function
-  const handleMenuMouseEnter = (menuId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveMenu(menuId);
-    setIsHoveringMegaMenu(true);
-  };
-
-  // Update the handleMenuMouseLeave function to check if we're hovering the mega menu
-  const handleMenuMouseLeave = () => {
-    // Only close the menu if we're not hovering the mega menu content
-    setTimeout(() => {
-      if (!isHoveringMegaMenu) {
-        setActiveMenu(null);
-      }
-    }, 100);
-  };
-
-  // Add handlers for the mega menu mouse events
-  const handleMegaMenuMouseEnter = () => {
-    setIsHoveringMegaMenu(true);
-  };
-
-  const handleMegaMenuMouseLeave = () => {
-    setIsHoveringMegaMenu(false);
-    setTimeout(() => {
-      setActiveMenu(null);
-    }, 150);
-  };
-
-  // Update renderNavItem with improved style and animation
+  // Pure CSS hover navigation item with React state backup
   const renderNavItem = (title: string, href: string, menuId: string) => (
-    <div
-      className="h-full flex items-center"
-      onMouseEnter={(e) => handleMenuMouseEnter(menuId, e)}
-      onMouseLeave={handleMenuMouseLeave}
-    >
-      <Link
-        href={href}
-        className="flex items-center h-full px-4 text-lg text-[#592F25] hover:text-[#8B4513] relative group font-['Poppins']"
-      >
-        <span>{title}</span>
-        <ChevronDown
-          className={`ml-1 h-4 w-4 transition-transform ${
-            activeMenu === menuId ? 'rotate-180 text-[#8B4513]' : ''
-          } group-hover:text-[#8B4513]`}
-          aria-hidden="true"
-        />
-        <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-[#8B4513] group-hover:w-full transition-all duration-300"></span>
-      </Link>
+    <div className="h-full flex items-center relative group hover-trigger">
+      <div className="h-full flex items-center cursor-pointer">
+        <Link
+          href={href}
+          className={`flex items-center h-full px-4 text-lg relative font-['Poppins'] transition-all duration-200 rounded-t-lg ${
+            activeMenu === menuId
+              ? 'text-[#8B4513] bg-white shadow-md border-l border-r border-t border-gray-100'
+              : 'text-[#592F25] hover:text-[#8B4513] hover:bg-amber-50'
+          }`}
+          onMouseEnter={() => {
+            if (closeTimeoutRef.current) {
+              clearTimeout(closeTimeoutRef.current);
+              closeTimeoutRef.current = null;
+            }
+            setActiveMenu(menuId);
+          }}
+          onMouseLeave={() => {
+            closeTimeoutRef.current = setTimeout(() => {
+              setActiveMenu(null);
+            }, 100);
+          }}
+          onClick={() => setActiveMenu(null)}
+        >
+          <span>{title}</span>
+          <ChevronDown
+            className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+              activeMenu === menuId ? 'rotate-180 text-[#8B4513]' : ''
+            } group-hover:text-[#8B4513]`}
+            aria-hidden="true"
+          />
+          <span
+            className={`absolute -bottom-0 left-0 h-0.5 bg-[#8B4513] transition-all duration-300 ${
+              activeMenu === menuId ? 'w-full' : 'w-0 group-hover:w-full'
+            }`}
+          />
+        </Link>
+      </div>
     </div>
   );
 
@@ -296,8 +225,8 @@ export default function Navbar() {
     },
   };
 
-  // Update mega menu render function for better visual style
-  const renderMegaMenu = (data: typeof glassesMenuData) => (
+  // Update mega menu render function with proper event handling
+  const renderMegaMenu = (data: typeof premiumSunglassesMenuData) => (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -311,7 +240,7 @@ export default function Navbar() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Featured Categories with Images */}
         <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-2">
-          {data.featuredLinks.map((link, index) => (
+          {data.featuredLinks.map((link: any, index: number) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -324,6 +253,7 @@ export default function Navbar() {
               <Link
                 href={link.href}
                 className="group transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg overflow-hidden"
+                onClick={() => setActiveMenu(null)}
               >
                 <div className="aspect-[4/3] h-24 sm:h-28 lg:h-32 overflow-hidden rounded-lg bg-gray-100 relative">
                   {link.image ? (
@@ -356,7 +286,7 @@ export default function Navbar() {
           <h3 className="font-medium text-lg text-gray-900 mb-4">
             Quick Links
           </h3>
-          {data.additionalLinks.map((link, index) => (
+          {data.additionalLinks.map((link: any, index: number) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: 20 }}
@@ -369,6 +299,7 @@ export default function Navbar() {
               <Link
                 href={link.href}
                 className="block text-base text-gray-700 hover:text-indigo-600 transition-colors duration-200 py-1 border-b border-gray-100 hover:border-indigo-200"
+                onClick={() => setActiveMenu(null)}
               >
                 {link.title}
               </Link>
@@ -381,7 +312,7 @@ export default function Navbar() {
 
   // Function to render mobile menu item with submenu
   const renderMobileMenuItem = (
-    menuData: typeof glassesMenuData & { id: string }
+    menuData: typeof premiumSunglassesMenuData & { id: string }
   ) => {
     const isExpanded = expandedMobileMenus.includes(menuData.id);
 
@@ -516,7 +447,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white">
+    <header className="bg-white fixed top-0 left-0 right-0 z-50 w-full">
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-sm h-10 text-white font-medium shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer md:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
@@ -563,7 +494,7 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation */}
-      <div className=" shadow-sm relative">
+      <div className="shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex justify-between items-center h-20 sm:h-24 md:h-20">
             {/* Logo */}
@@ -638,16 +569,18 @@ export default function Navbar() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.div variants={itemVariants} className="h-full">
-                  {renderNavItem('Glasses', '/glasses', 'glasses')}
+                  {renderNavItem(
+                    'Premium Sunglasses',
+                    '/sunglasses/premium',
+                    'premium-sunglasses'
+                  )}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
-                  {renderNavItem('Sunglasses', '/sunglasses', 'sunglasses')}
-                </motion.div>
-                <motion.div variants={itemVariants} className="h-full">
-                  {renderNavLink('Accessories', '/accessories')}
-                </motion.div>
-                <motion.div variants={itemVariants} className="h-full">
-                  {renderNavLink('Contacts', '/contacts')}
+                  {renderNavItem(
+                    'Standard Sunglasses',
+                    '/sunglasses/standard',
+                    'standard-sunglasses'
+                  )}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
                   {renderNavLink('Contact Us', '/contact')}
@@ -671,29 +604,44 @@ export default function Navbar() {
             </motion.div>
           </div>
         </div>
-      </div>
 
-      {/* Mega Menu */}
-      <AnimatePresence>
-        {activeMenu && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{
-              duration: 0.3,
-              ease: 'easeOut',
-            }}
-            className="absolute left-0 w-full z-50 bg-white shadow-lg border-t border-gray-100"
-            onMouseEnter={handleMegaMenuMouseEnter}
-            onMouseLeave={handleMegaMenuMouseLeave}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {activeMenu === 'glasses' && renderMegaMenu(glassesMenuData)}
-            {activeMenu === 'sunglasses' && renderMegaMenu(sunglassesMenuData)}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Mega Menu - Now inside the navbar container */}
+        <AnimatePresence>
+          {activeMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{
+                duration: 0.2,
+                ease: 'easeOut',
+              }}
+              className="absolute left-0 w-full z-50 bg-white shadow-xl border-t border-gray-100"
+              style={{
+                top: '100%',
+                marginTop: '0px',
+              }}
+              onMouseEnter={() => {
+                if (closeTimeoutRef.current) {
+                  clearTimeout(closeTimeoutRef.current);
+                  closeTimeoutRef.current = null;
+                }
+              }}
+              onMouseLeave={() => {
+                closeTimeoutRef.current = setTimeout(() => {
+                  setActiveMenu(null);
+                }, 100);
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {activeMenu === 'premium-sunglasses' &&
+                renderMegaMenu(premiumSunglassesMenuData)}
+              {activeMenu === 'standard-sunglasses' &&
+                renderMegaMenu(standardSunglassesMenuData)}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
@@ -707,30 +655,6 @@ export default function Navbar() {
           >
             <div className="bg-[#2A2829] divide-y divide-gray-700">
               {allMenuData.map((menuData) => renderMobileMenuItem(menuData))}
-              <motion.div
-                variants={itemVariants}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <Link
-                  href="/accessories"
-                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
-                  onClick={toggleMobileMenu}
-                >
-                  Accessories
-                </Link>
-              </motion.div>
-              <motion.div
-                variants={itemVariants}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <Link
-                  href="/contacts"
-                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
-                  onClick={toggleMobileMenu}
-                >
-                  Contacts
-                </Link>
-              </motion.div>
               <motion.div
                 variants={itemVariants}
                 className="border-b border-gray-700 last:border-b-0"

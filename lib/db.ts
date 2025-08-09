@@ -16,6 +16,8 @@ export async function getProducts() {
       description: product.description,
       colors: product.colors,
       stockQuantity: product.stockQuantity,
+      status: product.status,
+      frameColorVariants: product.frameColorVariants,
     })) as ProductFormValues[];
   } catch (error) {
     console.error('Error fetching products:', error);

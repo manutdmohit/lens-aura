@@ -58,6 +58,11 @@ export default function CartDropdown() {
     newQuantity: number,
     color: string
   ) => {
+    console.log('Cart dropdown handleQuantityChange called with:', {
+      productId,
+      newQuantity,
+      color,
+    });
     updateQuantity(productId, newQuantity, color);
   };
 
@@ -116,96 +121,118 @@ export default function CartDropdown() {
             ) : (
               <>
                 <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4">
-                  {items.map((item: CartItem) => (
-                    <div
-                      key={`${item.product._id}-${item.color}`}
-                      className="flex gap-4 py-2 border-b last:border-0"
-                    >
-                      <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                        <Image
-                          src={item.product.thumbnail || '/placeholder.svg'}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                          width={100}
-                          height={100}
-                          priority
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <div className="flex justify-between">
-                          <h3 className="font-medium">{item.product.name}</h3>
-                          <p className="font-medium">
-                            ${(item.product.price * item.quantity).toFixed(2)}
+                  {items.map((item: CartItem) => {
+                    // Calculate available stock based on product type
+                    const getAvailableStock = () => {
+                      if (
+                        item.product.productType === 'glasses' ||
+                        item.product.productType === 'sunglasses'
+                      ) {
+                        // For glasses/sunglasses, check frame color variants
+                        const variant = item.product.frameColorVariants?.find(
+                          (v) => v.color === item.color
+                        );
+                        return variant?.stockQuantity || 0;
+                      } else {
+                        // For contacts/accessories, use direct stockQuantity
+                        return item.product.stockQuantity || 0;
+                      }
+                    };
+
+                    const availableStock = getAvailableStock();
+                    const isAtMaxStock = item.quantity >= availableStock;
+
+                    return (
+                      <div
+                        key={`${item.product._id}-${item.color}`}
+                        className="flex gap-4 py-2 border-b last:border-0"
+                      >
+                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                          <Image
+                            src={item.product.thumbnail || '/placeholder.svg'}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                            width={100}
+                            height={100}
+                            priority
+                          />
+                        </div>
+                        <div className="flex-grow">
+                          <div className="flex justify-between">
+                            <h3 className="font-medium">{item.product.name}</h3>
+                            <p className="font-medium">
+                              ${(item.product.price * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            Color: {item.color}
                           </p>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Color: {item.color}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ${item.product.price.toFixed(2)} each
-                        </p>
+                          <p className="text-sm text-gray-500">
+                            ${item.product.price.toFixed(2)} each
+                          </p>
 
-                        <div className="flex justify-between items-center mt-2">
-                          <div className="flex items-center border rounded-md">
+                          <div className="flex justify-between items-center mt-2">
+                            <div className="flex items-center border rounded-md">
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.product._id,
+                                    item.quantity - 1,
+                                    item.color
+                                  )
+                                }
+                                className="p-1 hover:bg-gray-100"
+                                aria-label="Decrease quantity"
+                                disabled={item.quantity <= 1}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="px-2 text-sm">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.product._id,
+                                    item.quantity + 1,
+                                    item.color
+                                  )
+                                }
+                                className={`p-1 ${
+                                  isAtMaxStock
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : 'hover:bg-gray-100'
+                                }`}
+                                aria-label="Increase quantity"
+                                disabled={isAtMaxStock}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
                             <button
                               onClick={() =>
-                                handleQuantityChange(
-                                  item.product._id,
-                                  item.quantity - 1,
-                                  item.color
-                                )
+                                handleRemoveItem(item.product._id, item.color)
                               }
-                              className="p-1 hover:bg-gray-100"
-                              aria-label="Decrease quantity"
-                              disabled={item.quantity <= 1}
+                              className="text-gray-500 hover:text-red-600 p-1"
+                              aria-label="Remove item"
                             >
-                              <Minus className="h-3 w-3" />
-                            </button>
-                            <span className="px-2 text-sm">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(
-                                  item.product._id,
-                                  item.quantity + 1,
-                                  item.color
-                                )
-                              }
-                              className={`p-1 ${
-                                item.quantity >= item.product.stockQuantity
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'hover:bg-gray-100'
-                              }`}
-                              aria-label="Increase quantity"
-                              disabled={
-                                item.quantity >= item.product.stockQuantity
-                              }
-                            >
-                              <Plus className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-                          <button
-                            onClick={() =>
-                              handleRemoveItem(item.product._id, item.color)
-                            }
-                            className="text-gray-500 hover:text-red-600 p-1"
-                            aria-label="Remove item"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {/* Stock warning */}
+                          {isAtMaxStock && availableStock > 0 && (
+                            <div className="mt-2 text-xs flex items-center text-amber-600">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              <span>
+                                Maximum stock reached ({availableStock}{' '}
+                                available)
+                              </span>
+                            </div>
+                          )}
                         </div>
-
-                        {/* Stock warning */}
-                        {item.quantity === item.product.stockQuantity && (
-                          <div className="mt-2 text-xs flex items-center text-amber-600">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            <span>Maximum stock reached</span>
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="p-4 border-t">

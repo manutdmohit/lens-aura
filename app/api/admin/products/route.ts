@@ -121,11 +121,43 @@ export async function POST(req: NextRequest) {
     const uploadedImageUrls = [];
     if (images && Array.isArray(images)) {
       for (const image of images) {
-        const uploadRes = await cloudinary.uploader.upload(image, {
-          folder: 'products/images',
-        });
-        uploadedImageUrls.push(uploadRes.secure_url);
+        if (image.startsWith('data:image')) {
+          const uploadRes = await cloudinary.uploader.upload(image, {
+            folder: 'products/images',
+          });
+          uploadedImageUrls.push(uploadRes.secure_url);
+        } else {
+          uploadedImageUrls.push(image); // It's already a URL
+        }
       }
+    }
+
+    // Handle frame color variant images upload
+    let processedFrameColorVariants = rest.frameColorVariants;
+    if (rest.frameColorVariants && Array.isArray(rest.frameColorVariants)) {
+      processedFrameColorVariants = await Promise.all(
+        rest.frameColorVariants.map(async (variant: any) => {
+          const updatedVariant = { ...variant };
+
+          // Upload variant images if they are data URLs
+          if (variant.images && Array.isArray(variant.images)) {
+            const variantImageUrls = await Promise.all(
+              variant.images.map(async (image: string) => {
+                if (image.startsWith('data:image')) {
+                  const uploadRes = await cloudinary.uploader.upload(image, {
+                    folder: `products/frame-colors/${variant.color}/images`,
+                  });
+                  return uploadRes.secure_url;
+                }
+                return image; // It's already a URL
+              })
+            );
+            updatedVariant.images = variantImageUrls;
+          }
+
+          return updatedVariant;
+        })
+      );
     }
 
     // Save product to DB
@@ -133,6 +165,7 @@ export async function POST(req: NextRequest) {
       ...rest,
       thumbnail,
       images: uploadedImageUrls,
+      frameColorVariants: processedFrameColorVariants,
     });
     await product.save();
 

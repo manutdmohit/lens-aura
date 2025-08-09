@@ -68,19 +68,35 @@ export async function PUT(req: NextRequest, context: any) {
     await connectToDatabase();
 
     // If updating status only
-    if (Object.keys(body).length === 1 && body.status) {
-      const product = await Product.findByIdAndUpdate(
-        id,
-        { $set: { status: body.status } },
-        { new: true }
-      ).lean();
+    if (Object.keys(body).length === 1 && 'status' in body) {
+      console.log('Status-only update detected:', body);
 
-      if (!product) {
+      // First, check if product exists
+      const existingProduct = await Product.findById(id);
+      if (!existingProduct) {
         return NextResponse.json(
           { error: 'Product not found' },
           { status: 404 }
         );
       }
+
+      console.log('Current product status:', existingProduct.status);
+
+      // Update the status
+      const product = await Product.findByIdAndUpdate(
+        id,
+        { $set: { status: body.status } },
+        { new: true, runValidators: true }
+      ).lean();
+
+      console.log('Product status after update:', product?.status);
+
+      // Verify the update worked
+      const verifyProduct = await Product.findById(id).lean();
+      console.log(
+        'Verification - product status in DB:',
+        verifyProduct?.status
+      );
 
       return NextResponse.json({ product });
     }
@@ -110,6 +126,45 @@ export async function PUT(req: NextRequest, context: any) {
         })
       );
       updateData.images = newImageUrls;
+    }
+
+    // Handle frame color variant images upload
+    if (body.frameColorVariants && Array.isArray(body.frameColorVariants)) {
+      const updatedVariants = await Promise.all(
+        body.frameColorVariants.map(async (variant: any) => {
+          const updatedVariant = { ...variant };
+
+          // Upload thumbnail if it's a data URL
+          if (variant.thumbnail && variant.thumbnail.startsWith('data:image')) {
+            const uploadRes = await cloudinary.uploader.upload(
+              variant.thumbnail,
+              {
+                folder: `products/frame-colors/${variant.color}/thumbnail`,
+              }
+            );
+            updatedVariant.thumbnail = uploadRes.secure_url;
+          }
+
+          // Upload variant images if they are data URLs
+          if (variant.images && Array.isArray(variant.images)) {
+            const variantImageUrls = await Promise.all(
+              variant.images.map(async (image: string) => {
+                if (image.startsWith('data:image')) {
+                  const uploadRes = await cloudinary.uploader.upload(image, {
+                    folder: `products/frame-colors/${variant.color}/images`,
+                  });
+                  return uploadRes.secure_url;
+                }
+                return image; // It's an existing URL
+              })
+            );
+            updatedVariant.images = variantImageUrls;
+          }
+
+          return updatedVariant;
+        })
+      );
+      updateData.frameColorVariants = updatedVariants;
     }
 
     const product = await Product.findByIdAndUpdate(

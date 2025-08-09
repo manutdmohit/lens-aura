@@ -83,6 +83,7 @@ export default function SunGlassesProductPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedColorVariant, setSelectedColorVariant] = useState<any>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
   const { itemCount, items } = useCart();
@@ -130,20 +131,31 @@ export default function SunGlassesProductPage() {
         const data = await response.json();
         setProduct(data.product);
 
-        // Set initial selected color
-        if (data.product.frameColor?.length > 0) {
-          setSelectedColor(data.product.frameColor[0]);
-        } else if (data.product.colors?.length > 0) {
-          setSelectedColor(data.product.colors[0]);
-        }
-
-        // Set product images
-        if (data.product.images && Array.isArray(data.product.images)) {
-          setProductImages(data.product.images);
-        } else if (data.product.imageUrl) {
-          setProductImages([data.product.imageUrl]);
+        // Handle frame color variants
+        if (
+          data.product.frameColorVariants &&
+          data.product.frameColorVariants.length > 0
+        ) {
+          const firstVariant = data.product.frameColorVariants[0];
+          setSelectedColor(firstVariant.color);
+          setSelectedColorVariant(firstVariant);
+          setProductImages(firstVariant.images || [firstVariant.thumbnail]);
         } else {
-          setProductImages(['/placeholder.svg']);
+          // Fallback to old structure
+          if (data.product.frameColor?.length > 0) {
+            setSelectedColor(data.product.frameColor[0]);
+          } else if (data.product.colors?.length > 0) {
+            setSelectedColor(data.product.colors[0]);
+          }
+
+          // Set product images (fallback)
+          if (data.product.images && Array.isArray(data.product.images)) {
+            setProductImages(data.product.images);
+          } else if (data.product.imageUrl) {
+            setProductImages([data.product.imageUrl]);
+          } else {
+            setProductImages(['/placeholder.svg']);
+          }
         }
       } catch (err) {
         console.error('Error fetching product:', err);
@@ -163,6 +175,20 @@ export default function SunGlassesProductPage() {
   // Handle color selection
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
+
+    // If we have frame color variants, find the matching variant and update images
+    if (product?.frameColorVariants && product.frameColorVariants.length > 0) {
+      const variant = product.frameColorVariants.find((v) => v.color === color);
+      if (variant) {
+        setSelectedColorVariant(variant);
+        setProductImages(
+          variant.images && variant.images.length > 0
+            ? variant.images
+            : [variant.thumbnail]
+        );
+        setActiveImageIndex(0); // Reset to first image when switching colors
+      }
+    }
   };
 
   // Handle image selection
@@ -198,12 +224,16 @@ export default function SunGlassesProductPage() {
 
   // Determine which colors to display
   const displayColors =
-    product.frameColor && product.frameColor.length > 0
+    product.frameColorVariants && product.frameColorVariants.length > 0
+      ? product.frameColorVariants.map((variant) => variant.color)
+      : product.frameColor && product.frameColor.length > 0
       ? product.frameColor
       : product.colors || [];
 
-  // Check if product is in stock
-  const isInStock = product.stockQuantity && product.stockQuantity > 0;
+  // Check if product is in stock - consider frame color variants
+  const isInStock = selectedColorVariant
+    ? selectedColorVariant.stockQuantity > 0
+    : product.stockQuantity && product.stockQuantity > 0;
 
   return (
     <motion.div
@@ -264,8 +294,11 @@ export default function SunGlassesProductPage() {
                   </Badge>
                 )}
                 {isInStock &&
-                  product.stockQuantity &&
-                  product.stockQuantity < 10 && (
+                  ((selectedColorVariant &&
+                    selectedColorVariant.stockQuantity < 10) ||
+                    (!selectedColorVariant &&
+                      product.stockQuantity &&
+                      product.stockQuantity < 10)) && (
                     <Badge className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-sm">
                       <Clock className="h-4 w-4 mr-1" />
                       Low Stock
@@ -354,9 +387,12 @@ export default function SunGlassesProductPage() {
                   <Check className="h-5 w-5 mr-2 flex-shrink-0" />
                   <span className="text-sm font-medium">
                     In Stock
-                    {product.stockQuantity &&
-                      product.stockQuantity < 10 &&
-                      ` (Only ${product.stockQuantity} left)`}
+                    {selectedColorVariant
+                      ? selectedColorVariant.stockQuantity < 10 &&
+                        ` (Only ${selectedColorVariant.stockQuantity} left)`
+                      : product.stockQuantity &&
+                        product.stockQuantity < 10 &&
+                        ` (Only ${product.stockQuantity} left)`}
                   </span>
                 </div>
               ) : (
@@ -576,13 +612,26 @@ export default function SunGlassesProductPage() {
                   <ShoppingCart className="h-5 w-5 mr-2 text-blue-600" />
                   <span className="font-medium text-gray-900">Add to Cart</span>
                 </div>
-                {isInStock && product.stockQuantity && (
-                  <span className="text-sm text-gray-500">
-                    {product.stockQuantity < 10
-                      ? `Only ${product.stockQuantity} left`
-                      : `${product.stockQuantity} in stock`}
-                  </span>
-                )}
+                {isInStock &&
+                  (selectedColorVariant
+                    ? selectedColorVariant.stockQuantity
+                    : product.stockQuantity) && (
+                    <span className="text-sm text-gray-500">
+                      {(selectedColorVariant
+                        ? selectedColorVariant.stockQuantity
+                        : product.stockQuantity) < 10
+                        ? `Only ${
+                            selectedColorVariant
+                              ? selectedColorVariant.stockQuantity
+                              : product.stockQuantity
+                          } left`
+                        : `${
+                            selectedColorVariant
+                              ? selectedColorVariant.stockQuantity
+                              : product.stockQuantity
+                          } in stock`}
+                    </span>
+                  )}
               </div>
 
               <div className="flex space-x-4">
@@ -595,7 +644,10 @@ export default function SunGlassesProductPage() {
                       <AlertCircle className="mr-2 h-5 w-5" />
                       Out of Stock
                     </Button>
-                  ) : quantityInCart + quantityToAdd > product.stockQuantity ? (
+                  ) : quantityInCart + quantityToAdd >
+                    (selectedColorVariant
+                      ? selectedColorVariant.stockQuantity
+                      : product.stockQuantity) ? (
                     <Button
                       className="w-full bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center h-12 rounded-xl"
                       disabled
@@ -608,6 +660,7 @@ export default function SunGlassesProductPage() {
                       <AddToCartButton
                         product={product as unknown as IProduct}
                         selectedColor={selectedColor}
+                        selectedColorVariant={selectedColorVariant}
                       />
                     </motion.div>
                   )}

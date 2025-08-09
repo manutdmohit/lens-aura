@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Check, AlertCircle, ShoppingCart, Clock } from 'lucide-react';
+import {
+  ShoppingBag,
+  Check,
+  AlertCircle,
+  ShoppingCart,
+  Clock,
+} from 'lucide-react';
 import { IProduct } from '@/models';
 import { useCart } from '@/context/cart-context';
 import { toast } from 'sonner';
@@ -13,27 +19,32 @@ interface AddToCartButtonProps {
   product: IProduct;
   selectedColor?: string;
   quantity?: number;
+  selectedColorVariant?: any; // Frame color variant with its own stock
 }
-
 
 export default function AddToCartButton({
   product,
   selectedColor,
   quantity = 1,
+  selectedColorVariant,
 }: AddToCartButtonProps) {
   const router = useRouter();
-
 
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const { addItem, itemCount, items } = useCart();
 
   // Determine if product is out of stock or has insufficient quantity
-  const isOutOfStock = product.stockQuantity <= 0;
+  // Use selectedColorVariant stock if available, otherwise fall back to product stock
+  const availableStock = selectedColorVariant
+    ? selectedColorVariant.stockQuantity
+    : product.stockQuantity || 0;
+
+  const isOutOfStock = availableStock <= 0;
   const cartQuantity =
     items.find((item) => item.product.id === product.id)?.quantity || 0;
 
-  const hasInsufficientStock = cartQuantity + quantity > product.stockQuantity;
+  const hasInsufficientStock = cartQuantity + quantity > availableStock;
 
   const buttonDisabled = isAdding || isOutOfStock || hasInsufficientStock;
 
@@ -43,7 +54,11 @@ export default function AddToCartButton({
     setIsAdding(true);
 
     // Use the first color if none is selected
-    const color = selectedColor || (product.colors && product.colors.length > 0 ? product.colors[0] : 'default');
+    const color =
+      selectedColor ||
+      (product.colors && product.colors.length > 0
+        ? product.colors[0]
+        : 'default');
 
     // Add item to cart
     addItem(product, quantity, color);
@@ -55,7 +70,7 @@ export default function AddToCartButton({
     setTimeout(() => {
       setIsAdding(false);
       setIsAdded(false);
-      
+
       // Show toast notification AFTER the button state has changed for better UX
       toast.success('Added to Cart', {
         description: `${product.name} has been added to your cart.`,
@@ -64,8 +79,7 @@ export default function AddToCartButton({
           onClick: () => {
             // You can add navigation to cart here if needed
             router.push('/cart');
-          }
-        
+          },
         },
         position: 'bottom-right',
         duration: 2000,
@@ -94,8 +108,10 @@ export default function AddToCartButton({
   // Determine button background color based on state
   const getButtonClass = () => {
     if (isAdded) return 'bg-blue-600 hover:bg-blue-700 text-white';
-    if (isOutOfStock) return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
-    if (hasInsufficientStock) return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
+    if (isOutOfStock)
+      return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
+    if (hasInsufficientStock)
+      return 'bg-gray-600 text-white hover:bg-gray-700 cursor-not-allowed';
     return 'bg-black text-white hover:bg-gray-800';
   };
 

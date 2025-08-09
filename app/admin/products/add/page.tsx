@@ -29,7 +29,9 @@ import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
 import MultiImageUpload from '@/components/multi-image-upload';
+import FrameColorVariantManager from '@/components/frame-color-variant-manager';
 import { productSchema, type ProductFormValues } from '@/lib/api/validation';
+import { type FrameColorVariant } from '@/types/product';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -43,6 +45,9 @@ export default function AddProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [colors, setColors] = useState<string[]>([]);
   const [colorInput, setColorInput] = useState('');
+  const [frameColorVariants, setFrameColorVariants] = useState<
+    FrameColorVariant[]
+  >([]);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -59,11 +64,11 @@ export default function AddProductPage() {
     defaultValues: {
       name: '',
       description: '',
-      price: 0,
+      price: undefined,
       thumbnail: '',
       images: [],
-      stockQuantity: 0,
-      productType: 'glasses',
+      stockQuantity: undefined,
+      productType: 'sunglasses',
       status: 'active',
       colors: [],
       isFeatured: false, // Added default value for isFeatured
@@ -79,11 +84,16 @@ export default function AddProductPage() {
     const currentValues = getValues();
     setValue('productType', value);
     setColors([]);
+    setFrameColorVariants([]);
 
     // Reset form with appropriate defaults based on product type
     reset({
       ...currentValues,
       productType: value,
+      stockQuantity:
+        value === 'sunglasses' || value === 'glasses'
+          ? undefined
+          : currentValues.stockQuantity,
       colors: [],
       frameType: undefined,
       frameMaterial: undefined,
@@ -91,7 +101,7 @@ export default function AddProductPage() {
       lensType: undefined,
       prescriptionType: undefined,
       gender: undefined,
-      lensColor: undefined,
+      category: undefined,
       uvProtection: false,
       polarized: false,
       style: undefined,
@@ -143,17 +153,45 @@ export default function AddProductPage() {
     setIsSubmitting(true);
 
     try {
-      // Prepare product data
-      const productData = {
+      // Prepare product data based on product type
+      const productData: any = {
         ...data,
-        colors: watchProductType === 'contacts' ? [] : colors, // Only include colors for non-contacts
-        frameColor: watchProductType !== 'contacts' ? colors : undefined, // Set frameColor for glasses/sunglasses
-        lensColor:
-          watchProductType === 'contacts' ? colors[0] || '' : data.lensColor, // Set lensColor for contacts
-        category: data.productType.toLowerCase(),
         status: 'active',
-        isFeatured: data.isFeatured, // Include isFeatured
+        isFeatured: data.isFeatured,
       };
+
+      // Handle field assignment based on product type
+      if (watchProductType === 'sunglasses' || watchProductType === 'glasses') {
+        // For glasses/sunglasses: use frameColorVariants, remove redundant fields
+        // Convert undefined stockQuantity values to 0 for database storage
+        const processedVariants = frameColorVariants.map((variant) => ({
+          ...variant,
+          stockQuantity: variant.stockQuantity ?? 0,
+        }));
+        productData.frameColorVariants = processedVariants;
+        delete productData.stockQuantity; // Remove - use frameColorVariants.stockQuantity instead
+        delete productData.images; // Remove - use frameColorVariants.images instead
+        delete productData.colors; // Remove - use frameColorVariants.color instead
+      } else if (watchProductType === 'contacts') {
+        // For contacts: use colors as lens colors, keep stockQuantity and images
+        productData.colors = colors; // Lens colors for contacts
+        productData.stockQuantity = data.stockQuantity;
+        productData.images = data.images;
+        delete productData.frameColorVariants; // Not applicable for contacts
+      } else if (watchProductType === 'accessory') {
+        // For accessories: keep stockQuantity and images, colors optional
+        productData.stockQuantity = data.stockQuantity;
+        productData.images = data.images;
+        productData.colors = colors;
+        delete productData.frameColorVariants; // Not applicable for accessories
+      }
+
+      // Set category only for sunglasses
+      if (watchProductType === 'sunglasses') {
+        productData.category = data.category;
+      } else {
+        delete productData.category;
+      }
 
       // Send the request
       const response = await fetch('/api/admin/products', {
@@ -241,8 +279,8 @@ export default function AddProductPage() {
                         <SelectValue placeholder="Select product type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="glasses">Glasses</SelectItem>
                         <SelectItem value="sunglasses">Sunglasses</SelectItem>
+                        <SelectItem value="glasses">Glasses</SelectItem>
                         <SelectItem value="contacts">Contact Lenses</SelectItem>
                         <SelectItem value="accessory">Accessory</SelectItem>
                       </SelectContent>
@@ -309,6 +347,7 @@ export default function AddProductPage() {
                         type="number"
                         step="0.01"
                         min="0"
+                        placeholder="0.00"
                         {...register('price', { valueAsNumber: true })}
                         className={errors.price ? 'border-red-500' : ''}
                       />
@@ -319,27 +358,36 @@ export default function AddProductPage() {
                       )}
                     </motion.div>
 
-                    <motion.div
-                      variants={fieldVariants}
-                      initial="hidden"
-                      animate="visible"
-                    >
-                      <Label htmlFor="stockQuantity">
-                        Stock Quantity <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="stockQuantity"
-                        type="number"
-                        min="0"
-                        {...register('stockQuantity', { valueAsNumber: true })}
-                        className={errors.stockQuantity ? 'border-red-500' : ''}
-                      />
-                      {errors.stockQuantity && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.stockQuantity.message}
-                        </p>
-                      )}
-                    </motion.div>
+                    {/* Stock Quantity - Only for contacts and accessories */}
+                    {(watchProductType === 'contacts' ||
+                      watchProductType === 'accessory') && (
+                      <motion.div
+                        variants={fieldVariants}
+                        initial="hidden"
+                        animate="visible"
+                      >
+                        <Label htmlFor="stockQuantity">
+                          Stock Quantity <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="stockQuantity"
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          {...register('stockQuantity', {
+                            valueAsNumber: true,
+                          })}
+                          className={
+                            errors.stockQuantity ? 'border-red-500' : ''
+                          }
+                        />
+                        {errors.stockQuantity && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors.stockQuantity.message}
+                          </p>
+                        )}
+                      </motion.div>
+                    )}
                   </div>
 
                   <motion.div
@@ -403,40 +451,39 @@ export default function AddProductPage() {
                     )}
                   </motion.div>
 
-                  <motion.div
-                    variants={fieldVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    <Label>Additional Images</Label>
-                    <input type="hidden" {...register('images')} />
-                    <MultiImageUpload
-                      onImagesUploaded={handleAdditionalImagesUpload}
-                    />
-                    {errors.images && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {Array.isArray(errors.images)
-                          ? (errors.images as any[])
-                              .map((e) => e.message)
-                              .join(', ')
-                          : errors.images.message}
-                      </p>
-                    )}
-                  </motion.div>
+                  {/* Additional Images - Only for contacts and accessories */}
+                  {(watchProductType === 'contacts' ||
+                    watchProductType === 'accessory') && (
+                    <motion.div
+                      variants={fieldVariants}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <Label>Additional Images</Label>
+                      <input type="hidden" {...register('images')} />
+                      <MultiImageUpload
+                        onImagesUploaded={handleAdditionalImagesUpload}
+                      />
+                      {errors.images && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {Array.isArray(errors.images)
+                            ? (errors.images as any[])
+                                .map((e) => e.message)
+                                .join(', ')
+                            : errors.images.message}
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
 
-                  {(watchProductType === 'glasses' ||
-                    watchProductType === 'sunglasses' ||
-                    watchProductType === 'contacts') && (
+                  {watchProductType === 'contacts' && (
                     <motion.div
                       variants={fieldVariants}
                       initial="hidden"
                       animate="visible"
                     >
                       <Label htmlFor="colors">
-                        {watchProductType === 'contacts'
-                          ? 'Available Colors'
-                          : 'Frame Colors'}{' '}
-                        <span className="text-red-500">*</span>
+                        Available Colors <span className="text-red-500">*</span>
                       </Label>
                       <div className="flex items-center space-x-2">
                         <Input
@@ -492,6 +539,27 @@ export default function AddProductPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Frame Color Variants - for Sunglasses and Glasses */}
+            {(watchProductType === 'sunglasses' ||
+              watchProductType === 'glasses') && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Frame Color Variants</CardTitle>
+                  <CardDescription>
+                    Organize your {watchProductType} by frame colors. Each color
+                    can have its own images and stock quantity.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FrameColorVariantManager
+                    variants={frameColorVariants}
+                    onChange={setFrameColorVariants}
+                    productType={watchProductType}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Product Type Specific Fields */}
             {watchProductType !== 'accessory' && (
@@ -748,6 +816,40 @@ export default function AddProductPage() {
                           initial="hidden"
                           animate="visible"
                         >
+                          <Label htmlFor="category">
+                            Category <span className="text-red-500">*</span>
+                          </Label>
+                          <Select
+                            value={watch('category')}
+                            onValueChange={(value) =>
+                              setValue('category', value as any)
+                            }
+                          >
+                            <SelectTrigger
+                              id="category"
+                              className={
+                                errors.category ? 'border-red-500' : ''
+                              }
+                            >
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="premium">Premium</SelectItem>
+                              <SelectItem value="standard">Standard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {errors.category && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.category.message}
+                            </p>
+                          )}
+                        </motion.div>
+
+                        <motion.div
+                          variants={fieldVariants}
+                          initial="hidden"
+                          animate="visible"
+                        >
                           <Label htmlFor="frameType">
                             Frame Type <span className="text-red-500">*</span>
                           </Label>
@@ -849,27 +951,6 @@ export default function AddProductPage() {
                           {errors.frameWidth && (
                             <p className="text-red-500 text-sm mt-1">
                               {errors.frameWidth.message}
-                            </p>
-                          )}
-                        </motion.div>
-
-                        <motion.div
-                          variants={fieldVariants}
-                          initial="hidden"
-                          animate="visible"
-                        >
-                          <Label htmlFor="lensColor">
-                            Lens Color <span className="text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="lensColor"
-                            placeholder="e.g., Black, Brown, Green"
-                            {...register('lensColor')}
-                            className={errors.lensColor ? 'border-red-500' : ''}
-                          />
-                          {errors.lensColor && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.lensColor.message}
                             </p>
                           )}
                         </motion.div>
@@ -1159,6 +1240,7 @@ export default function AddProductPage() {
                             type="number"
                             min="0"
                             max="100"
+                            placeholder="0"
                             {...register('waterContent', {
                               valueAsNumber: true,
                             })}
@@ -1186,6 +1268,7 @@ export default function AddProductPage() {
                             id="diameter"
                             type="number"
                             step="0.1"
+                            placeholder="0.0"
                             {...register('diameter', { valueAsNumber: true })}
                             className={errors.diameter ? 'border-red-500' : ''}
                           />
@@ -1209,6 +1292,7 @@ export default function AddProductPage() {
                             id="baseCurve"
                             type="number"
                             step="0.1"
+                            placeholder="0.0"
                             {...register('baseCurve', { valueAsNumber: true })}
                             className={errors.baseCurve ? 'border-red-500' : ''}
                           />
@@ -1231,6 +1315,7 @@ export default function AddProductPage() {
                           <Input
                             id="quantity"
                             type="number"
+                            placeholder="0"
                             {...register('quantity', { valueAsNumber: true })}
                             className={errors.quantity ? 'border-red-500' : ''}
                           />

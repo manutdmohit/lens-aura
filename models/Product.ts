@@ -2,6 +2,14 @@ import { mongoose } from '@/lib/mongoose/db-config';
 import { Schema, type Document, type Model } from 'mongoose';
 import slugify from 'slugify';
 
+// Frame color variant interface for organizing products by frame colors
+export interface IFrameColorVariant {
+  color: string;
+  lensColor: string;
+  stockQuantity: number | undefined; // Allow undefined for empty state
+  images: string[];
+}
+
 export interface IProduct extends Document {
   _id: string;
   name: string;
@@ -10,11 +18,19 @@ export interface IProduct extends Document {
   price: number;
   isFeatured?: boolean;
   thumbnail: string;
+
+  // Images - only for contacts and accessories (glasses/sunglasses use frameColorVariants.images)
   images?: string[];
-  stockQuantity: number;
+
+  // Stock quantity - only for contacts and accessories (glasses/sunglasses use frameColorVariants.stockQuantity)
+  stockQuantity?: number;
+
   inStock: boolean;
   productType: 'glasses' | 'sunglasses' | 'contacts' | 'accessory';
-  colors: string[];
+
+  // Colors - only for contacts (as lens colors), glasses/sunglasses use frameColorVariants.color
+  colors?: string[];
+
   status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
@@ -23,8 +39,10 @@ export interface IProduct extends Document {
   frameType?: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial?: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth?: 'narrow' | 'medium' | 'wide';
-  frameColor?: string[];
   gender?: 'men' | 'women' | 'unisex';
+
+  // Frame color variants - new structure for organizing by frame colors
+  frameColorVariants?: IFrameColorVariant[];
 
   // Glasses-specific
   lensType?:
@@ -36,6 +54,7 @@ export interface IProduct extends Document {
   prescriptionType?: 'distance' | 'reading' | 'multifocal' | 'non-prescription';
 
   // Sunglasses-specific
+  category?: 'premium' | 'standard'; // Sunglasses category
   lensColor?: string;
   uvProtection?: boolean;
   polarized?: boolean;
@@ -75,6 +94,14 @@ export interface IProduct extends Document {
   uvBlocking?: boolean;
 }
 
+// Frame color variant schema
+const FrameColorVariantSchema = new Schema<IFrameColorVariant>({
+  color: { type: String, required: true },
+  lensColor: { type: String, required: true },
+  stockQuantity: { type: Number, required: true, min: 0, default: 0 },
+  images: { type: [String], required: true, default: [] },
+});
+
 const ProductSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true, trim: true, index: true },
@@ -83,12 +110,31 @@ const ProductSchema = new Schema<IProduct>(
     price: { type: Number, required: true, min: 0 },
     isFeatured: { type: Boolean, default: false },
     thumbnail: { type: String, required: true },
+
+    // Images - only for contacts and accessories (glasses/sunglasses use frameColorVariants.images)
     images: { type: [String], default: [] },
-    stockQuantity: { type: Number, required: true, min: 0, default: 0 },
+
+    // Stock quantity - only for contacts and accessories (glasses/sunglasses use frameColorVariants.stockQuantity)
+    stockQuantity: { type: Number, min: 0, default: 0 },
+
     inStock: {
       type: Boolean,
       default: function (this: IProduct) {
-        return this.stockQuantity > 0;
+        // For glasses/sunglasses, calculate from frameColorVariants
+        if (
+          this.productType === 'glasses' ||
+          this.productType === 'sunglasses'
+        ) {
+          return !!(
+            this.frameColorVariants &&
+            this.frameColorVariants.length > 0 &&
+            this.frameColorVariants.some(
+              (variant) => (variant.stockQuantity || 0) > 0
+            )
+          );
+        }
+        // For contacts/accessories, use direct stockQuantity
+        return (this.stockQuantity || 0) > 0;
       },
     },
     productType: {
@@ -96,7 +142,10 @@ const ProductSchema = new Schema<IProduct>(
       required: true,
       enum: ['glasses', 'sunglasses', 'contacts', 'accessory'],
     },
+
+    // Colors - only for contacts (as lens colors), glasses/sunglasses use frameColorVariants.color
     colors: { type: [String], default: [] },
+
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
 
     // Shared: Glasses & Sunglasses
@@ -106,8 +155,10 @@ const ProductSchema = new Schema<IProduct>(
       enum: ['acetate', 'metal', 'titanium', 'plastic', 'mixed'],
     },
     frameWidth: { type: String, enum: ['narrow', 'medium', 'wide'] },
-    frameColor: { type: [String], default: [] },
     gender: { type: String, enum: ['men', 'women', 'unisex'] },
+
+    // Frame color variants - for glasses and sunglasses only
+    frameColorVariants: { type: [FrameColorVariantSchema], default: [] },
 
     // Glasses
     lensType: {
@@ -126,6 +177,7 @@ const ProductSchema = new Schema<IProduct>(
     },
 
     // Sunglasses
+    category: { type: String, enum: ['premium', 'standard'] },
     lensColor: { type: String },
     uvProtection: { type: Boolean },
     polarized: { type: Boolean },
@@ -190,7 +242,20 @@ ProductSchema.pre<IProduct>('validate', async function (next) {
 
 // Automatically set inStock on save
 ProductSchema.pre('save', async function (next) {
-  this.inStock = this.stockQuantity > 0;
+  // Calculate inStock based on product type
+  if (this.productType === 'glasses' || this.productType === 'sunglasses') {
+    // For glasses/sunglasses, check frameColorVariants stock
+    this.inStock = !!(
+      this.frameColorVariants &&
+      this.frameColorVariants.length > 0 &&
+      this.frameColorVariants.some(
+        (variant) => (variant.stockQuantity || 0) > 0
+      )
+    );
+  } else {
+    // For contacts/accessories, use direct stockQuantity
+    this.inStock = (this.stockQuantity || 0) > 0;
+  }
 
   if (this.isModified('name') || !this.slug) {
     let baseSlug = slugify(this.name, { lower: true, strict: true });

@@ -36,6 +36,7 @@ import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
 import MultiImageUpload from '@/components/multi-image-upload';
+import FrameColorVariantManager from '@/components/frame-color-variant-manager';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import {
@@ -53,6 +54,7 @@ import {
   productSchema,
   type ProductFormValues as Product,
 } from '@/lib/api/validation';
+import { type FrameColorVariant } from '@/types/product';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
@@ -66,6 +68,9 @@ export default function ProductDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [colors, setColors] = useState<string[]>([]);
   const [colorInput, setColorInput] = useState('');
+  const [frameColorVariants, setFrameColorVariants] = useState<
+    FrameColorVariant[]
+  >([]);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const router = useRouter();
@@ -107,6 +112,8 @@ export default function ProductDetailPage() {
         }
 
         const data = await response.json();
+        console.log('Fetched product data:', data.product);
+        console.log('Product status from fetch:', data.product?.status);
         setProduct(data.product);
 
         // Set form values
@@ -114,6 +121,8 @@ export default function ProductDetailPage() {
           ...data.product,
           productType: data.product.productType.toLowerCase(),
           images: data.product.images || [],
+          status: data.product.status || 'active',
+          frameColorVariants: data.product.frameColorVariants || [],
         };
 
         reset(formData);
@@ -123,6 +132,14 @@ export default function ProductDetailPage() {
           setColors(data.product.colors || []);
         } else {
           setColors(data.product.frameColor || data.product.colors || []);
+        }
+
+        // Set frame color variants if they exist
+        if (
+          data.product.frameColorVariants &&
+          Array.isArray(data.product.frameColorVariants)
+        ) {
+          setFrameColorVariants(data.product.frameColorVariants);
         }
       } catch (error: any) {
         console.error('Error fetching product:', error);
@@ -176,15 +193,46 @@ export default function ProductDetailPage() {
         throw new Error('At least one color is required for contact lenses');
       }
 
-      // Add colors to the data
+      // Validate frame color variants for glasses/sunglasses
+      if (
+        (data.productType === 'glasses' || data.productType === 'sunglasses') &&
+        (!frameColorVariants || frameColorVariants.length === 0)
+      ) {
+        throw new Error(
+          `At least one frame color variant is required for ${data.productType}`
+        );
+      }
+
+      // Validate that frame color variants have stock quantities
+      if (
+        (data.productType === 'glasses' || data.productType === 'sunglasses') &&
+        frameColorVariants
+      ) {
+        const hasInvalidStock = frameColorVariants.some(
+          (variant) =>
+            variant.stockQuantity === undefined || variant.stockQuantity < 0
+        );
+        if (hasInvalidStock) {
+          throw new Error(
+            'All frame color variants must have valid stock quantities'
+          );
+        }
+      }
+
+      // Add colors and frame color variants to the data
       const productData = {
         ...data,
         images: watch('images') || [],
         colors,
-        // For glasses and sunglasses, add frameColor
-        ...(data.productType !== 'contacts' && { frameColor: colors }),
+        // For glasses and sunglasses, add frameColor and frameColorVariants
+        ...(data.productType !== 'contacts' && {
+          frameColor: colors,
+          frameColorVariants: frameColorVariants,
+        }),
         // For contacts, ensure colors are set
         ...(data.productType === 'contacts' && { colors }),
+        // Ensure status is included
+        status: data.status || product?.status || 'active',
       };
 
       // Send the request
@@ -203,6 +251,11 @@ export default function ProductDetailPage() {
 
       const updatedProduct = await response.json();
       setProduct(updatedProduct.product);
+
+      // Update frame color variants if they were changed
+      if (updatedProduct.product.frameColorVariants) {
+        setFrameColorVariants(updatedProduct.product.frameColorVariants);
+      }
 
       toast.success('Product updated', {
         description: 'The product has been updated successfully.',
@@ -227,34 +280,27 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Handle product deletion
-  const handleDelete = async () => {
+  // Handle product status toggle (activate/deactivate)
+  const handleToggleStatus = async () => {
+    console.log('handleToggleStatus function called');
+    console.log('Product ID:', productId);
+    console.log('Current product:', product);
+
     setIsDeleting(true);
     setError(null);
 
     try {
-      // Get admin token
-      // const token = localStorage.getItem('adminToken');
-      // if (!token) {
-      //   throw new Error('Authentication required');
-      // }
+      const currentStatus = product?.status;
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
-      let productStatus;
-      productStatus = product?.status;
-
-      if (productStatus === 'active') {
-        productStatus = 'inactive';
-      } else {
-        productStatus = 'active';
-      }
-
-      // Send the request
+      // Send PUT request with status update
+      console.log('Sending status update:', { status: newStatus });
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: productStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (!response.ok) {
@@ -262,26 +308,37 @@ export default function ProductDetailPage() {
         throw new Error(errorData.error || 'Failed to update product status');
       }
 
-      toast('Product Status Changed', {
-        description: 'The product status has been changed to ' + productStatus,
+      const result = await response.json();
+      console.log('API response:', result);
+
+      // Update local product state with the actual response
+      if (result.product) {
+        setProduct(result.product);
+        console.log('Updated local product state:', result.product.status);
+      }
+
+      toast.success('Product Status Updated', {
+        description: `Product has been ${
+          newStatus === 'active' ? 'activated' : 'deactivated'
+        } successfully.`,
         style: {
           background: 'rgb(59, 130, 246)',
           color: 'white',
         },
       });
 
-      // Redirect to products page
-      router.push('/admin/products');
+      // Add a small delay to ensure the state is properly updated before redirect
+      setTimeout(() => {
+        router.push('/admin/products');
+      }, 1000);
     } catch (error: any) {
-      console.error('Error deleting product:', error);
-      setError(error.message || 'Failed to delete product. Please try again.');
-      toast('Error', {
+      console.error('Error updating product status:', error);
+      setError(
+        error.message || 'Failed to update product status. Please try again.'
+      );
+      toast.error('Error', {
         description:
-          error.message || 'Failed to delete product. Please try again.',
-        style: {
-          background: 'rgb(239, 68, 68)',
-          color: 'white',
-        },
+          error.message || 'Failed to update product status. Please try again.',
       });
     } finally {
       setIsDeleting(false);
@@ -329,7 +386,7 @@ export default function ProductDetailPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Basic Information */}
                 <Card>
                   <CardHeader>
@@ -425,40 +482,163 @@ export default function ProductDetailPage() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="stockQuantity">
-                          Stock Quantity <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="stockQuantity"
-                          type="number"
-                          {...register('stockQuantity')}
-                          className={
-                            errors.stockQuantity ? 'border-red-500' : ''
-                          }
-                        />
-                        {errors.stockQuantity && (
-                          <p className="text-red-500 text-sm">
-                            {errors.stockQuantity.message}
-                          </p>
+                      {/* Only show stock quantity for non-glasses/sunglasses products */}
+                      {watchProductType !== 'glasses' &&
+                        watchProductType !== 'sunglasses' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="stockQuantity">
+                              Stock Quantity{' '}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="stockQuantity"
+                              type="number"
+                              {...register('stockQuantity')}
+                              className={
+                                errors.stockQuantity ? 'border-red-500' : ''
+                              }
+                            />
+                            {errors.stockQuantity && (
+                              <p className="text-red-500 text-sm">
+                                {errors.stockQuantity.message}
+                              </p>
+                            )}
+                          </div>
                         )}
-                      </div>
+
+                      {/* Information for glasses/sunglasses */}
+                      {(watchProductType === 'glasses' ||
+                        watchProductType === 'sunglasses') && (
+                        <div className="space-y-2">
+                          <Label>Stock Management</Label>
+                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <p className="text-sm text-blue-800">
+                              <strong>
+                                Stock is managed through Frame Color Variants
+                              </strong>
+                              <br />
+                              Each frame color has its own stock quantity. See
+                              the Frame Color Variants section below to manage
+                              inventory.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Media and Colors */}
+                {/* Status and Analytics */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Media & Colors</CardTitle>
+                    <CardTitle>Product Status & Analytics</CardTitle>
                     <CardDescription>
-                      Update product image and available colors
+                      Current product status and stock information
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Current Status</Label>
+                      <Badge
+                        variant={
+                          product?.status === 'active' ? 'default' : 'secondary'
+                        }
+                        className={
+                          product?.status === 'active'
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                        }
+                      >
+                        {product?.status === 'active' ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Total Stock</Label>
+                      <div className="text-lg font-semibold">
+                        {(() => {
+                          if (!product) return '0';
+
+                          if (
+                            watchProductType === 'glasses' ||
+                            watchProductType === 'sunglasses'
+                          ) {
+                            // For glasses/sunglasses, sum all frameColorVariants stock
+                            const totalStock = (
+                              frameColorVariants || []
+                            ).reduce(
+                              (sum, variant) =>
+                                sum + (variant.stockQuantity ?? 0),
+                              0
+                            );
+                            return totalStock;
+                          } else {
+                            // For contacts/accessories, use direct stockQuantity
+                            return product.stockQuantity ?? 0;
+                          }
+                        })()}
+                        <span className="text-sm font-normal text-gray-500 ml-2">
+                          units
+                        </span>
+                      </div>
+                    </div>
+
+                    {(watchProductType === 'glasses' ||
+                      watchProductType === 'sunglasses') &&
+                      frameColorVariants &&
+                      frameColorVariants.length > 0 && (
+                        <div className="space-y-2">
+                          <Label>Stock by Frame Color</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {frameColorVariants.map((variant, index) => (
+                              <div
+                                key={index}
+                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                              >
+                                <span className="text-sm font-medium">
+                                  {variant.color}
+                                </span>
+                                <span
+                                  className={`text-sm ${
+                                    (variant.stockQuantity ?? 0) <= 5
+                                      ? 'text-orange-600 font-medium'
+                                      : ''
+                                  }`}
+                                >
+                                  {variant.stockQuantity ?? 0} units
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                    {(watchProductType === 'contacts' ||
+                      watchProductType === 'accessory') && (
+                      <div className="space-y-2">
+                        <Label>Direct Stock Management</Label>
+                        <p className="text-sm text-gray-600">
+                          Stock for {watchProductType} is managed through the
+                          main stock quantity field above.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Media */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product Media</CardTitle>
+                    <CardDescription>
+                      Upload main product image and additional gallery images
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <Label>
-                        Product Image <span className="text-red-500">*</span>
+                        Main Product Image{' '}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <input type="hidden" {...register('thumbnail')} />
                       <ImageUpload
@@ -472,62 +652,77 @@ export default function ProductDetailPage() {
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Additional Images</Label>
-                      {(watch('images') || []).length > 0 && (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4">
-                          {(watch('images') || []).map((image, index) => (
-                            <div key={index} className="relative group">
-                              <Image
-                                src={image}
-                                alt={`Product image ${index + 1}`}
-                                width={150}
-                                height={150}
-                                className="rounded-md object-cover w-full h-24"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const currentImages = watch('images') || [];
-                                  const newImages = currentImages.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  setValue('images', newImages, {
-                                    shouldValidate: true,
-                                  });
-                                }}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                    {/* Only show additional images for contacts and accessories */}
+                    {(watchProductType === 'contacts' ||
+                      watchProductType === 'accessory') && (
+                      <div className="space-y-2">
+                        <Label>Additional Images</Label>
+                        {(watch('images') || []).length > 0 && (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4">
+                            {(watch('images') || []).map((image, index) => (
+                              <div key={index} className="relative group">
+                                <Image
+                                  src={image}
+                                  alt={`Product image ${index + 1}`}
+                                  width={150}
+                                  height={150}
+                                  className="rounded-md object-cover w-full h-24"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentImages = watch('images') || [];
+                                    const newImages = currentImages.filter(
+                                      (_, i) => i !== index
+                                    );
+                                    setValue('images', newImages, {
+                                      shouldValidate: true,
+                                    });
+                                  }}
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
-                      <input type="hidden" {...register('images')} />
-                      <MultiImageUpload
-                        onImagesUploaded={handleAdditionalImagesUpload}
-                        currentImageCount={(watch('images') || []).length}
-                      />
+                        <input type="hidden" {...register('images')} />
+                        <MultiImageUpload
+                          onImagesUploaded={handleAdditionalImagesUpload}
+                          currentImageCount={(watch('images') || []).length}
+                        />
 
-                      {errors.images && (
-                        <p className="text-red-500 text-sm">
-                          {Array.isArray(errors.images)
-                            ? (errors.images as any[])
-                                .map((e) => e.message)
-                                .join(', ')
-                            : (errors.images as any)?.message}
+                        {errors.images && (
+                          <p className="text-red-500 text-sm">
+                            {Array.isArray(errors.images)
+                              ? (errors.images as any[])
+                                  .map((e) => e.message)
+                                  .join(', ')
+                              : (errors.images as any)?.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Note for glasses/sunglasses */}
+                    {(watchProductType === 'glasses' ||
+                      watchProductType === 'sunglasses') && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-sm text-amber-800">
+                          <strong>Note:</strong> Additional images for each
+                          frame color are managed in the Frame Color Variants
+                          section below.
                         </p>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
-                    {watchProductType !== 'accessory' && (
+                    {/* Colors for contacts only */}
+                    {watchProductType === 'contacts' && (
                       <div className="space-y-2">
                         <Label htmlFor="colors">
-                          {watchProductType !== 'contacts'
-                            ? 'Frame Colors'
-                            : 'Available Colors'}
+                          Available Colors{' '}
                           <span className="text-red-500">*</span>
                         </Label>
                         <div className="flex items-center space-x-2">
@@ -535,7 +730,7 @@ export default function ProductDetailPage() {
                             id="colorInput"
                             value={colorInput}
                             onChange={(e) => setColorInput(e.target.value)}
-                            placeholder="Add a color (e.g., Black, Red, Blue)"
+                            placeholder="Add a color (e.g., Blue, Green, Brown)"
                             className="flex-grow"
                           />
                           <Button
@@ -581,17 +776,39 @@ export default function ProductDetailPage() {
                             ))}
                           </div>
                         )}
-                        {watchProductType !== 'contacts' &&
-                          colors.length === 0 && (
-                            <p className="text-red-500 text-sm">
-                              At least one frame color is required
-                            </p>
-                          )}
+                        {colors.length === 0 && (
+                          <p className="text-red-500 text-sm">
+                            At least one color is required for contact lenses
+                          </p>
+                        )}
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Frame Color Variants - for Sunglasses and Glasses */}
+              {(watchProductType === 'sunglasses' ||
+                watchProductType === 'glasses') && (
+                <div className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Frame Color Variants</CardTitle>
+                      <CardDescription>
+                        Organize your {watchProductType} by frame colors. Each
+                        color can have its own images and stock quantity.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <FrameColorVariantManager
+                        variants={frameColorVariants}
+                        onChange={setFrameColorVariants}
+                        productType={watchProductType}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               {/* Product Type Specific Fields */}
               <div className="mt-6">
@@ -1372,6 +1589,11 @@ export default function ProductDetailPage() {
                       type="button"
                       variant="destructive"
                       disabled={isSubmitting || isDeleting}
+                      onClick={() => {
+                        console.log('Status toggle button clicked');
+                        console.log('Current product status:', product?.status);
+                        console.log('Delete dialog should open now');
+                      }}
                       className={`${
                         product && product.status === 'active'
                           ? 'bg-red-600 hover:bg-red-700'
@@ -1412,7 +1634,7 @@ export default function ProductDetailPage() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={handleDelete}
+                        onClick={handleToggleStatus}
                         className={
                           product?.status === 'active'
                             ? 'bg-red-600 hover:bg-red-700'

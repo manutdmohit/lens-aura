@@ -1,5 +1,5 @@
 import mongoose, { Model } from 'mongoose';
-import Product, { type IProduct } from './Product';
+import Product, { type IProduct, type IFrameColorVariant } from './Product';
 
 // Sunglasses interface extending the base Product
 export interface ISunglasses extends IProduct {
@@ -7,6 +7,7 @@ export interface ISunglasses extends IProduct {
   frameMaterial: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth: 'narrow' | 'medium' | 'wide';
   frameColor: string[];
+  frameColorVariants: IFrameColorVariant[];
   lensColor: string;
   uvProtection: boolean;
   polarized: boolean;
@@ -95,7 +96,7 @@ const SunglassesSchema = new mongoose.Schema<ISunglasses>({
 
 // Create the Sunglasses model as a discriminator of Product
 const Sunglasses: Model<ISunglasses> =
-  mongoose.models.Glasses ||
+  mongoose.models.Sunglasses ||
   Product.discriminator<ISunglasses>('Sunglasses', SunglassesSchema);
 
 export default Sunglasses;

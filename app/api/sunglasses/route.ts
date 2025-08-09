@@ -13,16 +13,26 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const gender = searchParams.get('gender');
+    const category = searchParams.get('category'); // premium or standard
     const query: any = {
       status: 'active',
       productType: 'sunglasses',
     };
+
+    // Filter by gender
     if (gender === 'men') {
       query.gender = { $in: ['men', 'unisex'] };
     } else if (gender === 'women') {
       query.gender = { $in: ['women', 'unisex'] };
     } else if (gender === 'unisex') {
       query.gender = 'unisex';
+    }
+
+    // Filter by category (premium or standard)
+    if (category === 'premium') {
+      query.category = 'premium';
+    } else if (category === 'standard') {
+      query.category = 'standard';
     }
 
     // Get total count for pagination metadata
@@ -32,7 +42,7 @@ export async function GET(req: NextRequest) {
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
       .select(
-        'name slug thumbnail inStock stockQuantity productType price colors gender'
+        'name slug thumbnail inStock stockQuantity productType price colors gender category frameColorVariants status'
       )
       .sort({ createdAt: -1 })
       .skip(skip)

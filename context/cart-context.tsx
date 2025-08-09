@@ -19,7 +19,11 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   itemCount: number;
-  addItem: (product: IProduct & { _id: string }, quantity: number, color: string) => void;
+  addItem: (
+    product: IProduct & { _id: string },
+    quantity: number,
+    color: string
+  ) => void;
   removeItem: (productId: string, color?: string) => void;
   updateQuantity: (productId: string, quantity: number, color: string) => void;
   clearCart: () => void;
@@ -61,7 +65,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
-  const addItem = (product: IProduct & { _id: string }, quantity: number, color: string) => {
+  const addItem = (
+    product: IProduct & { _id: string },
+    quantity: number,
+    color: string
+  ) => {
+    console.log('addItem called with product:', product);
+    console.log('Product _id:', product._id);
+    console.log('Product id:', (product as any).id);
+
     setItems((prevItems) => {
       if (!Array.isArray(prevItems)) return [];
 
@@ -93,19 +105,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updateQuantity = (productId: string, quantity: number, color: string) => {
+  const updateQuantity = (
+    productId: string,
+    quantity: number,
+    color: string
+  ) => {
+    console.log('updateQuantity called with:', { productId, quantity, color });
+    console.log('Current items:', items);
+
     if (quantity <= 0) {
       removeItem(productId, color);
       return;
     }
 
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product._id === productId && item.color === color
-          ? { ...item, quantity }
-          : item
-      )
-    );
+    setItems((prevItems) => {
+      const updatedItems = prevItems.map((item) => {
+        // Check both _id and id properties for flexibility
+        const itemProductId = item.product._id || (item.product as any).id;
+        const matches = itemProductId === productId && item.color === color;
+
+        console.log('Checking item:', {
+          itemId: itemProductId,
+          itemColor: item.color,
+          matches: matches,
+        });
+
+        return matches ? { ...item, quantity } : item;
+      });
+      console.log('Updated items:', updatedItems);
+      return updatedItems;
+    });
   };
 
   const clearCart = () => {

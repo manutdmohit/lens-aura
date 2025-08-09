@@ -38,7 +38,7 @@ export default function MensGlassesNewArrivalsPage() {
   const hasProducts = Array.isArray(products) && products.length > 0;
 
   return (
-    <main className="flex flex-col min-h-screen -mt-[64px]">
+    <main className="flex flex-col min-h-screen">
       <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">New Arrivals - Sunglasses</h1>
