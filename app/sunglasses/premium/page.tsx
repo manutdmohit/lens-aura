@@ -138,13 +138,15 @@ function PremiumSunglassesContent() {
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
                 Luxury designer frames crafted with premium materials, featuring
-                polarized lenses and exceptional UV protection. Starting from{' '}
-                {priceRange?.lowest ? (
-                  <span className="font-semibold text-amber-600">
-                    ${priceRange.lowest.price.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="font-semibold text-amber-600">$150</span>
+                polarized lenses and exceptional UV protection.
+                {priceRange?.lowest && (
+                  <>
+                    {' '}
+                    Starting from{' '}
+                    <span className="font-semibold text-amber-600">
+                      ${priceRange.lowest.price.toFixed(2)}
+                    </span>
+                  </>
                 )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">

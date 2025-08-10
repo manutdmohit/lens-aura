@@ -141,13 +141,14 @@ function StandardSunglassesContent() {
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
                 Quality everyday sunglasses with excellent UV protection at
                 affordable prices. Perfect for daily wear and active lifestyles.
-                Starting from{' '}
-                {priceRange?.lowest ? (
-                  <span className="font-semibold text-blue-600">
-                    ${priceRange.lowest.price.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="font-semibold text-blue-600">$95</span>
+                {priceRange?.lowest && (
+                  <>
+                    {' '}
+                    Starting from{' '}
+                    <span className="font-semibold text-blue-600">
+                      ${priceRange.lowest.price.toFixed(2)}
+                    </span>
+                  </>
                 )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">

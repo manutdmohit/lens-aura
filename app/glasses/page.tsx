@@ -136,9 +136,8 @@ function GlassesContent() {
               </>
             ) : (
               <>
-                Our prescription glasses start from just $95, including standard
-                single-vision lenses. Choose from our wide range of styles and
-                colors.
+                Our prescription glasses include standard single-vision lenses.
+                Choose from our wide range of styles and colors.
               </>
             )}
           </p>

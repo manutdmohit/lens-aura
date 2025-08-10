@@ -145,13 +145,15 @@ function SunglassesContent() {
               </div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Luxury designer frames with premium polarized lenses, superior
-                UV protection, and exceptional craftsmanship. Starting from{' '}
-                {priceRange.premium?.lowest ? (
-                  <span className="font-semibold text-amber-600">
-                    ${priceRange.premium.lowest.price.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="font-semibold text-amber-600">$150</span>
+                UV protection, and exceptional craftsmanship.
+                {priceRange.premium?.lowest && (
+                  <>
+                    {' '}
+                    Starting from{' '}
+                    <span className="font-semibold text-amber-600">
+                      ${priceRange.premium.lowest.price.toFixed(2)}
+                    </span>
+                  </>
                 )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -221,13 +223,14 @@ function SunglassesContent() {
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Quality everyday sunglasses with excellent UV protection at
                 affordable prices. Perfect for daily wear and active lifestyles.
-                Starting from{' '}
-                {priceRange.standard?.lowest ? (
-                  <span className="font-semibold text-blue-600">
-                    ${priceRange.standard.lowest.price.toFixed(2)}
-                  </span>
-                ) : (
-                  <span className="font-semibold text-blue-600">$95</span>
+                {priceRange.standard?.lowest && (
+                  <>
+                    {' '}
+                    Starting from{' '}
+                    <span className="font-semibold text-blue-600">
+                      ${priceRange.standard.lowest.price.toFixed(2)}
+                    </span>
+                  </>
                 )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
