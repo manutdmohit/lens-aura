@@ -9,6 +9,7 @@ const colorHash = new ColorHash({
 
 // Extended color mapping for custom colors
 const customColorMapping: Record<string, string> = {
+  tiger: '#FF8C00', // Orange with black stripes pattern
   tigers: '#FF8C00', // Orange with black stripes pattern
   tortoiseshell: '#8B4513', // Brown tortoiseshell
   leopard: '#DAA520', // Golden leopard print
@@ -20,6 +21,14 @@ const customColorMapping: Record<string, string> = {
   'matte black': '#1C1C1C', // Matte black
   transparent: 'rgba(255, 255, 255, 0.1)', // Transparent
   clear: 'rgba(255, 255, 255, 0.1)', // Clear
+  'white trans': '#F5F5F5', // White transparent
+  'white transparent': '#E8E8E8', // White transparent (more visible)
+  'dark grey': '#2F4F4F', // Dark grey
+  'deep silver': '#708090', // Deep silver
+  tea: '#8B4513', // Tea color
+  'olive green': '#556B2F', // Olive green
+  'hawksbill turtle tea': '#8B4513', // Hawksbill turtle tea
+  'orange black': '#FF8C00', // Orange black
   frosted: 'rgba(255, 255, 255, 0.3)', // Frosted
   smoke: '#708090', // Smoke gray
   mirror: '#C0C0C0', // Mirror finish
@@ -484,6 +493,12 @@ export function isPatternColor(colorName: string): boolean {
     'brushed',
     'textured',
     'patterned',
+    'white trans',
+    'white transparent',
+    'dark grey',
+    'deep silver',
+    'hawksbill turtle tea',
+    'orange black',
     'embossed',
     'engraved',
     'etched',
@@ -691,8 +706,35 @@ export function getColorDisplayName(colorName: string): string {
   if (!colorName) return '';
 
   // Handle special cases
+  if (colorName.toLowerCase() === 'tiger') {
+    return 'Tiger (Orange with Black Stripes)';
+  }
   if (colorName.toLowerCase() === 'tigers') {
     return 'Tigers (Orange with Black Stripes)';
+  }
+  if (colorName.toLowerCase() === 'white trans') {
+    return 'White Transparent';
+  }
+  if (colorName.toLowerCase() === 'white transparent') {
+    return 'White Transparent';
+  }
+  if (colorName.toLowerCase() === 'dark grey') {
+    return 'Dark Grey';
+  }
+  if (colorName.toLowerCase() === 'deep silver') {
+    return 'Deep Silver';
+  }
+  if (colorName.toLowerCase() === 'tea') {
+    return 'Tea';
+  }
+  if (colorName.toLowerCase() === 'olive green') {
+    return 'Olive Green';
+  }
+  if (colorName.toLowerCase() === 'hawksbill turtle tea') {
+    return 'Hawksbill Turtle Tea';
+  }
+  if (colorName.toLowerCase() === 'orange black') {
+    return 'Orange Black';
   }
 
   // Capitalize first letter of each word
