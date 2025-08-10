@@ -172,7 +172,7 @@ function PremiumSunglassesContent() {
                   variant="secondary"
                   className="bg-amber-100 text-amber-800 border-amber-200"
                 >
-                  2-Year Warranty
+                  1-Year Warranty
                 </Badge>
               </div>
               <div className="flex justify-center">

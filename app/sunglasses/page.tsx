@@ -330,7 +330,7 @@ function SunglassesContent() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span>2-year warranty</span>
+                        <span>1-year warranty</span>
                       </div>
                     </div>
                     <div className="pt-4 border-t">

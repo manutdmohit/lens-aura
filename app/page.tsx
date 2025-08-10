@@ -4,7 +4,7 @@ import FeaturedProducts from '@/components/featured-products';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
 import PriceRangeDisplay from '@/components/price-range-display';
-import { Glasses, Sun, Star, Quote, ArrowRight, Eye } from 'lucide-react';
+import { Glasses, Sun, ArrowRight, Eye } from 'lucide-react';
 import { Playfair_Display, Montserrat } from 'next/font/google';
 import Image from 'next/image';
 
@@ -176,98 +176,6 @@ export default function Home() {
                   </div>
                 </AnimatedSection>
               </div>
-            </div>
-          </section>
-
-          {/* Enhanced testimonials section */}
-          <section className="py-24 px-4 max-w-7xl mx-auto">
-            <AnimatedSection direction="up" className="text-center mb-16">
-              <Star className="w-12 h-12 text-amber-400 mx-auto mb-6" />
-              <h2
-                className={`${playfair.className} text-4xl md:text-5xl font-bold mb-6`}
-              >
-                What Our Customers Say
-              </h2>
-              <div className="w-24 h-1 bg-amber-400 mx-auto"></div>
-            </AnimatedSection>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <AnimatedSection direction="up" delay={0.1}>
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-                  <Quote className="w-10 h-10 text-teal-500 mb-6" />
-                  <div className="flex items-center mb-6">
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop"
-                      alt="Customer"
-                      width={400}
-                      height={400}
-                      className="w-16 h-16 rounded-full object-cover mr-4 ring-4 ring-amber-100"
-                    />
-                    <div>
-                      <h3 className={`${playfair.className} text-xl font-bold`}>
-                        Sarah J.
-                      </h3>
-                      <p className="text-gray-500">Sydney, Australia</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    "I love my new glasses! The quality is amazing and the price
-                    was so reasonable. The staff was incredibly helpful in
-                    finding the perfect fit for my face."
-                  </p>
-                </div>
-              </AnimatedSection>
-
-              <AnimatedSection direction="up" delay={0.2}>
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-                  <Quote className="w-10 h-10 text-teal-500 mb-6" />
-                  <div className="flex items-center mb-6">
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
-                      alt="Customer"
-                      width={400}
-                      height={400}
-                      className="w-16 h-16 rounded-full object-cover mr-4 ring-4 ring-amber-100"
-                    />
-                    <div>
-                      <h3 className={`${playfair.className} text-xl font-bold`}>
-                        Michael T.
-                      </h3>
-                      <p className="text-gray-500">Melbourne, Australia</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    "The eye test was thorough and professional. I ended up with
-                    the perfect prescription and stylish frames that I get
-                    compliments on all the time."
-                  </p>
-                </div>
-              </AnimatedSection>
-
-              <AnimatedSection direction="up" delay={0.3}>
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-                  <Quote className="w-10 h-10 text-teal-500 mb-6" />
-                  <div className="flex items-center mb-6">
-                    <img
-                      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop"
-                      alt="Customer"
-                      width={400}
-                      height={400}
-                      className="w-16 h-16 rounded-full object-cover mr-4 ring-4 ring-amber-100"
-                    />
-                    <div>
-                      <h3 className={`${playfair.className} text-xl font-bold`}>
-                        Emma L.
-                      </h3>
-                      <p className="text-gray-500">Brisbane, Australia</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    "Lens Aura's sunglasses are my go-to. The polarized lenses
-                    are fantastic and the styles are so much more unique than
-                    what you find at other stores."
-                  </p>
-                </div>
-              </AnimatedSection>
             </div>
           </section>
         </div>
