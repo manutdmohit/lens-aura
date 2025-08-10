@@ -421,6 +421,7 @@ export default function ProductDetailPage() {
                           <SelectItem value="contacts">
                             Contact Lenses
                           </SelectItem>
+                          <SelectItem value="accessory">Accessory</SelectItem>
                         </SelectContent>
                       </Select>
                       {errors.productType && (
@@ -523,6 +524,29 @@ export default function ProductDetailPage() {
                             </p>
                           </div>
                         </div>
+                      )}
+                    </div>
+
+                    {/* Featured Product Toggle */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="isFeatured"
+                          checked={watch('isFeatured')}
+                          onCheckedChange={(checked) =>
+                            setValue('isFeatured', checked as boolean, {
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                        <Label htmlFor="isFeatured" className="font-normal">
+                          Mark as Featured Product
+                        </Label>
+                      </div>
+                      {errors.isFeatured && (
+                        <p className="text-red-500 text-sm">
+                          {errors.isFeatured.message as any}
+                        </p>
                       )}
                     </div>
                   </CardContent>
@@ -1048,6 +1072,38 @@ export default function ProductDetailPage() {
                     {watchProductType === 'sunglasses' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
+                          {/* Category */}
+                          <div className="space-y-2">
+                            <Label htmlFor="category">
+                              Category <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                              value={watch('category')}
+                              onValueChange={(value) =>
+                                setValue('category', value as any)
+                              }
+                            >
+                              <SelectTrigger
+                                id="category"
+                                className={
+                                  errors.category ? 'border-red-500' : ''
+                                }
+                              >
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="premium">Premium</SelectItem>
+                                <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {errors.category && (
+                              <p className="text-red-500 text-sm">
+                                {errors.category.message}
+                              </p>
+                            )}
+                          </div>
                           <div className="space-y-2">
                             <Label htmlFor="frameType">
                               Frame Type <span className="text-red-500">*</span>
@@ -1147,25 +1203,6 @@ export default function ProductDetailPage() {
                             {errors.frameWidth && (
                               <p className="text-red-500 text-sm">
                                 {errors.frameWidth.message}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="lensColor">
-                              Lens Color <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id="lensColor"
-                              placeholder="e.g., Black, Brown, Green"
-                              {...register('lensColor')}
-                              className={
-                                errors.lensColor ? 'border-red-500' : ''
-                              }
-                            />
-                            {errors.lensColor && (
-                              <p className="text-red-500 text-sm">
-                                {errors.lensColor.message}
                               </p>
                             )}
                           </div>
