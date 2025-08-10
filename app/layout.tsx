@@ -8,6 +8,7 @@ import { CartProvider } from '@/context/cart-context';
 import { SessionProvider } from '@/components/session-provider';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+import WhatsAppButton from '@/components/whatsapp-button';
 import { Toaster } from 'sonner';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,7 @@ export default function RootLayout({
             {!isAdminRoute && <Navbar />}
             <main className="min-h-screen pt-20 md:pt-20">{children}</main>
             {!isAdminRoute && <Footer />}
+            {!isAdminRoute && <WhatsAppButton phoneNumber="+61 451 533 354" />}
             <Toaster />
           </CartProvider>
         </SessionProvider>
