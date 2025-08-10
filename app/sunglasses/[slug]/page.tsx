@@ -359,6 +359,71 @@ export default function SunGlassesProductPage() {
               </div>
             </motion.div>
 
+            {/* Color Selection - Moved up for better UX */}
+            {displayColors.length > 0 && (
+              <motion.div
+                variants={slideUp}
+                className="border border-gray-200 rounded-xl overflow-hidden"
+              >
+                <div className="flex items-center justify-between bg-gray-50 p-4 border-b">
+                  <div className="flex items-center">
+                    <Palette className="h-5 w-5 mr-2 text-blue-600" />
+                    <h3 className="font-medium text-gray-900">Color Options</h3>
+                  </div>
+                  <span className="text-sm text-blue-600 font-medium">
+                    {selectedColor && formatText(selectedColor)}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {displayColors.map((color, index) => (
+                      <motion.button
+                        key={index}
+                        className={`relative p-1 rounded-full cursor-pointer transition-all 
+                        `}
+                        onClick={() => handleColorSelect(color)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <div
+                          className="w-8 h-8 rounded-full"
+                          style={{
+                            backgroundColor: getCSSColor(color),
+                            border:
+                              color.toLowerCase() === 'white' ||
+                              color.toLowerCase() === '#ffffff'
+                                ? '1px solid #e5e5e5'
+                                : 'none',
+                          }}
+                          title={getColorDisplayName(color)}
+                        />
+                        {selectedColor === color && (
+                          <motion.div
+                            className="absolute inset-0 flex items-center justify-center"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            <Check
+                              className={`h-4 w-4 ${
+                                [
+                                  'white',
+                                  '#ffffff',
+                                  'yellow',
+                                  '#ffff00',
+                                ].includes(color.toLowerCase())
+                                  ? 'text-black'
+                                  : 'text-white'
+                              }`}
+                            />
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Availability */}
             <motion.div variants={slideUp} className="flex items-center">
               {isInStock ? (
@@ -517,71 +582,6 @@ export default function SunGlassesProductPage() {
                 )}
               </div>
             </motion.div>
-
-            {/* Color Selection */}
-            {displayColors.length > 0 && (
-              <motion.div
-                variants={slideUp}
-                className="border border-gray-200 rounded-xl overflow-hidden"
-              >
-                <div className="flex items-center justify-between bg-gray-50 p-4 border-b">
-                  <div className="flex items-center">
-                    <Palette className="h-5 w-5 mr-2 text-blue-600" />
-                    <h3 className="font-medium text-gray-900">Color Options</h3>
-                  </div>
-                  <span className="text-sm text-blue-600 font-medium">
-                    {selectedColor && formatText(selectedColor)}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {displayColors.map((color, index) => (
-                      <motion.button
-                        key={index}
-                        className={`relative p-1 rounded-full cursor-pointer transition-all 
-                        `}
-                        onClick={() => handleColorSelect(color)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <div
-                          className="w-8 h-8 rounded-full"
-                          style={{
-                            backgroundColor: getCSSColor(color),
-                            border:
-                              color.toLowerCase() === 'white' ||
-                              color.toLowerCase() === '#ffffff'
-                                ? '1px solid #e5e5e5'
-                                : 'none',
-                          }}
-                          title={getColorDisplayName(color)}
-                        />
-                        {selectedColor === color && (
-                          <motion.div
-                            className="absolute inset-0 flex items-center justify-center"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                          >
-                            <Check
-                              className={`h-4 w-4 ${
-                                [
-                                  'white',
-                                  '#ffffff',
-                                  'yellow',
-                                  '#ffff00',
-                                ].includes(color.toLowerCase())
-                                  ? 'text-black'
-                                  : 'text-white'
-                              }`}
-                            />
-                          </motion.div>
-                        )}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
             {/* Add to Cart */}
             <motion.div
