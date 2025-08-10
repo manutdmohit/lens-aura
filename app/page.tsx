@@ -47,9 +47,13 @@ export const metadata = {
 export default function Home() {
   return (
     <PageTransition>
-      <div className={`flex flex-col ${montserrat.className} bg-[#F2D399]`}>
+      <div
+        className={`flex flex-col ${montserrat.className} bg-gradient-to-br from-slate-50 via-white to-blue-50/30`}
+      >
         <div className="flex-grow">
           <HeroSection />
+
+          {/* Extraordinary Design, Surprising Prices, Featured Products */}
           <AnimatedSection className="py-24 px-4 max-w-7xl mx-auto text-center">
             <h2
               className={`${playfair.className} text-5xl md:text-6xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 relative z-10 drop-shadow-sm`}
@@ -58,13 +62,13 @@ export default function Home() {
               Extraordinary Design, Surprising Prices
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-16 leading-relaxed">
-              Our frames are designed in-house and handcrafted from premium
-              materials, starting from just $95 including prescription lenses.
+              Our sunglasses are designed in-house and handcrafted from premium
+              materials, featuring polarized lenses and UV protection.
             </p>
             <FeaturedProducts />
           </AnimatedSection>
 
-          {/* Price Range Display */}
+          {/* Price Range Display, Featured Products */}
           <AnimatedSection
             className="py-12 px-4 max-w-7xl mx-auto"
             direction="up"
@@ -73,7 +77,7 @@ export default function Home() {
           </AnimatedSection>
 
           {/* Lifestyle images section with enhanced design */}
-          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to-[#F2D399]">
+          <section className="mx-auto py-24 bg-gradient-to-b from-gray-50 to-slate-100">
             <div className="max-w-7xl mx-auto px-4">
               <AnimatedSection direction="up" className="text-center mb-16">
                 <h2
