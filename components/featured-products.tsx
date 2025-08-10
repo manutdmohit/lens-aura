@@ -20,6 +20,9 @@ interface Product {
   gender?: string;
   inStock?: boolean;
   stockQuantity?: number;
+  frameColorVariants?: Array<{
+    stockQuantity?: number;
+  }>;
 }
 
 export default function FeaturedProducts() {
@@ -180,18 +183,22 @@ export default function FeaturedProducts() {
               {/* Stock Status */}
               <div className="absolute bottom-3 left-3 z-10">
                 {(() => {
-                  // Determine stock status based on multiple factors
+                  // Calculate total stock from frameColorVariants array or fallback to stockQuantity
                   const isInStock = product.inStock === true;
-                  const hasStockQuantity =
-                    product.stockQuantity && product.stockQuantity > 0;
+                  const totalStock =
+                    product.frameColorVariants?.reduce((total, variant) => {
+                      return total + (variant.stockQuantity || 0);
+                    }, 0) ||
+                    product.stockQuantity ||
+                    0;
 
-                  if (isInStock && hasStockQuantity) {
+                  if (isInStock && totalStock > 5) {
                     return (
                       <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                         In Stock
                       </span>
                     );
-                  } else if (isInStock && !hasStockQuantity) {
+                  } else if (isInStock && totalStock > 0 && totalStock <= 5) {
                     return (
                       <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                         Limited Stock

@@ -7,7 +7,7 @@ import type { ProductFormValues as Product } from '@/lib/api/validation';
 import StaggeredList from '@/components/staggered-list';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Eye, Heart, ShoppingCart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 interface ProductGridProps {
   products: Product[];
@@ -56,7 +56,31 @@ export default function ProductGrid({
   };
 
   const renderStockStatus = (product: Product) => {
-    if (!product.inStock) {
+    const isInStock = product.inStock === true;
+
+    // Calculate total stock from frameColors array
+    const totalStock =
+      product.frameColorVariants?.reduce((total, variant) => {
+        return total + (variant.stockQuantity || 0);
+      }, 0) || 0;
+
+    if (isInStock && totalStock > 5) {
+      return (
+        <div className="absolute top-3 left-3 z-10">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 shadow-sm">
+            In Stock
+          </span>
+        </div>
+      );
+    } else if (isInStock && totalStock > 0 && totalStock <= 5) {
+      return (
+        <div className="absolute top-3 left-3 z-10">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
+            Limited Stock
+          </span>
+        </div>
+      );
+    } else {
       return (
         <div className="absolute top-3 left-3 z-10">
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200 shadow-sm">
@@ -65,7 +89,6 @@ export default function ProductGrid({
         </div>
       );
     }
-    return null;
   };
 
   const renderCategoryBadge = (product: Product) => {
@@ -86,54 +109,6 @@ export default function ProductGrid({
       );
     }
     return null;
-  };
-
-  const renderQuickActions = (product: Product) => {
-    if (!showQuickActions) return null;
-
-    return (
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-        <div className="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-            onClick={(e) => {
-              e.preventDefault();
-              // Quick view logic
-            }}
-          >
-            <Eye className="w-4 h-4 text-gray-700" />
-          </motion.button>
-
-          {showWishlist && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-              onClick={(e) => {
-                e.preventDefault();
-                // Wishlist logic
-              }}
-            >
-              <Heart className="w-4 h-4 text-gray-700" />
-            </motion.button>
-          )}
-
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-            onClick={(e) => {
-              e.preventDefault();
-              // Add to cart logic
-            }}
-          >
-            <ShoppingCart className="w-4 h-4 text-gray-700" />
-          </motion.button>
-        </div>
-      </div>
-    );
   };
 
   const renderProductFeatures = (product: Product) => {
@@ -234,9 +209,6 @@ export default function ProductGrid({
                 </div>
               )}
 
-              {/* Quick Actions Overlay */}
-              {renderQuickActions(product)}
-
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
             </div>
@@ -292,15 +264,39 @@ export default function ProductGrid({
                     <Badge variant="secondary" className="text-xs">
                       {product.gender}
                     </Badge>
-                    {product.inStock ? (
-                      <Badge className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border-green-200">
-                        In Stock
-                      </Badge>
-                    ) : (
-                      <Badge className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border-red-200">
-                        Out of Stock
-                      </Badge>
-                    )}
+                    {(() => {
+                      const isInStock = product.inStock === true;
+
+                      // Calculate total stock from frameColors array
+                      const totalStock =
+                        product.frameColorVariants?.reduce((total, variant) => {
+                          return total + (variant.stockQuantity || 0);
+                        }, 0) || 0;
+
+                      if (isInStock && totalStock > 5) {
+                        return (
+                          <Badge className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border-green-200">
+                            In Stock
+                          </Badge>
+                        );
+                      } else if (
+                        isInStock &&
+                        totalStock > 0 &&
+                        totalStock <= 5
+                      ) {
+                        return (
+                          <Badge className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                            Limited Stock
+                          </Badge>
+                        );
+                      } else {
+                        return (
+                          <Badge className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border-red-200">
+                            Out of Stock
+                          </Badge>
+                        );
+                      }
+                    })()}
                   </div>
                 )}
               </div>
