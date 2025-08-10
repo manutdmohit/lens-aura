@@ -99,9 +99,9 @@ export default function Footer() {
                   </h3>
                 </div>
                 <p className="text-slate-300 leading-relaxed">
-                  Premium sunglasses at surprising prices. Designed in-house,
-                  handcrafted from quality materials with UV protection and
-                  polarized lenses.
+                  Premium sunglasses at surprising prices. Made from premium
+                  materials with advanced UV protection and high-quality
+                  polarized lenses for ultimate style and protection.
                 </p>
 
                 {/* Feature Badges */}
@@ -272,7 +272,7 @@ export default function Footer() {
                     <div>
                       <p className="font-medium text-white">Business Hours</p>
                       <p className="text-sm text-slate-400">
-                        Mon-Fri: 9am - 5pm AEST
+                        Mon-Fri: 8:30am - 5:30pm AEST
                       </p>
                     </div>
                   </div>
