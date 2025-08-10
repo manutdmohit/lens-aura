@@ -32,7 +32,7 @@ export async function GET(
       return session; // This is an error response
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -79,7 +79,7 @@ export async function PUT(
       return session; // This is an error response
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {

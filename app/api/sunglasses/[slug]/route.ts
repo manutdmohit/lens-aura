@@ -6,7 +6,7 @@ import Product from '@/models/Product';
 
 export async function GET(request: NextRequest, context: any) {
   try {
-    const { slug } = context.params;
+    const { slug } = await context.params;
 
     if (!slug) {
       return NextResponse.json(

@@ -20,8 +20,9 @@ export async function PUT(
       return session; // This is an error response
     }
 
+    const { id } = await context.params;
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(context.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid review ID format' },
         { status: 400 }
@@ -38,7 +39,7 @@ export async function PUT(
     await connectToDatabase();
 
     // Get review
-    const review = await Review.findById(context.params.id);
+    const review = await Review.findById(id);
 
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
@@ -77,7 +78,7 @@ export async function DELETE(
   context: any
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
     const session = await authenticate(req);
 
     if (session instanceof NextResponse) {

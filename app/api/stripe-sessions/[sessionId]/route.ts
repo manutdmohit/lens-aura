@@ -17,7 +17,7 @@ export async function GET(
   try {
     await connectToDatabase();
 
-    const { sessionId } = context.params;
+    const { sessionId } = await context.params;
 
     // Clean the session ID - handle various formats
     const cleanSessionId = sessionId
@@ -140,7 +140,7 @@ export async function POST(
   try {
     await connectToDatabase();
     const { checkStock } = await req.json();
-    const { sessionId } = context.params;
+    const { sessionId } = await context.params;
 
     // Find the order by session ID
     const order = await Order.findOne({ stripeSessionId: sessionId });

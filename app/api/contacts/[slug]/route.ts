@@ -7,7 +7,7 @@ export async function GET(
   context: any
 ) {
   try {
-    const { slug } = context.params;
+    const { slug } = await context.params;
 
     if (!slug) {
       return NextResponse.json(

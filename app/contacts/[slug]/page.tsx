@@ -37,6 +37,7 @@ import {
   X,
 } from 'lucide-react';
 import type { ProductFormValues } from '@/lib/api/validation';
+import { getCSSColor, getColorDisplayName } from '@/lib/color-utils';
 import { useCart } from '@/context/cart-context';
 import LoadingPage from '@/components/loading';
 import { type IProduct } from '@/models';
@@ -226,7 +227,7 @@ export default function ContactsProductPage() {
   const displayColors = product.colors || [];
 
   // Check if product is in stock
-  const isInStock = product.stockQuantity > 0;
+  const isInStock = (product.stockQuantity ?? 0) > 0;
 
   return (
     <motion.div
@@ -342,24 +343,6 @@ export default function ContactsProductPage() {
                 <p className="text-2xl md:text-3xl font-bold text-blue-600">
                   {formatCurrency(product.price)}
                 </p>
-              </div>
-              <div className="flex items-center mt-2">
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-yellow-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="ml-2 text-gray-600 text-sm">
-                    4.8 (120 reviews)
-                  </span>
-                </div>
               </div>
             </motion.div>
 
@@ -578,13 +561,14 @@ export default function ContactsProductPage() {
                         <div
                           className="w-8 h-8 rounded-full"
                           style={{
-                            backgroundColor: color.toLowerCase(),
+                            backgroundColor: getCSSColor(color),
                             border:
                               color.toLowerCase() === 'white' ||
                               color.toLowerCase() === '#ffffff'
                                 ? '1px solid #e5e5e5'
                                 : 'none',
                           }}
+                          title={getColorDisplayName(color)}
                         />
                         {selectedColor === color && (
                           <motion.div
@@ -642,7 +626,8 @@ export default function ContactsProductPage() {
                       <AlertCircle className="mr-2 h-5 w-5" />
                       Out of Stock
                     </Button>
-                  ) : quantityInCart + quantityToAdd > product.stockQuantity ? (
+                  ) : product.stockQuantity !== undefined &&
+                    quantityInCart + quantityToAdd > product.stockQuantity ? (
                     <Button
                       className="w-full bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center h-12 rounded-xl"
                       disabled

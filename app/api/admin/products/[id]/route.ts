@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, context: any) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest, context: any) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {

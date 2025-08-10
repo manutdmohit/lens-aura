@@ -22,7 +22,8 @@ export async function GET(
     await connectToDatabase();
 
     // Find order by orderNumber
-    const order = await Order.findOne({ orderNumber: context.params.orderNumber })
+    const { orderNumber } = await context.params;
+    const order = await Order.findOne({ orderNumber })
       .lean() as unknown as IOrder;
 
     if (!order) {
@@ -120,8 +121,9 @@ export async function PATCH(
     }
 
     // Update order
+    const { orderNumber } = await context.params;
     const order = await Order.findOneAndUpdate(
-      { orderNumber: context.params.orderNumber },
+      { orderNumber },
       { 
         $set: { 
           deliveryStatus,

@@ -17,7 +17,7 @@ export async function GET(
   context: any
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     await connectToDatabase();
 
@@ -46,7 +46,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -108,7 +108,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
