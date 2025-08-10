@@ -118,18 +118,18 @@ export default function HeroSection() {
               asChild
               className="bg-amber-400 text-gray-900 hover:bg-amber-300 font-medium gap-2 py-6"
             >
-              <Link href="/glasses">
-                <Glasses className="h-5 w-5" />
-                <span>Shop Glasses</span>
+              <Link href="/sunglasses/premium">
+                <Sun className="h-5 w-5" />
+                <span>Premium Sunglasses</span>
               </Link>
             </AnimatedButton>
             <AnimatedButton
               asChild
               className="bg-teal-600 text-white hover:bg-teal-500 font-medium gap-2 py-6"
             >
-              <Link href="/sunglasses">
+              <Link href="/sunglasses/standard">
                 <Sun className="h-5 w-5" />
-                <span>Shop Sunglasses</span>
+                <span>Standard Sunglasses</span>
               </Link>
             </AnimatedButton>
           </motion.div>
