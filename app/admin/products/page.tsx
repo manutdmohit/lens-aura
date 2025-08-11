@@ -59,8 +59,6 @@ import {
 import { toast } from 'sonner';
 import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
-import { getProducts } from '@/lib/db';
-// import type { Product } from '@/types/product';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import Image from 'next/image';
 
@@ -76,6 +74,8 @@ export default function AdminProductsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   // Analytics state
   const [analytics, setAnalytics] = useState({
@@ -85,111 +85,76 @@ export default function AdminProductsPage() {
     totalValue: 0,
   });
 
+  // Fetch products with server-side pagination
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        sort: sortField,
+        order: sortDirection,
+      });
+
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      if (categoryFilter !== 'all') {
+        params.append('productType', categoryFilter);
+      }
+
+      if (statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
+
+      const response = await fetch(`/api/admin/products?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+
+      const data = await response.json();
+      setProducts(data.products);
+      setTotalPages(data.pagination.pages);
+      setTotalProducts(data.pagination.total);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to fetch products');
+      setLoading(false);
+    }
+  };
+
+  // Fetch analytics separately
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch('/api/admin/analytics');
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics');
+      }
+
+      const data = await response.json();
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      toast.error('Failed to fetch analytics');
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await getProducts();
-        setProducts(data);
-
-        // Calculate analytics
-        const totalProducts = data.length;
-        const activeProducts = data.filter(
-          (p: Product) => p.status === 'active'
-        ).length;
-
-        // Calculate stock-related metrics considering frameColorVariants for glasses/sunglasses
-        const lowStockProducts = data.filter((p: Product) => {
-          if (p.productType === 'glasses' || p.productType === 'sunglasses') {
-            // For glasses/sunglasses, check frameColorVariants stock
-            const totalFrameStock = (p.frameColorVariants || []).reduce(
-              (sum, variant) => sum + (variant.stockQuantity ?? 0),
-              0
-            );
-            return totalFrameStock <= 5;
-          } else {
-            // For contacts/accessories, use direct stockQuantity
-            return (p.stockQuantity ?? 0) <= 5;
-          }
-        }).length;
-
-        const totalValue = data.reduce((sum: number, p: Product) => {
-          let productStock = 0;
-          if (p.productType === 'glasses' || p.productType === 'sunglasses') {
-            // For glasses/sunglasses, sum all frameColorVariants stock
-            productStock = (p.frameColorVariants || []).reduce(
-              (sum, variant) => sum + (variant.stockQuantity ?? 0),
-              0
-            );
-          } else {
-            // For contacts/accessories, use direct stockQuantity
-            productStock = p.stockQuantity ?? 0;
-          }
-          return sum + (p.price ?? 0) * productStock;
-        }, 0);
-
-        setAnalytics({
-          totalProducts,
-          activeProducts,
-          lowStockProducts,
-          totalValue,
-        });
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        toast.error('Failed to fetch products');
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
-  }, []);
-
-  // Filter, sort, and paginate products
-  const processedProducts = (() => {
-    let filtered = products.filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesCategory =
-        categoryFilter === 'all' || product.productType === categoryFilter;
-
-      const matchesStatus =
-        statusFilter === 'all' || product.status === statusFilter;
-
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-
-    // Sort products
-    filtered = filtered.sort((a, b) => {
-      let aValue = a[sortField as keyof Product];
-      let bValue = b[sortField as keyof Product];
-
-      // Handle undefined values
-      if (aValue === undefined) aValue = '';
-      if (bValue === undefined) bValue = '';
-
-      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-
-      if (sortDirection === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
-    });
-
-    return filtered;
-  })();
-
-  // Pagination
-  const totalPages = Math.ceil(processedProducts.length / itemsPerPage);
-  const paginatedProducts = processedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    fetchAnalytics();
+  }, [
+    currentPage,
+    itemsPerPage,
+    sortField,
+    sortDirection,
+    searchQuery,
+    categoryFilter,
+    statusFilter,
+  ]);
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -199,11 +164,28 @@ export default function AdminProductsPage() {
       setSortField(field);
       setSortDirection('asc');
     }
+    setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  // Handle search and filters
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleCategoryFilterChange = (value: string) => {
+    setCategoryFilter(value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const exportToCSV = () => {
     const csvHeaders = ['Name', 'Category', 'Price', 'Stock', 'Status'];
-    const csvData = processedProducts.map((product) => [
+    const csvData = products.map((product) => [
       product.name,
       product.productType,
       product.price,
@@ -260,41 +242,9 @@ export default function AdminProductsPage() {
         } successfully`
       );
 
-      // Refresh the products list to reflect changes
-      console.log('Refreshing products list...');
-      const data = await getProducts();
-      setProducts(data);
-
-      // Recalculate analytics
-      const totalProducts = data.length;
-      const activeProducts = data.filter(
-        (p: Product) => p.status === 'active'
-      ).length;
-      const lowStockProducts = data.filter((p: Product) => {
-        if (p.productType === 'glasses' || p.productType === 'sunglasses') {
-          return (p.frameColorVariants || []).some(
-            (variant) => (variant.stockQuantity ?? 0) <= 5
-          );
-        }
-        return (p.stockQuantity ?? 0) <= 5;
-      }).length;
-      const totalValue = data.reduce((sum: number, p: Product) => {
-        if (p.productType === 'glasses' || p.productType === 'sunglasses') {
-          const totalStock = (p.frameColorVariants || []).reduce(
-            (stockSum, variant) => stockSum + (variant.stockQuantity ?? 0),
-            0
-          );
-          return sum + (p.price ?? 0) * totalStock;
-        }
-        return sum + (p.price ?? 0) * (p.stockQuantity ?? 0);
-      }, 0);
-
-      setAnalytics({
-        totalProducts,
-        activeProducts,
-        lowStockProducts,
-        totalValue,
-      });
+      // Refresh the products list and analytics
+      fetchProducts();
+      fetchAnalytics();
     } catch (error: any) {
       console.error('Error updating product status:', error);
       toast.error(error.message || 'Failed to update product status');
@@ -400,9 +350,7 @@ export default function AdminProductsPage() {
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <CardTitle>
-                    All Products ({processedProducts.length})
-                  </CardTitle>
+                  <CardTitle>All Products ({totalProducts})</CardTitle>
                   <CardDescription>
                     Manage your product inventory with advanced filtering and
                     bulk actions
@@ -416,12 +364,12 @@ export default function AdminProductsPage() {
                       placeholder="Search products..."
                       className="pl-10 w-full sm:w-[250px]"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => handleSearchChange(e.target.value)}
                     />
                   </div>
                   <Select
                     value={categoryFilter}
-                    onValueChange={setCategoryFilter}
+                    onValueChange={handleCategoryFilterChange}
                   >
                     <SelectTrigger className="w-full sm:w-[150px]">
                       <div className="flex items-center gap-2">
@@ -436,7 +384,10 @@ export default function AdminProductsPage() {
                       <SelectItem value="contacts">Contact Lenses</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={handleStatusFilterChange}
+                  >
                     <SelectTrigger className="w-full sm:w-[130px]">
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4" />
@@ -540,14 +491,14 @@ export default function AdminProductsPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedProducts.length === 0 ? (
+                        {products.length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={7} className="h-24 text-center">
                               No products found matching your search.
                             </TableCell>
                           </TableRow>
                         ) : (
-                          paginatedProducts.map((product, index) => (
+                          products.map((product, index) => (
                             <motion.tr
                               key={product.id}
                               initial={{ opacity: 0, y: 10 }}
@@ -713,12 +664,12 @@ export default function AdminProductsPage() {
 
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
-                    {paginatedProducts.length === 0 ? (
+                    {products.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         No products found matching your search.
                       </div>
                     ) : (
-                      paginatedProducts.map((product, index) => (
+                      products.map((product, index) => (
                         <motion.div
                           key={product.id}
                           initial={{ opacity: 0, y: 10 }}
@@ -894,11 +845,8 @@ export default function AdminProductsPage() {
                     <div className="flex flex-col sm:flex-row items-center justify-between px-2 mt-4 space-y-3 sm:space-y-0">
                       <div className="text-sm text-muted-foreground">
                         Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-                        {Math.min(
-                          currentPage * itemsPerPage,
-                          processedProducts.length
-                        )}{' '}
-                        of {processedProducts.length} results
+                        {Math.min(currentPage * itemsPerPage, totalProducts)} of{' '}
+                        {totalProducts} results
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
