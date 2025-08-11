@@ -74,8 +74,14 @@ export async function GET(req: NextRequest) {
     // Get total count for pagination
     const total = await Product.countDocuments(query);
 
+    // Transform _id to id for frontend compatibility
+    const transformedProducts = products.map((product) => ({
+      ...product.toObject(),
+      id: product._id.toString(),
+    }));
+
     return NextResponse.json({
-      products,
+      products: transformedProducts,
       pagination: {
         total,
         page,

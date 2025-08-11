@@ -116,6 +116,8 @@ export default function AdminProductsPage() {
       }
 
       const data = await response.json();
+      console.log('Products data received:', data.products);
+      console.log('First product ID:', data.products[0]?.id);
       setProducts(data.products);
       setTotalPages(data.pagination.pages);
       setTotalProducts(data.pagination.total);
@@ -214,6 +216,12 @@ export default function AdminProductsPage() {
       productId,
       currentStatus,
     });
+
+    if (!productId) {
+      console.error('Product ID is missing!');
+      toast.error('Product ID is missing');
+      return;
+    }
 
     try {
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
@@ -492,7 +500,7 @@ export default function AdminProductsPage() {
                       </TableHeader>
                       <TableBody>
                         {products.length === 0 ? (
-                          <TableRow>
+                          <TableRow key="no-products">
                             <TableCell colSpan={7} className="h-24 text-center">
                               No products found matching your search.
                             </TableCell>
@@ -500,7 +508,7 @@ export default function AdminProductsPage() {
                         ) : (
                           products.map((product, index) => (
                             <motion.tr
-                              key={product.id}
+                              key={product.id || `product-${index}`}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
@@ -665,13 +673,16 @@ export default function AdminProductsPage() {
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
                     {products.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
+                      <div
+                        key="no-products-mobile"
+                        className="text-center py-8 text-gray-500"
+                      >
                         No products found matching your search.
                       </div>
                     ) : (
                       products.map((product, index) => (
                         <motion.div
-                          key={product.id}
+                          key={product.id || `product-mobile-${index}`}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -872,13 +883,20 @@ export default function AdminProductsPage() {
                                   page <= currentPage + 2)
                             )
                             .map((page, index, array) => (
-                              <div key={page} className="flex items-center">
+                              <div
+                                key={`page-${page}`}
+                                className="flex items-center"
+                              >
                                 {index > 0 && array[index - 1] !== page - 1 && (
-                                  <span className="px-2 text-muted-foreground">
+                                  <span
+                                    key={`ellipsis-${page}`}
+                                    className="px-2 text-muted-foreground"
+                                  >
                                     ...
                                   </span>
                                 )}
                                 <Button
+                                  key={`button-${page}`}
                                   variant={
                                     currentPage === page ? 'default' : 'outline'
                                   }
