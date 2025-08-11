@@ -39,7 +39,7 @@ interface PriceRange {
 }
 
 // Separate the main content to a client component
-function PremiumSunglassesContent() {
+function SignatureSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
@@ -64,7 +64,7 @@ function PremiumSunglassesContent() {
       try {
         const response = await fetch('/api/products/price-range');
         const data = await response.json();
-        setPriceRange(data.sunglasses?.premium || null);
+        setPriceRange(data.sunglasses?.signature || null);
       } catch (error) {
         console.error('Error fetching price range:', error);
       }
@@ -79,7 +79,7 @@ function PremiumSunglassesContent() {
         setLoading(true);
 
         const response = await fetch(
-          `/api/sunglasses?category=premium&page=${currentPage}&limit=${limitRef.current}`
+          `/api/sunglasses?category=signature&page=${currentPage}&limit=${limitRef.current}`
         );
         const data = await response.json();
 
@@ -99,8 +99,10 @@ function PremiumSunglassesContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error('Error fetching premium sunglasses:', error);
-        toast.error(`${error.message || 'Failed to fetch premium sunglasses'}`);
+        console.error('Error fetching signature sunglasses:', error);
+        toast.error(
+          `${error.message || 'Failed to fetch signature sunglasses'}`
+        );
         setProducts([]);
       } finally {
         setLoading(false);
@@ -113,7 +115,7 @@ function PremiumSunglassesContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/premium?${params.toString()}`);
+    router.push(`/sunglasses/signature?${params.toString()}`);
   };
 
   // Check if products array is valid
@@ -133,12 +135,12 @@ function PremiumSunglassesContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600`}
                 >
-                  Premium Sunglasses
+                  Signature Sunglasses
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
-                Luxury designer frames crafted with premium materials, featuring
-                polarized lenses and exceptional UV protection.
+                Luxury designer frames crafted with signature materials,
+                featuring polarized lenses and exceptional UV protection.
                 {priceRange?.lowest && (
                   <>
                     {' '}
@@ -155,7 +157,7 @@ function PremiumSunglassesContent() {
                   className="bg-amber-100 text-amber-800 border-amber-200"
                 >
                   <Star className="w-4 h-4 mr-1" />
-                  Premium Materials
+                  Signature Materials
                 </Badge>
                 <Badge
                   variant="secondary"
@@ -199,7 +201,7 @@ function PremiumSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No premium sunglasses found. Check back soon for our latest
+                  No signature sunglasses found. Check back soon for our latest
                   luxury collection!
                 </p>
                 <Button
@@ -217,23 +219,23 @@ function PremiumSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Premium Collection ({pagination.total} Products)
+                    Signature Collection ({pagination.total} Products)
                   </h2>
                   <div className="flex flex-wrap justify-center gap-4 mb-8">
                     <Link
-                      href="/sunglasses/premium/mens"
+                      href="/sunglasses/signature/mens"
                       className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors"
                     >
-                      Men's Premium
+                      Men's Signature
                     </Link>
                     <Link
-                      href="/sunglasses/premium/womens"
+                      href="/sunglasses/signature/womens"
                       className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors"
                     >
-                      Women's Premium
+                      Women's Signature
                     </Link>
                     <Link
-                      href="/sunglasses/premium/new-arrivals"
+                      href="/sunglasses/signature/new-arrivals"
                       className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors"
                     >
                       New Arrivals
@@ -254,7 +256,7 @@ function PremiumSunglassesContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} premium
+                  Showing {products.length} of {pagination.total} signature
                   sunglasses
                 </div>
               </AnimatedSection>
@@ -267,10 +269,10 @@ function PremiumSunglassesContent() {
 }
 
 // Main export with Suspense boundary
-export default function PremiumSunglassesPage() {
+export default function SignatureSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <PremiumSunglassesContent />
+      <SignatureSunglassesContent />
     </Suspense>
   );
 }

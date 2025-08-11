@@ -39,7 +39,7 @@ interface PriceRange {
 }
 
 // Separate the main content to a client component
-function StandardSunglassesContent() {
+function EssentialsSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
@@ -64,7 +64,7 @@ function StandardSunglassesContent() {
       try {
         const response = await fetch('/api/products/price-range');
         const data = await response.json();
-        setPriceRange(data.sunglasses?.standard || null);
+        setPriceRange(data.sunglasses?.essentials || null);
       } catch (error) {
         console.error('Error fetching price range:', error);
       }
@@ -79,7 +79,7 @@ function StandardSunglassesContent() {
         setLoading(true);
 
         const response = await fetch(
-          `/api/sunglasses?category=standard&page=${currentPage}&limit=${limitRef.current}`
+          `/api/sunglasses?category=essentials&page=${currentPage}&limit=${limitRef.current}`
         );
         const data = await response.json();
 
@@ -99,9 +99,9 @@ function StandardSunglassesContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error('Error fetching standard sunglasses:', error);
+        console.error('Error fetching essentials sunglasses:', error);
         toast.error(
-          `${error.message || 'Failed to fetch standard sunglasses'}`
+          `${error.message || 'Failed to fetch essentials sunglasses'}`
         );
         setProducts([]);
       } finally {
@@ -115,7 +115,7 @@ function StandardSunglassesContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/standard?${params.toString()}`);
+    router.push(`/sunglasses/essentials?${params.toString()}`);
   };
 
   // Check if products array is valid
@@ -135,7 +135,7 @@ function StandardSunglassesContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
                 >
-                  Standard Sunglasses
+                  Essentials Sunglasses
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
@@ -200,7 +200,7 @@ function StandardSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No standard sunglasses found. Check back soon for our latest
+                  No essentials sunglasses found. Check back soon for our latest
                   affordable collection!
                 </p>
                 <Button
@@ -218,23 +218,23 @@ function StandardSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Standard Collection ({pagination.total} Products)
+                    Essentials Collection ({pagination.total} Products)
                   </h2>
                   <div className="flex flex-wrap justify-center gap-4 mb-8">
                     <Link
-                      href="/sunglasses/standard/mens"
+                      href="/sunglasses/essentials/mens"
                       className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
                     >
-                      Men's Standard
+                      Men's Essentials
                     </Link>
                     <Link
-                      href="/sunglasses/standard/womens"
+                      href="/sunglasses/essentials/womens"
                       className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
                     >
-                      Women's Standard
+                      Women's Essentials
                     </Link>
                     <Link
-                      href="/sunglasses/standard/new-arrivals"
+                      href="/sunglasses/essentials/new-arrivals"
                       className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
                     >
                       New Arrivals
@@ -255,7 +255,7 @@ function StandardSunglassesContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} standard
+                  Showing {products.length} of {pagination.total} essentials
                   sunglasses
                 </div>
               </AnimatedSection>
@@ -268,10 +268,10 @@ function StandardSunglassesContent() {
 }
 
 // Main export with Suspense boundary
-export default function StandardSunglassesPage() {
+export default function EssentialsSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <StandardSunglassesContent />
+      <EssentialsSunglassesContent />
     </Suspense>
   );
 }
