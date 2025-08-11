@@ -183,12 +183,12 @@ export default function Footer() {
                   {[
                     { href: '/sunglasses', label: 'All Sunglasses' },
                     {
-                      href: '/sunglasses/premium',
-                      label: 'Premium Collection',
+                      href: '/sunglasses/signature',
+                      label: 'Signature Collection',
                     },
                     {
-                      href: '/sunglasses/standard',
-                      label: 'Standard Collection',
+                      href: '/sunglasses/essentials',
+                      label: 'Essentials Collection',
                     },
                     { href: '/sunglasses/new-arrivals', label: 'New Arrivals' },
                   ].map((link, index) => (

@@ -7,7 +7,6 @@ import type { ProductFormValues as Product } from '@/lib/api/validation';
 import StaggeredList from '@/components/staggered-list';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Star } from 'lucide-react';
 
 interface ProductGridProps {
   products: Product[];
@@ -93,17 +92,17 @@ export default function ProductGrid({
 
   const renderCategoryBadge = (product: Product) => {
     if (product.category) {
-      const isPremium = product.category === 'premium';
+      const isSignature = product.category === 'signature';
       return (
         <div className="absolute top-3 right-3 z-10">
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${
-              isPremium
+              isSignature
                 ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white'
                 : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
             }`}
           >
-            {isPremium ? 'Premium' : 'Standard'}
+            {isSignature ? 'Signature' : 'Essentials'}
           </span>
         </div>
       );
@@ -136,26 +135,6 @@ export default function ProductGrid({
           </svg>
           Polarized
         </span>
-      </div>
-    );
-  };
-
-  const renderRating = (product: Product) => {
-    if (variant === 'compact') return null;
-
-    return (
-      <div className="flex items-center gap-1 mt-2">
-        <div className="flex items-center">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`w-3 h-3 ${
-                i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-        <span className="text-xs text-gray-500 ml-1">(4.2)</span>
       </div>
     );
   };
@@ -224,9 +203,6 @@ export default function ProductGrid({
                   {product.name}
                 </h3>
 
-                {/* Rating */}
-                {renderRating(product)}
-
                 {/* Price Section */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-baseline gap-2">
@@ -237,10 +213,10 @@ export default function ProductGrid({
                     >
                       ${product.price.toFixed(2)}
                     </span>
-                    {product.category === 'premium' &&
+                    {product.category === 'signature' &&
                       variant !== 'compact' && (
                         <span className="text-xs text-amber-600 font-medium">
-                          Premium Quality
+                          Signature Quality
                         </span>
                       )}
                   </div>

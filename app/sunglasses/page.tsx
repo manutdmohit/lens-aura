@@ -47,15 +47,15 @@ interface PriceRange {
 
 // Separate the main content to a client component
 function SunglassesContent() {
-  const [premiumProducts, setPremiumProducts] = useState<Product[]>([]);
-  const [standardProducts, setStandardProducts] = useState<Product[]>([]);
+  const [signatureProducts, setSignatureProducts] = useState<Product[]>([]);
+  const [essentialsProducts, setEssentialsProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<{
-    premium: PriceRange | null;
-    standard: PriceRange | null;
+    signature: PriceRange | null;
+    essentials: PriceRange | null;
   }>({
-    premium: null,
-    standard: null,
+    signature: null,
+    essentials: null,
   });
 
   const router = useRouter();
@@ -65,32 +65,32 @@ function SunglassesContent() {
       try {
         setLoading(true);
 
-        // Fetch premium and standard products in parallel
-        const [premiumResponse, standardResponse, priceRangeResponse] =
+        // Fetch signature and essentials products in parallel
+        const [signatureResponse, essentialsResponse, priceRangeResponse] =
           await Promise.all([
-            fetch('/api/sunglasses?category=premium&limit=6'),
-            fetch('/api/sunglasses?category=standard&limit=6'),
+            fetch('/api/sunglasses?category=signature&limit=6'),
+            fetch('/api/sunglasses?category=essentials&limit=6'),
             fetch('/api/products/price-range'),
           ]);
 
-        const [premiumData, standardData, priceData] = await Promise.all([
-          premiumResponse.json(),
-          standardResponse.json(),
+        const [signatureData, essentialsData, priceData] = await Promise.all([
+          signatureResponse.json(),
+          essentialsResponse.json(),
           priceRangeResponse.json(),
         ]);
 
-        if (premiumData?.products) {
-          setPremiumProducts(premiumData.products);
+        if (signatureData?.products) {
+          setSignatureProducts(signatureData.products);
         }
 
-        if (standardData?.products) {
-          setStandardProducts(standardData.products);
+        if (essentialsData?.products) {
+          setEssentialsProducts(essentialsData.products);
         }
 
         if (priceData?.sunglasses) {
           setPriceRange({
-            premium: priceData.sunglasses.premium || null,
-            standard: priceData.sunglasses.standard || null,
+            signature: priceData.sunglasses.signature || null,
+            essentials: priceData.sunglasses.essentials || null,
           });
         }
       } catch (error: any) {
@@ -121,15 +121,15 @@ function SunglassesContent() {
                 Sunglasses Collection
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
-                Discover our premium and standard sunglasses collections. From
-                luxury designer frames to everyday essentials, we have the
+                Discover our signature and essentials sunglasses collections.
+                From luxury designer frames to everyday essentials, we have the
                 perfect pair for every style and budget.
               </p>
             </AnimatedSection>
           </div>
         </section>
 
-        {/* Premium Sunglasses Section */}
+        {/* Signature Sunglasses Section */}
         <section className="py-20 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
             <AnimatedSection direction="up" className="text-center mb-16">
@@ -140,18 +140,18 @@ function SunglassesContent() {
                 <h2
                   className={`${playfair.className} text-4xl md:text-5xl font-bold`}
                 >
-                  Premium Sunglasses
+                  Signature Sunglasses
                 </h2>
               </div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-                Luxury designer frames with premium polarized lenses, superior
+                Luxury designer frames with signature polarized lenses, superior
                 UV protection, and exceptional craftsmanship.
-                {priceRange.premium?.lowest && (
+                {priceRange.signature?.lowest && (
                   <>
                     {' '}
                     Starting from{' '}
                     <span className="font-semibold text-amber-600">
-                      ${priceRange.premium.lowest.price.toFixed(2)}
+                      ${priceRange.signature.lowest.price.toFixed(2)}
                     </span>
                   </>
                 )}
@@ -162,7 +162,7 @@ function SunglassesContent() {
                   className="bg-amber-100 text-amber-800 border-amber-200"
                 >
                   <Star className="w-4 h-4 mr-1" />
-                  Premium Materials
+                  Signature Materials
                 </Badge>
                 <Badge
                   variant="secondary"
@@ -181,16 +181,16 @@ function SunglassesContent() {
             </AnimatedSection>
 
             <AnimatedSection direction="up" delay={0.2}>
-              {premiumProducts.length > 0 ? (
+              {signatureProducts.length > 0 ? (
                 <>
-                  <ProductGrid products={premiumProducts} />
+                  <ProductGrid products={signatureProducts} />
                   <div className="text-center mt-12">
                     <Button
-                      onClick={() => router.push('/sunglasses/premium')}
+                      onClick={() => router.push('/sunglasses/signature')}
                       size="lg"
                       className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-3 text-lg"
                     >
-                      View All Premium Sunglasses
+                      View All Signature Sunglasses
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Button>
                   </div>
@@ -198,7 +198,7 @@ function SunglassesContent() {
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-500 text-lg">
-                    Premium sunglasses coming soon!
+                    Signature sunglasses coming soon!
                   </p>
                 </div>
               )}
@@ -206,7 +206,7 @@ function SunglassesContent() {
           </div>
         </section>
 
-        {/* Standard Sunglasses Section */}
+        {/* Essentials Sunglasses Section */}
         <section className="py-20 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <AnimatedSection direction="up" className="text-center mb-16">
@@ -217,18 +217,18 @@ function SunglassesContent() {
                 <h2
                   className={`${playfair.className} text-4xl md:text-5xl font-bold`}
                 >
-                  Standard Sunglasses
+                  Essentials Sunglasses
                 </h2>
               </div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Quality everyday sunglasses with excellent UV protection at
                 affordable prices. Perfect for daily wear and active lifestyles.
-                {priceRange.standard?.lowest && (
+                {priceRange.essentials?.lowest && (
                   <>
                     {' '}
                     Starting from{' '}
                     <span className="font-semibold text-blue-600">
-                      ${priceRange.standard.lowest.price.toFixed(2)}
+                      ${priceRange.essentials.lowest.price.toFixed(2)}
                     </span>
                   </>
                 )}
@@ -257,16 +257,16 @@ function SunglassesContent() {
             </AnimatedSection>
 
             <AnimatedSection direction="up" delay={0.2}>
-              {standardProducts.length > 0 ? (
+              {essentialsProducts.length > 0 ? (
                 <>
-                  <ProductGrid products={standardProducts} />
+                  <ProductGrid products={essentialsProducts} />
                   <div className="text-center mt-12">
                     <Button
-                      onClick={() => router.push('/sunglasses/standard')}
+                      onClick={() => router.push('/sunglasses/essentials')}
                       size="lg"
                       className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-3 text-lg"
                     >
-                      View All Standard Sunglasses
+                      View All Essentials Sunglasses
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Button>
                   </div>
@@ -274,7 +274,7 @@ function SunglassesContent() {
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-500 text-lg">
-                    Standard sunglasses coming soon!
+                    Essentials sunglasses coming soon!
                   </p>
                 </div>
               )}
@@ -292,7 +292,7 @@ function SunglassesContent() {
                 Choose Your Perfect Pair
               </h2>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Compare our Premium and Standard collections to find the
+                Compare our Signature and Essentials collections to find the
                 sunglasses that match your style and budget.
               </p>
             </AnimatedSection>
@@ -307,7 +307,7 @@ function SunglassesContent() {
                     <CardTitle
                       className={`${playfair.className} text-3xl text-amber-600`}
                     >
-                      Premium Collection
+                      Signature Collection
                     </CardTitle>
                     <CardDescription className="text-lg">
                       Luxury designer frames for the discerning customer
@@ -317,7 +317,7 @@ function SunglassesContent() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span>Premium polarized lenses</span>
+                        <span>Signature polarized lenses</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
@@ -338,11 +338,11 @@ function SunglassesContent() {
                     </div>
                     <div className="pt-4 border-t">
                       <Button
-                        onClick={() => router.push('/sunglasses/premium')}
+                        onClick={() => router.push('/sunglasses/signature')}
                         className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                         size="lg"
                       >
-                        Shop Premium
+                        Shop Signature
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </div>
@@ -359,7 +359,7 @@ function SunglassesContent() {
                     <CardTitle
                       className={`${playfair.className} text-3xl text-blue-600`}
                     >
-                      Standard Collection
+                      Essentials Collection
                     </CardTitle>
                     <CardDescription className="text-lg">
                       Quality everyday sunglasses at affordable prices
@@ -390,11 +390,11 @@ function SunglassesContent() {
                     </div>
                     <div className="pt-4 border-t">
                       <Button
-                        onClick={() => router.push('/sunglasses/standard')}
+                        onClick={() => router.push('/sunglasses/essentials')}
                         className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                         size="lg"
                       >
-                        Shop Standard
+                        Shop Essentials
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </div>

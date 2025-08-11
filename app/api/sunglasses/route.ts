@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const gender = searchParams.get('gender');
-    const category = searchParams.get('category'); // premium or standard
+    const category = searchParams.get('category'); // signature or essentials
     const query: any = {
       status: 'active',
       productType: 'sunglasses',
@@ -28,11 +28,11 @@ export async function GET(req: NextRequest) {
       query.gender = 'unisex';
     }
 
-    // Filter by category (premium or standard)
-    if (category === 'premium') {
-      query.category = 'premium';
-    } else if (category === 'standard') {
-      query.category = 'standard';
+    // Filter by category (signature or essentials)
+    if (category === 'signature') {
+      query.category = 'signature';
+    } else if (category === 'essentials') {
+      query.category = 'essentials';
     }
 
     // Get total count for pagination metadata

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     // Get price ranges for sunglasses
     const sunglassesRange = await getPriceRange('sunglasses');
 
-    // Get price ranges for premium and standard sunglasses
+    // Get price ranges for signature and essentials sunglasses
     const premiumSunglassesRange = await getPriceRangeWithCategory(
       'sunglasses',
       'premium'

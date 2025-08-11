@@ -13,64 +13,64 @@ import CartDropdown from '@/components/cart-dropdown';
 import Image from 'next/image';
 
 // Mega menu data
-const premiumSunglassesMenuData = {
-  title: 'Premium Sunglasses',
-  mainLink: '/sunglasses/premium',
+const signatureSunglassesMenuData = {
+  title: 'Signature Sunglasses',
+  mainLink: '/sunglasses/signature',
   featuredLinks: [
     {
       title: 'New Arrivals',
-      href: '/sunglasses/premium/new-arrivals',
+      href: '/sunglasses/signature/new-arrivals',
       image: '/images/sunglasses/new-arrivals.jpg',
     },
     {
       title: "Women's",
-      href: '/sunglasses/premium/womens',
+      href: '/sunglasses/signature/womens',
       image: '/images/sunglasses/womens-premium.jpg',
     },
     {
       title: "Men's",
-      href: '/sunglasses/premium/mens',
+      href: '/sunglasses/signature/mens',
       image: '/images/sunglasses/mens-premium.jpg',
     },
   ],
   additionalLinks: [
-    { title: 'All Glasses', href: '/sunglasses/premium' },
-    { title: 'Womens', href: '/sunglasses/premium/womens' },
-    { title: 'Mens', href: '/sunglasses/premium/mens' },
+    { title: 'All Glasses', href: '/sunglasses/signature' },
+    { title: 'Womens', href: '/sunglasses/signature/womens' },
+    { title: 'Mens', href: '/sunglasses/signature/mens' },
   ],
 };
 
-const standardSunglassesMenuData = {
-  title: 'Standard Sunglasses',
-  mainLink: '/sunglasses/standard',
+const essentialsSunglassesMenuData = {
+  title: 'Essentials Sunglasses',
+  mainLink: '/sunglasses/essentials',
   featuredLinks: [
     {
       title: 'New Arrivals',
-      href: '/sunglasses/standard/new-arrivals',
+      href: '/sunglasses/essentials/new-arrivals',
       image: '/images/sunglasses/standard-new-arrivals.jpg',
     },
     {
       title: "Women's",
-      href: '/sunglasses/standard/womens',
+      href: '/sunglasses/essentials/womens',
       image: '/images/sunglasses/womens-standard.jpg',
     },
     {
       title: "Men's",
-      href: '/sunglasses/standard/mens',
+      href: '/sunglasses/essentials/mens',
       image: '/images/sunglasses/mens-standard.jpg',
     },
   ],
   additionalLinks: [
-    { title: 'All Glasses', href: '/sunglasses/standard' },
-    { title: 'Womens', href: '/sunglasses/standard/womens' },
-    { title: 'Mens', href: '/sunglasses/standard/mens' },
+    { title: 'All Glasses', href: '/sunglasses/essentials' },
+    { title: 'Womens', href: '/sunglasses/essentials/womens' },
+    { title: 'Mens', href: '/sunglasses/essentials/mens' },
   ],
 };
 
 // Array of all menu data for easier iteration
 const allMenuData = [
-  { id: 'premium-sunglasses', ...premiumSunglassesMenuData },
-  { id: 'standard-sunglasses', ...standardSunglassesMenuData },
+  { id: 'signature-sunglasses', ...signatureSunglassesMenuData },
+  { id: 'essentials-sunglasses', ...essentialsSunglassesMenuData },
 ];
 
 export default function Navbar() {
@@ -226,7 +226,7 @@ export default function Navbar() {
   };
 
   // Update mega menu render function with proper event handling
-  const renderMegaMenu = (data: typeof premiumSunglassesMenuData) => (
+  const renderMegaMenu = (data: typeof signatureSunglassesMenuData) => (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -312,7 +312,7 @@ export default function Navbar() {
 
   // Function to render mobile menu item with submenu
   const renderMobileMenuItem = (
-    menuData: typeof premiumSunglassesMenuData & { id: string }
+    menuData: typeof signatureSunglassesMenuData & { id: string }
   ) => {
     const isExpanded = expandedMobileMenus.includes(menuData.id);
 
@@ -570,16 +570,16 @@ export default function Navbar() {
               >
                 <motion.div variants={itemVariants} className="h-full">
                   {renderNavItem(
-                    'Premium Sunglasses',
-                    '/sunglasses/premium',
-                    'premium-sunglasses'
+                    'Signature Sunglasses',
+                    '/sunglasses/signature',
+                    'signature-sunglasses'
                   )}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
                   {renderNavItem(
-                    'Standard Sunglasses',
-                    '/sunglasses/standard',
-                    'standard-sunglasses'
+                    'Essentials Sunglasses',
+                    '/sunglasses/essentials',
+                    'essentials-sunglasses'
                   )}
                 </motion.div>
                 <motion.div variants={itemVariants} className="h-full">
@@ -634,10 +634,10 @@ export default function Navbar() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {activeMenu === 'premium-sunglasses' &&
-                renderMegaMenu(premiumSunglassesMenuData)}
-              {activeMenu === 'standard-sunglasses' &&
-                renderMegaMenu(standardSunglassesMenuData)}
+              {activeMenu === 'signature-sunglasses' &&
+                renderMegaMenu(signatureSunglassesMenuData)}
+              {activeMenu === 'essentials-sunglasses' &&
+                renderMegaMenu(essentialsSunglassesMenuData)}
             </motion.div>
           )}
         </AnimatePresence>

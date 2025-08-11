@@ -834,8 +834,12 @@ export default function AddProductPage() {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="premium">Premium</SelectItem>
-                              <SelectItem value="standard">Standard</SelectItem>
+                              <SelectItem value="signature">
+                                Signature
+                              </SelectItem>
+                              <SelectItem value="essentials">
+                                Essentials
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           {errors.category && (

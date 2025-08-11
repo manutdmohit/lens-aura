@@ -54,7 +54,7 @@ export interface IProduct extends Document {
   prescriptionType?: 'distance' | 'reading' | 'multifocal' | 'non-prescription';
 
   // Sunglasses-specific
-  category?: 'premium' | 'standard'; // Sunglasses category
+  category?: 'signature' | 'essentials'; // Sunglasses category
   lensColor?: string;
   uvProtection?: boolean;
   polarized?: boolean;
@@ -177,7 +177,7 @@ const ProductSchema = new Schema<IProduct>(
     },
 
     // Sunglasses
-    category: { type: String, enum: ['premium', 'standard'] },
+    category: { type: String, enum: ['signature', 'essentials'] },
     lensColor: { type: String },
     uvProtection: { type: Boolean },
     polarized: { type: Boolean },

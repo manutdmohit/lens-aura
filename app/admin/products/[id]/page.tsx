@@ -1092,9 +1092,11 @@ export default function ProductDetailPage() {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="premium">Premium</SelectItem>
-                                <SelectItem value="standard">
-                                  Standard
+                                <SelectItem value="signature">
+                                  Signature
+                                </SelectItem>
+                                <SelectItem value="essentials">
+                                  Essentials
                                 </SelectItem>
                               </SelectContent>
                             </Select>

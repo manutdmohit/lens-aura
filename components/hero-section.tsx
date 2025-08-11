@@ -102,7 +102,7 @@ export default function HeroSection() {
             variants={fadeInUp}
           >
             Embrace the perfect blend of fashion and functionality with our
-            premium eyewear collection. Designed for those who appreciate
+            signature eyewear collection. Designed for those who appreciate
             quality craftsmanship and distinctive style.
           </motion.p>
 
@@ -118,18 +118,18 @@ export default function HeroSection() {
               asChild
               className="bg-amber-400 text-gray-900 hover:bg-amber-300 font-medium gap-2 py-6"
             >
-              <Link href="/sunglasses/premium">
+              <Link href="/sunglasses/signature">
                 <Sun className="h-5 w-5" />
-                <span>Premium Sunglasses</span>
+                <span>Signature Sunglasses</span>
               </Link>
             </AnimatedButton>
             <AnimatedButton
               asChild
               className="bg-teal-600 text-white hover:bg-teal-500 font-medium gap-2 py-6"
             >
-              <Link href="/sunglasses/standard">
+              <Link href="/sunglasses/essentials">
                 <Sun className="h-5 w-5" />
-                <span>Standard Sunglasses</span>
+                <span>Essentials Sunglasses</span>
               </Link>
             </AnimatedButton>
           </motion.div>

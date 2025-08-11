@@ -62,8 +62,8 @@ export default function Home() {
               Extraordinary Design, Surprising Prices
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-16 leading-relaxed">
-              Our sunglasses are designed in-house and handcrafted from premium
-              materials, featuring polarized lenses and UV protection.
+              Our sunglasses are designed in-house and handcrafted from
+              signature materials, featuring polarized lenses and UV protection.
             </p>
             <FeaturedProducts />
           </AnimatedSection>
@@ -93,7 +93,7 @@ export default function Home() {
                     <div className="absolute inset-0">
                       <Image
                         src="/images/sunglasses.jpg"
-                        alt="Premium sunglasses collection"
+                        alt="Signature sunglasses collection"
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-contain transition-all duration-700 group-hover:scale-110 group-hover:-rotate-1"
@@ -113,18 +113,18 @@ export default function Home() {
                           <h3
                             className={`${playfair.className} text-2xl font-bold text-white`}
                           >
-                            Premium Sunglasses
+                            Signature Sunglasses
                           </h3>
                         </div>
                         <p className="text-white/80 mb-4 text-sm leading-relaxed">
-                          Luxury designer frames with premium polarized lenses
+                          Luxury designer frames with signature polarized lenses
                           and UV protection
                         </p>
                         <Link
                           href="/sunglasses"
                           className="inline-flex items-center text-lg font-medium text-white hover:text-amber-300 transition-colors group/link"
                         >
-                          Explore Premium Collection
+                          Explore Signature Collection
                           <ArrowRight className="ml-2 w-5 h-5 transform group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       </div>
@@ -137,7 +137,7 @@ export default function Home() {
                     <div className="absolute inset-0">
                       <Image
                         src="/images/sunglasses.jpg"
-                        alt="Standard sunglasses collection"
+                        alt="Essentials sunglasses collection"
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-contain transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
@@ -157,7 +157,7 @@ export default function Home() {
                           <h3
                             className={`${playfair.className} text-2xl font-bold text-white`}
                           >
-                            Standard Sunglasses
+                            Essentials Sunglasses
                           </h3>
                         </div>
                         <p className="text-white/80 mb-4 text-sm leading-relaxed">
@@ -168,7 +168,7 @@ export default function Home() {
                           href="/sunglasses"
                           className="inline-flex items-center text-lg font-medium text-white hover:text-blue-300 transition-colors group/link"
                         >
-                          Explore Standard Collection
+                          Explore Essentials Collection
                           <ArrowRight className="ml-2 w-5 h-5 transform group-hover/link:translate-x-1 transition-transform" />
                         </Link>
                       </div>

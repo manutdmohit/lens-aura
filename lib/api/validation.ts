@@ -244,7 +244,7 @@ export const productSchema = z
       .optional(),
 
     // Sunglasses - These will be conditionally required
-    category: z.enum(['premium', 'standard']).optional(),
+    category: z.enum(['signature', 'essentials']).optional(),
     lensColor: z.string().optional(),
     uvProtection: z.boolean().default(false).optional(),
     polarized: z.boolean().default(false).optional(),

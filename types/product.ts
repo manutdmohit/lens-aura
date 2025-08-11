@@ -44,7 +44,7 @@ export interface GlassesProduct extends Product {
 // Sunglasses specific interface
 export interface SunglassesProduct extends Product {
   productType: 'sunglasses';
-  category: 'premium' | 'standard';
+  category: 'signature' | 'essentials';
   frameType: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
   frameWidth: 'narrow' | 'medium' | 'wide';

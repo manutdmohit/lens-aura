@@ -157,12 +157,14 @@ export default function FeaturedProducts() {
                 <div className="absolute top-3 left-3 z-10">
                   <span
                     className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
-                      product.category === 'premium'
+                      product.category === 'signature'
                         ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white'
                         : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
                     }`}
                   >
-                    {product.category === 'premium' ? 'Premium' : 'Standard'}
+                    {product.category === 'signature'
+                      ? 'Signature'
+                      : 'Essentials'}
                   </span>
                 </div>
               )}
@@ -231,9 +233,9 @@ export default function FeaturedProducts() {
                     <span className="text-2xl font-bold text-gray-900">
                       ${product.price.toFixed(2)}
                     </span>
-                    {product.category === 'premium' && (
+                    {product.category === 'signature' && (
                       <span className="text-xs text-amber-600 font-medium">
-                        Premium Quality
+                        Signature Quality
                       </span>
                     )}
                   </div>
