@@ -35,6 +35,13 @@ export interface IProduct extends Document {
   createdAt: Date;
   updatedAt: Date;
 
+  // Product dimensions
+  dimensions?: {
+    eye?: number;
+    bridge?: number;
+    temple?: number;
+  };
+
   // Common Glasses & Sunglasses fields
   frameType?: 'full-rim' | 'semi-rimless' | 'rimless';
   frameMaterial?: 'acetate' | 'metal' | 'titanium' | 'plastic' | 'mixed';
@@ -147,6 +154,13 @@ const ProductSchema = new Schema<IProduct>(
     colors: { type: [String], default: [] },
 
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+
+    // Product dimensions
+    dimensions: {
+      eye: { type: Number, min: 0 },
+      bridge: { type: Number, min: 0 },
+      temple: { type: Number, min: 0 },
+    },
 
     // Shared: Glasses & Sunglasses
     frameType: { type: String, enum: ['full-rim', 'semi-rimless', 'rimless'] },

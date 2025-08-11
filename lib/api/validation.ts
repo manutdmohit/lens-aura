@@ -218,6 +218,15 @@ export const productSchema = z
       errorMap: () => ({ message: 'Invalid status' }),
     }),
 
+    // Product dimensions
+    dimensions: z
+      .object({
+        eye: z.coerce.number().min(0).optional(),
+        bridge: z.coerce.number().min(0).optional(),
+        temple: z.coerce.number().min(0).optional(),
+      })
+      .optional(),
+
     // Shared: Glasses & Sunglasses - These will be conditionally required
     frameType: z.enum(['full-rim', 'semi-rimless', 'rimless']).optional(),
     frameMaterial: z

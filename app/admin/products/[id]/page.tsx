@@ -37,6 +37,7 @@ import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
 import MultiImageUpload from '@/components/multi-image-upload';
 import FrameColorVariantManager from '@/components/frame-color-variant-manager';
+import { DimensionFields } from '@/components/product-fields/DimensionFields';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import {
@@ -82,6 +83,7 @@ export default function ProductDetailPage() {
     setValue,
     watch,
     reset,
+    control,
   } = useForm<Product>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -549,6 +551,9 @@ export default function ProductDetailPage() {
                         </p>
                       )}
                     </div>
+
+                    {/* Product Dimensions */}
+                    <DimensionFields control={control} errors={errors} />
                   </CardContent>
                 </Card>
 

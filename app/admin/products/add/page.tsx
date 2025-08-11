@@ -30,6 +30,7 @@ import ProtectedRoute from '@/components/admin/protected-route';
 import ImageUpload from '@/components/image-upload';
 import MultiImageUpload from '@/components/multi-image-upload';
 import FrameColorVariantManager from '@/components/frame-color-variant-manager';
+import { DimensionFields } from '@/components/product-fields/DimensionFields';
 import { productSchema, type ProductFormValues } from '@/lib/api/validation';
 import { type FrameColorVariant } from '@/types/product';
 import { useForm } from 'react-hook-form';
@@ -59,6 +60,7 @@ export default function AddProductPage() {
     watch,
     reset,
     getValues,
+    control,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -418,6 +420,15 @@ export default function AddProductPage() {
                         {errors.isFeatured.message}
                       </p>
                     )}
+                  </motion.div>
+
+                  {/* Product Dimensions */}
+                  <motion.div
+                    variants={fieldVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <DimensionFields control={control} errors={errors} />
                   </motion.div>
                 </CardContent>
               </Card>

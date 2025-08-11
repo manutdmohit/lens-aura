@@ -22,6 +22,11 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   frameColorVariants?: FrameColorVariant[];
+  dimensions?: {
+    eye?: number;
+    bridge?: number;
+    temple?: number;
+  };
 }
 
 // Glasses specific interface
