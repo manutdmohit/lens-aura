@@ -123,18 +123,54 @@ ${message}
     }/contact
     `.trim();
 
-    // Send both emails and Telegram message
-    await Promise.all([
+    // Send emails and Telegram message independently
+    const results = await Promise.allSettled([
       sgMail.send(customerMsg),
       sgMail.send(adminMsg),
       sendTelegramMessage(telegramMessage),
     ]);
 
-    return NextResponse.json({ success: true });
+    // Check if at least one method succeeded
+    const emailSuccess =
+      results[0].status === 'fulfilled' && results[1].status === 'fulfilled';
+    const telegramSuccess = results[2].status === 'fulfilled';
+
+    if (!emailSuccess && !telegramSuccess) {
+      throw new Error('Failed to send message via any method');
+    }
+
+    // Log any failures for debugging
+    if (results[0].status === 'rejected') {
+      console.error('Customer email failed:', results[0].reason);
+    }
+    if (results[1].status === 'rejected') {
+      console.error('Admin email failed:', results[1].reason);
+    }
+    if (results[2].status === 'rejected') {
+      console.error('Telegram message failed:', results[2].reason);
+    }
+
+    return NextResponse.json({
+      success: true,
+      emailSent: emailSuccess,
+      telegramSent: telegramSuccess,
+    });
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error in contact form processing:', error);
+
+    // Check if it's a specific failure or general error
+    if (
+      error instanceof Error &&
+      error.message === 'Failed to send message via any method'
+    ) {
+      return NextResponse.json(
+        { success: false, message: 'Failed to send message via any method' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { success: false, message: 'Failed to send message' },
+      { success: false, message: 'Failed to process contact form' },
       { status: 500 }
     );
   }

@@ -35,9 +35,25 @@ export default function ContactPage() {
         throw new Error('Failed to send message');
       }
 
-      toast.success('Message sent successfully!', {
-        description: 'We will get back to you as soon as possible.',
-      });
+      const result = await response.json();
+
+      if (result.success) {
+        let description = 'We will get back to you as soon as possible.';
+
+        if (result.telegramSent && !result.emailSent) {
+          description =
+            'Message sent via Telegram. Email delivery may be delayed.';
+        } else if (!result.telegramSent && result.emailSent) {
+          description =
+            'Message sent via email. Telegram notification may be delayed.';
+        }
+
+        toast.success('Message sent successfully!', {
+          description,
+        });
+      } else {
+        throw new Error(result.message || 'Failed to send message');
+      }
 
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
