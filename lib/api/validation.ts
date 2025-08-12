@@ -70,8 +70,8 @@ export const sunglassesSchema = baseProductSchema.extend({
   frameType: z.enum(['full-rim', 'semi-rimless', 'rimless']),
   frameMaterial: z.enum(['acetate', 'metal', 'titanium', 'plastic', 'mixed']),
   frameWidth: z.enum(['narrow', 'medium', 'wide']),
-  frameColor: z.array(z.string()),
-  lensColor: z.string(),
+  frameColor: z.array(z.string()).optional(), // Made optional since frameColorVariants handle this
+  lensColor: z.string().optional(), // Made optional since frameColorVariants handle this
   uvProtection: z.boolean(),
   polarized: z.boolean(),
   style: z.enum([
@@ -174,9 +174,7 @@ export const frameColorVariantSchema = z.object({
     .nonnegative({ message: 'Stock quantity cannot be negative' })
     .optional()
     .transform((val) => val ?? 0), // Convert undefined to 0 for validation
-  images: z
-    .array(z.string())
-    .min(1, { message: 'At least one image is required per color' }),
+  images: z.array(z.string()).optional().default([]), // Made optional and default to empty array
 });
 
 // Consolidated product schema
@@ -237,6 +235,9 @@ export const productSchema = z
 
     // Frame color variants - for glasses and sunglasses only
     frameColorVariants: z.array(frameColorVariantSchema).optional().default([]),
+
+    // Frame color - legacy field, optional when frameColorVariants are present
+    frameColor: z.array(z.string()).optional().default([]),
 
     // Glasses - These will be conditionally required
     lensType: z
@@ -533,6 +534,55 @@ export const productSchema = z
     {
       message: 'Stock quantity is required for contacts and accessories',
       path: ['stockQuantity'],
+    }
+  )
+  .refine(
+    (data) => {
+      // For sunglasses, either frameColor/lensColor OR frameColorVariants must be present
+      if (data.productType === 'sunglasses') {
+        const hasFrameColorVariants =
+          data.frameColorVariants && data.frameColorVariants.length > 0;
+        const hasFrameColor = data.frameColor && data.frameColor.length > 0;
+        const hasLensColor = data.lensColor && data.lensColor.trim() !== '';
+
+        // If frameColorVariants are present, frameColor and lensColor are optional
+        if (hasFrameColorVariants) {
+          return true;
+        }
+
+        // If no frameColorVariants, then frameColor and lensColor are required
+        return hasFrameColor && hasLensColor;
+      }
+      return true;
+    },
+    {
+      message:
+        'For sunglasses, either frame color variants must be present, or both frame color and lens color are required',
+      path: ['frameColorVariants'],
+    }
+  )
+  .refine(
+    (data) => {
+      // For glasses, either frameColor/lensColor OR frameColorVariants must be present
+      if (data.productType === 'glasses') {
+        const hasFrameColorVariants =
+          data.frameColorVariants && data.frameColorVariants.length > 0;
+        const hasFrameColor = data.frameColor && data.frameColor.length > 0;
+
+        // If frameColorVariants are present, frameColor is optional
+        if (hasFrameColorVariants) {
+          return true;
+        }
+
+        // If no frameColorVariants, then frameColor is required
+        return hasFrameColor;
+      }
+      return true;
+    },
+    {
+      message:
+        'For glasses, either frame color variants must be present, or frame color is required',
+      path: ['frameColorVariants'],
     }
   );
 

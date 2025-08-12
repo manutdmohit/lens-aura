@@ -7,7 +7,7 @@ export interface IFrameColorVariant {
   color: string;
   lensColor: string;
   stockQuantity: number | undefined; // Allow undefined for empty state
-  images: string[];
+  images?: string[]; // Made optional
 }
 
 export interface IProduct extends Document {
@@ -50,6 +50,9 @@ export interface IProduct extends Document {
 
   // Frame color variants - new structure for organizing by frame colors
   frameColorVariants?: IFrameColorVariant[];
+
+  // Frame color - legacy field, optional when frameColorVariants are present
+  frameColor?: string[];
 
   // Glasses-specific
   lensType?:
@@ -106,7 +109,7 @@ const FrameColorVariantSchema = new Schema<IFrameColorVariant>({
   color: { type: String, required: true },
   lensColor: { type: String, required: true },
   stockQuantity: { type: Number, required: true, min: 0, default: 0 },
-  images: { type: [String], required: true, default: [] },
+  images: { type: [String], default: [] }, // Made optional
 });
 
 const ProductSchema = new Schema<IProduct>(
@@ -173,6 +176,9 @@ const ProductSchema = new Schema<IProduct>(
 
     // Frame color variants - for glasses and sunglasses only
     frameColorVariants: { type: [FrameColorVariantSchema], default: [] },
+
+    // Frame color - legacy field, optional when frameColorVariants are present
+    frameColor: { type: [String], default: [] },
 
     // Glasses
     lensType: {
