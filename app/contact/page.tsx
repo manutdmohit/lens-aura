@@ -22,15 +22,32 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    toast.success('Message sent successfully!', {
-      description: 'We will get back to you as soon as possible.',
-    });
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setIsSubmitting(false);
+      toast.success('Message sent successfully!', {
+        description: 'We will get back to you as soon as possible.',
+      });
+
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message', {
+        description: 'Please try again later or contact us directly.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -141,11 +158,11 @@ export default function ContactPage() {
                       className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
                     >
                       <option value="">Select a subject</option>
-                      <option value="premium-sunglasses">
-                        Premium Sunglasses Inquiry
+                      <option value="signature-sunglasses">
+                        Signature Sunglasses Inquiry
                       </option>
                       <option value="standard-sunglasses">
-                        Standard Sunglasses Inquiry
+                        Essentials Sunglasses Inquiry
                       </option>
                       <option value="product-recommendation">
                         Product Recommendation
@@ -249,7 +266,7 @@ export default function ContactPage() {
                           Business Hours
                         </h3>
                         <p className="text-slate-600">
-                          Monday to Friday: 9am - 5pm AEST
+                          Monday to Friday: 8:30 am - 5:30 pm AEST
                         </p>
                         <p className="text-sm text-slate-500">
                           Australian Eastern Standard Time
@@ -268,7 +285,8 @@ export default function ContactPage() {
                     <div className="flex items-start space-x-3">
                       <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
                       <p className="text-amber-800">
-                        Premium and standard sunglasses with UV400 protection
+                        Signature and Essentials sunglasses with UV400
+                        protection
                       </p>
                     </div>
                     <div className="flex items-start space-x-3">
