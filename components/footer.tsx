@@ -250,7 +250,6 @@ export default function Footer() {
                     <Phone className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="font-medium text-white">+61 402 564 501</p>
-                      <p className="text-sm text-slate-400">Call us anytime</p>
                     </div>
                   </div>
 

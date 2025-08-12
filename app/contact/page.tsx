@@ -38,18 +38,8 @@ export default function ContactPage() {
       const result = await response.json();
 
       if (result.success) {
-        let description = 'We will get back to you as soon as possible.';
-
-        if (result.telegramSent && !result.emailSent) {
-          description =
-            'Message sent via Telegram. Email delivery may be delayed.';
-        } else if (!result.telegramSent && result.emailSent) {
-          description =
-            'Message sent via email. Telegram notification may be delayed.';
-        }
-
         toast.success('Message sent successfully!', {
-          description,
+          description: 'Thank you for contacting us. We will get back to you as soon as possible.',
         });
       } else {
         throw new Error(result.message || 'Failed to send message');
