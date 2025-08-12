@@ -39,7 +39,8 @@ export default function ContactPage() {
 
       if (result.success) {
         toast.success('Message sent successfully!', {
-          description: 'Thank you for contacting us. We will get back to you as soon as possible.',
+          description:
+            'Thank you for contacting us. We will get back to you as soon as possible.',
         });
       } else {
         throw new Error(result.message || 'Failed to send message');
