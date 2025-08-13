@@ -5,7 +5,7 @@ import {
   authenticateAdmin,
   handleError,
 } from '@/lib/api/middleware';
-import Order from '@/lib/mongoose/models/order.model';
+import Order from '@/models/Order';
 import mongoose from 'mongoose';
 import { z } from 'zod';
 
@@ -21,10 +21,7 @@ const updateOrderStatusSchema = z.object({
   ]),
 });
 
-export async function GET(
-  req: NextRequest,
-  context: any
-) {
+export async function GET(req: NextRequest, context: any) {
   try {
     const session = await authenticate(req);
 
@@ -65,13 +62,10 @@ export async function GET(
     return NextResponse.json({ order });
   } catch (error) {
     return handleError(error);
-  } 
+  }
 }
 
-export async function PUT(
-  req: NextRequest,
-  context: any
-) {
+export async function PUT(req: NextRequest, context: any) {
   try {
     const session = await authenticateAdmin(req);
 

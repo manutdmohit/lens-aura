@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import { authenticateAdmin, handleError } from '@/lib/api/middleware';
-import User from '@/lib/mongoose/models/user.model';
-import Product from '@/lib/mongoose/models/product.model';
-import Order from '@/lib/mongoose/models/order.model';
+import User from '@/models/User';
+import Product from '@/models/Product';
+import Order from '@/models/Order';
 
 export async function GET(req: NextRequest) {
   try {

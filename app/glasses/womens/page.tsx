@@ -84,6 +84,8 @@ export default function WomensGlassesPage() {
                 inStock: true,
                 thumbnail: p.imageUrl,
                 images: p.imageUrl ? [p.imageUrl] : [],
+                frameColorVariants: [],
+                frameColor: [],
               }))}
             />
             <div className="mt-8">

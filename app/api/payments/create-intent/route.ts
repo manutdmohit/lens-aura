@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import { authenticate, handleError } from '@/lib/api/middleware';
-import Order from '@/lib/mongoose/models/order.model';
+import Order from '@/models/Order';
 import mongoose from 'mongoose';
 import Stripe from 'stripe';
 
@@ -83,5 +83,5 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     return handleError(error);
-  } 
+  }
 }

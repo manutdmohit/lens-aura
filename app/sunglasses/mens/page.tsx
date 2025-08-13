@@ -82,6 +82,8 @@ export default function MensSunglassesPage() {
                 colors: [],
                 inStock: true,
                 thumbnail: p.thumbnail,
+                frameColorVariants: [],
+                frameColor: [],
               }))}
             />
             <div className="mt-8">

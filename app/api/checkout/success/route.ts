@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
         const originalStock = originalProduct.stockQuantity;
         console.log(`Current stock for ${originalProduct.name}: ${originalStock}`);
         
-        // Update the product stock
-        const updatedProduct = await updateProductStock(productId.toString(), item.quantity);
+        // Update the product stock (pass color if available)
+        const updatedProduct = await updateProductStock(productId.toString(), item.quantity, item.color);
         
         if (!updatedProduct) {
           console.error(`Failed to update stock for product: ${productId}`);

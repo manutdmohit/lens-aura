@@ -221,7 +221,7 @@ export default function ContactLensProducts() {
                         priority
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                      {product.stockQuantity > 0 && (
+                      {(product.stockQuantity ?? 0) > 0 && (
                         <div className="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                           In Stock
                         </div>
@@ -247,10 +247,10 @@ export default function ContactLensProducts() {
                           <p className="text-lg font-medium text-gray-900">
                             ${product.price.toFixed(2)}
                           </p>
-                          {product.stockQuantity > 0 && (
+                          {(product.stockQuantity ?? 0) > 0 && (
                             <div className="flex items-center text-xs text-gray-500">
                               <Package className="h-3 w-3 mr-1" />
-                              <span>{product.stockQuantity} left</span>
+                              <span>{product.stockQuantity ?? 0} left</span>
                             </div>
                           )}
                         </div>

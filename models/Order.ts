@@ -12,7 +12,7 @@ export interface IOrderItem {
 export interface IShippingAddress {
   firstName?: string;
   lastName?: string;
-  address?: string;
+  street?: string;
   city?: string;
   state?: string;
   postalCode?: string;
@@ -22,7 +22,17 @@ export interface IShippingAddress {
 
 export interface IOrder extends Document {
   paymentMethod: string;
-  deliveryStatus: 'ORDER_PLACED' | 'ORDER_CONFIRMED' | 'PROCESSING' | 'DISPATCHED' | 'IN_TRANSIT' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'RETURNED' | 'DELAYED';
+  deliveryStatus:
+    | 'ORDER_PLACED'
+    | 'ORDER_CONFIRMED'
+    | 'PROCESSING'
+    | 'DISPATCHED'
+    | 'IN_TRANSIT'
+    | 'OUT_FOR_DELIVERY'
+    | 'DELIVERED'
+    | 'CANCELLED'
+    | 'RETURNED'
+    | 'DELAYED';
   userId?: string;
   orderNumber: string;
   customerEmail?: string;
@@ -38,83 +48,91 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
-const OrderSchema = new Schema({
-  userId: { type: String },
-  orderNumber: { 
-    type: String,
-    unique: true,
-    required: true
-  },
-  customerEmail: { type: String },
-  customerPhone: { type: String },
-  items: [{
-    productId: { type: String },
-    name: { type: String, required: true },
-    price: { type: Number, required: true },
-    quantity: { type: Number, required: true },
-    color: { type: String, required: true },
-    imageUrl: { type: String },
-    productType: { type: String },
-    product: { type: Schema.Types.ObjectId, ref: 'Product' }
-  }],
-  totalAmount: { type: Number, required: true },
-  shippingAddress: {
-    firstName: { type: String },
-    lastName: { type: String },
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    postalCode: { type: String },
-    country: { type: String },
-    phone: { type: String }
-  },
-  paymentStatus: { 
-    type: String, 
-    enum: ['pending', 'paid', 'failed'], 
-    default: 'pending' 
-  },
-  deliveryStatus: {
-    type: String,
-    enum: [
-      'ORDER_PLACED',
-      'ORDER_CONFIRMED',
-      'PROCESSING',
-      'DISPATCHED',
-      'IN_TRANSIT',
-      'OUT_FOR_DELIVERY',
-      'DELIVERED',
-      'CANCELLED',
-      'RETURNED',
-      'DELAYED'
+const OrderSchema = new Schema(
+  {
+    userId: { type: String },
+    orderNumber: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    customerEmail: { type: String },
+    customerPhone: { type: String },
+    items: [
+      {
+        productId: { type: String },
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        color: { type: String, required: true },
+        imageUrl: { type: String },
+        productType: { type: String },
+        product: { type: Schema.Types.ObjectId, ref: 'Product' },
+      },
     ],
-    default: 'ORDER_PLACED'
+    totalAmount: { type: Number, required: true },
+    shippingAddress: {
+      firstName: { type: String },
+      lastName: { type: String },
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      postalCode: { type: String },
+      country: { type: String },
+      phone: { type: String },
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
+    deliveryStatus: {
+      type: String,
+      enum: [
+        'ORDER_PLACED',
+        'ORDER_CONFIRMED',
+        'PROCESSING',
+        'DISPATCHED',
+        'IN_TRANSIT',
+        'OUT_FOR_DELIVERY',
+        'DELIVERED',
+        'CANCELLED',
+        'RETURNED',
+        'DELAYED',
+      ],
+      default: 'ORDER_PLACED',
+    },
+    paymentMethod: { type: String },
+    paymentIntent: { type: String },
+    stripeSessionId: {
+      type: String,
+      required: true,
+      index: true, // Add index for faster lookups
+    },
+    stockReduced: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
-  paymentMethod: { type: String },
-  paymentIntent: { type: String },
-  stripeSessionId: { 
-    type: String, 
-    required: true,
-    index: true // Add index for faster lookups
-  },
-  stockReduced: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 // Generate a unique order number before saving
-OrderSchema.pre('save', async function(next) {
+OrderSchema.pre('save', async function (next) {
   const order = this;
-  
+
   // Only generate order number if it doesn't exist
   if (!order.orderNumber) {
     // Create a unique order number format: LA-{timestamp}-{random}
     const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
     order.orderNumber = `LA-${timestamp}-${random}`;
   }
-  
+
   next();
 });
 
 // Use mongoose.models to check if the model exists already to prevent overwriting
-export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+export default mongoose.models.Order ||
+  mongoose.model<IOrder>('Order', OrderSchema);

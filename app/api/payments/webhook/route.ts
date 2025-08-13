@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import { handleError } from '@/lib/api/middleware';
-import Order from '@/lib/mongoose/models/order.model';
+import Order from '@/models/Order';
 import Stripe from 'stripe';
 
 // Initialize Stripe
@@ -93,7 +93,7 @@ async function handleSuccessfulPayment(paymentIntent: Stripe.PaymentIntent) {
     console.log(`Payment successful for order ${orderId}`);
   } catch (error) {
     console.error('Error handling successful payment:', error);
-  } 
+  }
 }
 
 // Handle failed payment
@@ -130,5 +130,5 @@ async function handleFailedPayment(paymentIntent: Stripe.PaymentIntent) {
     console.log(`Payment failed for order ${orderId}`);
   } catch (error) {
     console.error('Error handling failed payment:', error);
-  } 
+  }
 }

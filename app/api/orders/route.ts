@@ -7,9 +7,9 @@ import {
   handleError,
 } from '@/lib/api/middleware';
 import { createOrderSchema } from '@/lib/api/validation';
-import Order from '@/lib/mongoose/models/order.model';
-import User from '@/lib/mongoose/models/user.model';
-import Product from '@/lib/mongoose/models/product.model';
+import Order from '@/models/Order';
+import User from '@/models/User';
+import Product from '@/models/Product';
 
 export async function GET(req: NextRequest) {
   try {
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (!product.inStock || product.stockQuantity < item.quantity) {
+      if (!product.inStock || (product.stockQuantity ?? 0) < item.quantity) {
         return NextResponse.json(
           {
             error: `Product ${product.name} is out of stock or has insufficient quantity`,
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
       subtotal += product.price * item.quantity;
 
       // Update product stock
-      product.stockQuantity -= item.quantity;
+      product.stockQuantity = (product.stockQuantity ?? 0) - item.quantity;
       await product.save();
     }
 
@@ -146,11 +146,8 @@ export async function POST(req: NextRequest) {
     user.orders.push(order._id as mongoose.Schema.Types.ObjectId);
     await user.save();
 
-    // Clear user's cart
-    if (user.cart) {
-      user.cart.items = [];
-      await user.save();
-    }
+    // Clear user's cart - cart is handled separately in the cart context
+    // The cart will be cleared on the frontend after successful order
 
     return NextResponse.json(
       { message: 'Order created successfully', order },

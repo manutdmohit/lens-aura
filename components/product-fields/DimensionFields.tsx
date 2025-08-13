@@ -61,11 +61,14 @@ export const DimensionFields = ({ control, errors }: DimensionFieldsProps) => {
                 />
               )}
             />
-            {errors?.dimensions?.[name.split('.')[1]] && (
-              <p className="text-red-500 text-sm mt-1">
-                {String(errors.dimensions[name.split('.')[1]]?.message)}
-              </p>
-            )}
+            {errors?.dimensions &&
+              (errors.dimensions as any)?.[name.split('.')[1]] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {String(
+                    (errors.dimensions as any)[name.split('.')[1]]?.message
+                  )}
+                </p>
+              )}
           </div>
         ))}
       </div>

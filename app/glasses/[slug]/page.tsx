@@ -578,8 +578,6 @@ export default function GlassesProductPage() {
               </div>
             </motion.div>
 
-
-
             {/* Add to Cart */}
             <motion.div
               variants={slideUp}
@@ -609,7 +607,8 @@ export default function GlassesProductPage() {
                       <AlertCircle className="mr-2 h-5 w-5" />
                       Out of Stock
                     </Button>
-                  ) : quantityInCart + quantityToAdd > product.stockQuantity ? (
+                  ) : quantityInCart + quantityToAdd >
+                    (product.stockQuantity ?? 0) ? (
                     <Button
                       className="w-full bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center h-12 rounded-xl"
                       disabled

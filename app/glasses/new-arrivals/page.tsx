@@ -67,6 +67,8 @@ export default function MensGlassesNewArrivalsPage() {
                 inStock: true,
                 thumbnail: p.imageUrl,
                 images: p.imageUrl ? [p.imageUrl] : [],
+                frameColorVariants: [],
+                frameColor: [],
               }))}
             />
           </>

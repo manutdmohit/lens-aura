@@ -3,8 +3,8 @@ import Order from '@/models/Order';
 import type { CartItem } from '@/context/cart-context';
 import mongoose from 'mongoose';
 import { updateProductStock } from './products';
-import type { IProduct } from '@/lib/mongoose/models/product.model';
-import { Product } from '@/models';
+import type { IProduct } from '@/models/Product';
+import Product from '@/models/Product';
 
 /**
  * Generates a unique order number
@@ -147,8 +147,7 @@ export async function updateOrderFromStripeSession(
     order.paymentStatus = paymentStatus;
     order.paymentIntent = paymentIntent;
     order.shippingAddress = {
-      address: shippingAddress.line1,
-      address2: shippingAddress.line2,
+      street: shippingAddress.line1,
       city: shippingAddress.city,
       state: shippingAddress.state,
       postalCode: shippingAddress.postalCode,
@@ -168,6 +167,8 @@ export async function updateOrderFromStripeSession(
     // If payment is successful, reduce the stock quantity
     if (paymentStatus === 'paid') {
       await updateProductStockFromOrder(order);
+      order.stockReduced = true;
+      await order.save();
     }
 
     return { orderId: order._id, orderNumber: order.orderNumber };
@@ -198,10 +199,11 @@ async function updateProductStockFromOrder(order: any) {
           `[DEBUG] Updating stock for product: ${productId}, reducing by ${item.quantity}`
         );
 
-        // Update the product stock
+        // Update the product stock (pass color if available)
         const updatedProduct = await updateProductStock(
           productId.toString(),
-          item.quantity
+          item.quantity,
+          item.color
         );
 
         if (!updatedProduct) {
@@ -246,7 +248,10 @@ async function updateProductStockDirectly(productId: string, quantity: number) {
     }
 
     // Calculate new stock
-    const newStock = Math.max(0, currentProduct.stockQuantity - quantity);
+    const newStock = Math.max(
+      0,
+      (currentProduct.stockQuantity ?? 0) - quantity
+    );
 
     // Direct MongoDB update
     const result = await Product.findByIdAndUpdate(
