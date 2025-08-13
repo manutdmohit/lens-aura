@@ -24,7 +24,7 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-function WomensStandardSunglassesContent() {
+function WomensEssentialsSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -47,7 +47,7 @@ function WomensStandardSunglassesContent() {
         setLoading(true);
 
         const response = await fetch(
-          `/api/sunglasses?category=standard&gender=women&page=${currentPage}&limit=${limitRef.current}`
+          `/api/sunglasses?category=essentials&gender=women&page=${currentPage}&limit=${limitRef.current}`
         );
         const data = await response.json();
 
@@ -67,9 +67,9 @@ function WomensStandardSunglassesContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error("Error fetching women's standard sunglasses:", error);
+        console.error("Error fetching women's essentials sunglasses:", error);
         toast.error(
-          `${error.message || "Failed to fetch women's standard sunglasses"}`
+          `${error.message || "Failed to fetch women's essentials sunglasses"}`
         );
         setProducts([]);
       } finally {
@@ -83,7 +83,7 @@ function WomensStandardSunglassesContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/standard/womens?${params.toString()}`);
+    router.push(`/sunglasses/essentials/womens?${params.toString()}`);
   };
 
   const hasProducts = Array.isArray(products) && products.length > 0;
@@ -102,7 +102,7 @@ function WomensStandardSunglassesContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
                 >
-                  Women's Standard Sunglasses
+                  Women's Essentials Sunglasses
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
@@ -170,7 +170,7 @@ function WomensStandardSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Women's Standard Collection ({pagination.total} Products)
+                    Women's Essentials Collection ({pagination.total} Products)
                   </h2>
                 </div>
 
@@ -188,7 +188,7 @@ function WomensStandardSunglassesContent() {
 
                 <div className="text-center text-sm text-gray-500 mt-4">
                   Showing {products.length} of {pagination.total} women's
-                  standard sunglasses
+                  essentials sunglasses
                 </div>
               </AnimatedSection>
             )}
@@ -199,10 +199,10 @@ function WomensStandardSunglassesContent() {
   );
 }
 
-export default function WomensStandardSunglassesPage() {
+export default function WomensEssentialsSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <WomensStandardSunglassesContent />
+      <WomensEssentialsSunglassesContent />
     </Suspense>
   );
 }

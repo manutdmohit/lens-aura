@@ -24,7 +24,7 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-function StandardNewArrivalsContent() {
+function EssentialsNewArrivalsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -46,9 +46,9 @@ function StandardNewArrivalsContent() {
       try {
         setLoading(true);
 
-        // Fetch standard products sorted by creation date (newest first)
+        // Fetch essentials products sorted by creation date (newest first)
         const response = await fetch(
-          `/api/sunglasses?category=standard&page=${currentPage}&limit=${limitRef.current}&sort=createdAt&order=desc`
+          `/api/sunglasses?category=essentials&page=${currentPage}&limit=${limitRef.current}&sort=createdAt&order=desc`
         );
         const data = await response.json();
 
@@ -68,9 +68,9 @@ function StandardNewArrivalsContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error('Error fetching standard new arrivals:', error);
+        console.error('Error fetching essentials new arrivals:', error);
         toast.error(
-          `${error.message || 'Failed to fetch standard new arrivals'}`
+          `${error.message || 'Failed to fetch essentials new arrivals'}`
         );
         setProducts([]);
       } finally {
@@ -84,7 +84,7 @@ function StandardNewArrivalsContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/standard/new-arrivals?${params.toString()}`);
+    router.push(`/sunglasses/essentials/new-arrivals?${params.toString()}`);
   };
 
   const hasProducts = Array.isArray(products) && products.length > 0;
@@ -103,11 +103,11 @@ function StandardNewArrivalsContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
                 >
-                  Standard New Arrivals
+                  Essentials New Arrivals
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
-                Discover our latest affordable sunglasses collection. Fresh
+                Discover our latest essentials sunglasses collection. Fresh
                 designs, quality materials, and unbeatable value.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -133,12 +133,12 @@ function StandardNewArrivalsContent() {
               </div>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   variant="outline"
                   className="border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Standard Collection
+                  Back to Essentials Collection
                 </Button>
               </div>
             </AnimatedSection>
@@ -153,14 +153,14 @@ function StandardNewArrivalsContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No standard new arrivals found. Check back soon for our latest
-                  affordable designs!
+                  No essentials new arrivals found. Check back soon for our
+                  latest affordable designs!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                 >
-                  Browse Standard Collection
+                  Browse Essentials Collection
                 </Button>
               </div>
             )}
@@ -171,11 +171,11 @@ function StandardNewArrivalsContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Latest Standard Arrivals ({pagination.total} Products)
+                    Latest Essentials Arrivals ({pagination.total} Products)
                   </h2>
                   <p className="text-center text-gray-600 mb-6">
                     Fresh designs at affordable prices - the newest additions to
-                    our standard collection
+                    our essentials collection
                   </p>
                 </div>
 
@@ -192,7 +192,7 @@ function StandardNewArrivalsContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} standard new
+                  Showing {products.length} of {pagination.total} essentials new
                   arrivals
                 </div>
               </AnimatedSection>
@@ -204,10 +204,10 @@ function StandardNewArrivalsContent() {
   );
 }
 
-export default function StandardNewArrivalsPage() {
+export default function EssentialsNewArrivalsPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <StandardNewArrivalsContent />
+      <EssentialsNewArrivalsContent />
     </Suspense>
   );
 }

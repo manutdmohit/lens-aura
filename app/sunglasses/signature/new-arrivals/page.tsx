@@ -24,7 +24,7 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-function PremiumNewArrivalsContent() {
+function SignatureNewArrivalsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -46,9 +46,9 @@ function PremiumNewArrivalsContent() {
       try {
         setLoading(true);
 
-        // Fetch premium products sorted by creation date (newest first)
+        // Fetch signature products sorted by creation date (newest first)
         const response = await fetch(
-          `/api/sunglasses?category=premium&page=${currentPage}&limit=${limitRef.current}&sort=createdAt&order=desc`
+          `/api/sunglasses?category=signature&page=${currentPage}&limit=${limitRef.current}&sort=createdAt&order=desc`
         );
         const data = await response.json();
 
@@ -68,9 +68,9 @@ function PremiumNewArrivalsContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error('Error fetching premium new arrivals:', error);
+        console.error('Error fetching signature new arrivals:', error);
         toast.error(
-          `${error.message || 'Failed to fetch premium new arrivals'}`
+          `${error.message || 'Failed to fetch signature new arrivals'}`
         );
         setProducts([]);
       } finally {
@@ -84,7 +84,7 @@ function PremiumNewArrivalsContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/premium/new-arrivals?${params.toString()}`);
+    router.push(`/sunglasses/signature/new-arrivals?${params.toString()}`);
   };
 
   const hasProducts = Array.isArray(products) && products.length > 0;
@@ -103,12 +103,12 @@ function PremiumNewArrivalsContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600`}
                 >
-                  Premium New Arrivals
+                  Signature New Arrivals
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
-                Discover our latest luxury sunglasses collection. Fresh designs,
-                premium materials, and cutting-edge style.
+                Discover our latest signature sunglasses collection. Fresh
+                designs, premium materials, and cutting-edge style.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
                 <Badge
@@ -133,12 +133,12 @@ function PremiumNewArrivalsContent() {
               </div>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/sunglasses/premium')}
+                  onClick={() => router.push('/sunglasses/signature')}
                   variant="outline"
                   className="border-amber-300 text-amber-700 hover:bg-amber-50"
                 >
                   <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Premium Collection
+                  Back to Signature Collection
                 </Button>
               </div>
             </AnimatedSection>
@@ -153,14 +153,14 @@ function PremiumNewArrivalsContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No premium new arrivals found. Check back soon for our latest
-                  luxury designs!
+                  No signature new arrivals found. Check back soon for our
+                  latest luxury designs!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/premium')}
+                  onClick={() => router.push('/sunglasses/signature')}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                 >
-                  Browse Premium Collection
+                  Browse Signature Collection
                 </Button>
               </div>
             )}
@@ -171,11 +171,11 @@ function PremiumNewArrivalsContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Latest Premium Arrivals ({pagination.total} Products)
+                    Latest Signature Arrivals ({pagination.total} Products)
                   </h2>
                   <p className="text-center text-gray-600 mb-6">
                     Fresh from our designers - the newest additions to our
-                    premium collection
+                    signature collection
                   </p>
                 </div>
 
@@ -192,7 +192,7 @@ function PremiumNewArrivalsContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} premium new
+                  Showing {products.length} of {pagination.total} signature new
                   arrivals
                 </div>
               </AnimatedSection>
@@ -204,10 +204,10 @@ function PremiumNewArrivalsContent() {
   );
 }
 
-export default function PremiumNewArrivalsPage() {
+export default function SignatureNewArrivalsPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <PremiumNewArrivalsContent />
+      <SignatureNewArrivalsContent />
     </Suspense>
   );
 }

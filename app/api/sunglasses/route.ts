@@ -38,13 +38,17 @@ export async function GET(req: NextRequest) {
     // Get total count for pagination metadata
     const totalCount = await Product.countDocuments(query);
 
+    // Get sorting parameters
+    const sort = searchParams.get('sort') || 'createdAt';
+    const order = searchParams.get('order') || 'desc';
+    const sortOrder = order === 'asc' ? 1 : -1;
+
     // Fetch products with pagination
     const products = await Product.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ [sort]: sortOrder })
       .select(
         'name slug thumbnail inStock stockQuantity productType price colors gender category frameColorVariants status'
       )
-      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 

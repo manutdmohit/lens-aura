@@ -24,7 +24,7 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-function MensStandardSunglassesContent() {
+function MensEssentialsSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -47,7 +47,7 @@ function MensStandardSunglassesContent() {
         setLoading(true);
 
         const response = await fetch(
-          `/api/sunglasses?category=standard&gender=men&page=${currentPage}&limit=${limitRef.current}`
+          `/api/sunglasses?category=essentials&gender=men&page=${currentPage}&limit=${limitRef.current}`
         );
         const data = await response.json();
 
@@ -67,9 +67,9 @@ function MensStandardSunglassesContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error("Error fetching men's standard sunglasses:", error);
+        console.error("Error fetching men's essentials sunglasses:", error);
         toast.error(
-          `${error.message || "Failed to fetch men's standard sunglasses"}`
+          `${error.message || "Failed to fetch men's essentials sunglasses"}`
         );
         setProducts([]);
       } finally {
@@ -83,7 +83,7 @@ function MensStandardSunglassesContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/standard/mens?${params.toString()}`);
+    router.push(`/sunglasses/essentials/mens?${params.toString()}`);
   };
 
   const hasProducts = Array.isArray(products) && products.length > 0;
@@ -199,10 +199,10 @@ function MensStandardSunglassesContent() {
   );
 }
 
-export default function MensStandardSunglassesPage() {
+export default function MensEssentialsSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <MensStandardSunglassesContent />
+      <MensEssentialsSunglassesContent />
     </Suspense>
   );
 }
