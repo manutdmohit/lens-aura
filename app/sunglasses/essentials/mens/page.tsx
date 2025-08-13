@@ -102,7 +102,7 @@ function MensEssentialsSunglassesContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
                 >
-                  Men's Standard Sunglasses
+                  Men's Essentials Sunglasses
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
@@ -132,12 +132,12 @@ function MensEssentialsSunglassesContent() {
               </div>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   variant="outline"
                   className="border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Standard Collection
+                  Back to Essentials Collection
                 </Button>
               </div>
             </AnimatedSection>
@@ -152,14 +152,14 @@ function MensEssentialsSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No men's standard sunglasses found. Check back soon for our
+                  No men's essentials sunglasses found. Check back soon for our
                   latest collection!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                 >
-                  Browse Standard Collection
+                  Browse Essentials Collection
                 </Button>
               </div>
             )}
@@ -170,7 +170,7 @@ function MensEssentialsSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Men's Standard Collection ({pagination.total} Products)
+                    Men's Essentials Collection ({pagination.total} Products)
                   </h2>
                 </div>
 
@@ -187,8 +187,8 @@ function MensEssentialsSunglassesContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} men's standard
-                  sunglasses
+                  Showing {products.length} of {pagination.total} men's
+                  essentials sunglasses
                 </div>
               </AnimatedSection>
             )}

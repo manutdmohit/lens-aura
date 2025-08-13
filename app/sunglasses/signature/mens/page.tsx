@@ -24,7 +24,7 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-function MensPremiumSunglassesContent() {
+function MensSignatureSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -47,7 +47,7 @@ function MensPremiumSunglassesContent() {
         setLoading(true);
 
         const response = await fetch(
-          `/api/sunglasses?category=premium&gender=men&page=${currentPage}&limit=${limitRef.current}`
+          `/api/sunglasses?category=signature&gender=men&page=${currentPage}&limit=${limitRef.current}`
         );
         const data = await response.json();
 
@@ -67,9 +67,9 @@ function MensPremiumSunglassesContent() {
           setProducts([]);
         }
       } catch (error: any) {
-        console.error("Error fetching men's premium sunglasses:", error);
+        console.error("Error fetching men's signature sunglasses:", error);
         toast.error(
-          `${error.message || "Failed to fetch men's premium sunglasses"}`
+          `${error.message || "Failed to fetch men's signature sunglasses"}`
         );
         setProducts([]);
       } finally {
@@ -83,7 +83,7 @@ function MensPremiumSunglassesContent() {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`/sunglasses/premium/mens?${params.toString()}`);
+    router.push(`/sunglasses/signature/mens?${params.toString()}`);
   };
 
   const hasProducts = Array.isArray(products) && products.length > 0;
@@ -102,12 +102,12 @@ function MensPremiumSunglassesContent() {
                 <h1
                   className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600`}
                 >
-                  Men's Premium Sunglasses
+                  Men's Signature Sunglasses
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
                 Sophisticated luxury sunglasses designed for the modern
-                gentleman. Premium materials, superior craftsmanship, and
+                gentleman. Signature materials, superior craftsmanship, and
                 timeless style.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -115,7 +115,7 @@ function MensPremiumSunglassesContent() {
                   variant="secondary"
                   className="bg-amber-100 text-amber-800 border-amber-200"
                 >
-                  Premium Materials
+                  Signature Materials
                 </Badge>
                 <Badge
                   variant="secondary"
@@ -132,12 +132,12 @@ function MensPremiumSunglassesContent() {
               </div>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/sunglasses/premium')}
+                  onClick={() => router.push('/sunglasses/signature')}
                   variant="outline"
                   className="border-amber-300 text-amber-700 hover:bg-amber-50"
                 >
                   <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Premium Collection
+                  Back to Signature Collection
                 </Button>
               </div>
             </AnimatedSection>
@@ -152,14 +152,14 @@ function MensPremiumSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No men's premium sunglasses found. Check back soon for our
+                  No men's signature sunglasses found. Check back soon for our
                   latest collection!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/premium')}
+                  onClick={() => router.push('/sunglasses/signature')}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                 >
-                  Browse Premium Collection
+                  Browse Signature Collection
                 </Button>
               </div>
             )}
@@ -170,7 +170,7 @@ function MensPremiumSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Men's Premium Collection ({pagination.total} Products)
+                    Men's Signature Collection ({pagination.total} Products)
                   </h2>
                 </div>
 
@@ -187,8 +187,8 @@ function MensPremiumSunglassesContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} men's premium
-                  sunglasses
+                  Showing {products.length} of {pagination.total} men's
+                  signature sunglasses
                 </div>
               </AnimatedSection>
             )}
@@ -199,10 +199,10 @@ function MensPremiumSunglassesContent() {
   );
 }
 
-export default function MensPremiumSunglassesPage() {
+export default function MensSignatureSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
-      <MensPremiumSunglassesContent />
+      <MensSignatureSunglassesContent />
     </Suspense>
   );
 }

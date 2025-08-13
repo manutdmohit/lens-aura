@@ -108,7 +108,7 @@ function SignatureNewArrivalsContent() {
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
                 Discover our latest signature sunglasses collection. Fresh
-                designs, premium materials, and cutting-edge style.
+                designs, signature materials, and cutting-edge style.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
                 <Badge
@@ -122,7 +122,7 @@ function SignatureNewArrivalsContent() {
                   variant="secondary"
                   className="bg-amber-100 text-amber-800 border-amber-200"
                 >
-                  Premium Quality
+                  Signature Quality
                 </Badge>
                 <Badge
                   variant="secondary"

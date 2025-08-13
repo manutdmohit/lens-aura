@@ -132,12 +132,12 @@ function WomensEssentialsSunglassesContent() {
               </div>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   variant="outline"
                   className="border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Standard Collection
+                  Back to Essentials Collection
                 </Button>
               </div>
             </AnimatedSection>
@@ -152,14 +152,14 @@ function WomensEssentialsSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No women's standard sunglasses found. Check back soon for our
-                  latest collection!
+                  No women's essentials sunglasses found. Check back soon for
+                  our latest collection!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/standard')}
+                  onClick={() => router.push('/sunglasses/essentials')}
                   className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                 >
-                  Browse Standard Collection
+                  Browse Essentials Collection
                 </Button>
               </div>
             )}
