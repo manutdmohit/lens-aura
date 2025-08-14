@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
+import { useState } from 'react';
 
 // Use the same Product type as the existing ProductGrid
 import type { ProductFormValues as Product } from '@/lib/api/validation';
@@ -15,6 +16,7 @@ interface ProductCardProps {
   showStockStatus?: boolean;
   showCategoryBadge?: boolean;
   showGenderBadge?: boolean;
+  showColorSelector?: boolean;
 }
 
 export default function ProductCard({
@@ -24,7 +26,10 @@ export default function ProductCard({
   showStockStatus = true,
   showCategoryBadge = true,
   showGenderBadge = true,
+  showColorSelector = true,
 }: ProductCardProps) {
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+
   const getCardHeight = () => {
     switch (variant) {
       case 'compact':
@@ -51,6 +56,28 @@ export default function ProductCard({
     return `/${
       product.productType === 'accessory' ? 'accessories' : product.productType
     }/${product.slug}`;
+  };
+
+  // Get current image based on selected color
+  const getCurrentImage = () => {
+    if (product.frameColorVariants && product.frameColorVariants.length > 0) {
+      const selectedVariant = product.frameColorVariants[selectedColorIndex];
+      if (
+        selectedVariant &&
+        selectedVariant.images &&
+        selectedVariant.images.length > 0
+      ) {
+        return selectedVariant.images[0];
+      }
+    }
+    return product.thumbnail || '/placeholder.svg';
+  };
+
+  // Handle color selection
+  const handleColorSelect = (index: number, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Prevent event bubbling
+    setSelectedColorIndex(index);
   };
 
   const renderStockStatus = (product: Product) => {
@@ -108,6 +135,45 @@ export default function ProductCard({
     );
   };
 
+  const renderColorSelector = () => {
+    if (
+      !showColorSelector ||
+      !product.frameColorVariants ||
+      product.frameColorVariants.length <= 1
+    ) {
+      return null;
+    }
+
+    const selectedVariant = product.frameColorVariants[selectedColorIndex];
+
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex justify-center gap-2">
+          {product.frameColorVariants.map((variant, index) => (
+            <button
+              key={index}
+              onClick={(e) => handleColorSelect(index, e)}
+              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                selectedColorIndex === index
+                  ? 'border-gray-800 shadow-md scale-110'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+              style={{
+                backgroundColor: variant.color.toLowerCase(),
+              }}
+              title={`${variant.color} - ${variant.lensColor}`}
+            />
+          ))}
+        </div>
+        {selectedVariant && (
+          <span className="text-xs text-gray-600 font-medium">
+            {selectedVariant.color}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   const renderProductFeatures = (product: Product) => {
     if (!showFeatures || variant === 'compact') return null;
 
@@ -149,7 +215,7 @@ export default function ProductCard({
             className="w-full h-full"
           >
             <Image
-              src={product.thumbnail || '/placeholder.svg'}
+              src={getCurrentImage()}
               alt={product.name}
               className="w-full h-full object-contain transition-all duration-700"
               width={500}
@@ -183,6 +249,9 @@ export default function ProductCard({
 
         <CardContent className={getCardPadding()}>
           <div className="space-y-3">
+            {/* Color Selector */}
+            {renderColorSelector()}
+
             {/* Product Name */}
             <h3
               className={`font-semibold text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-2 ${
