@@ -2,21 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utils/authOptions'; // adjust path if different
 import { connectToDatabase } from '@/lib/api/db';
-// import {
-//   authenticateAdmin,
-//   validateRequest,
-//   handleError,
-// } from '@/lib/api/middleware';
-// import {
-//   baseProductSchema,
-//   glassesSchema,
-//   sunglassesSchema,
-//   contactLensesSchema,
-// } from '@/lib/api/validation';
-// import Product from '@/lib/mongoose/models/product.model';
-// import Glasses from '@/lib/mongoose/models/glasses.model';
-// import Sunglasses from '@/lib/mongoose/models/sunglasses.model';
-// import ContactLenses from '@/lib/mongoose/models/contact-lenses-model';
+import { productSchema } from '@/lib/api/validation';
 import { Product } from '@/models';
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -101,17 +87,36 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    if (!session) {
+      return NextResponse.json(
+        { message: 'No session found' },
+        { status: 401 }
+      );
     }
-    // const session = await authenticateAdmin(req);
 
-    // if (session instanceof NextResponse) {
-    //   return session; // This is an error response
-    // }
+    if (session.user.role !== 'admin') {
+      return NextResponse.json(
+        { message: 'Admin access required' },
+        { status: 401 }
+      );
+    }
 
     const body = await req.json();
-    let { thumbnail, images, ...rest } = body;
+
+    // Validate the request body using productSchema
+    const validationResult = productSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          message: 'Validation failed',
+          errors: validationResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    let { thumbnail, images, ...rest } = validationResult.data;
 
     await connectToDatabase();
 
@@ -151,7 +156,7 @@ export async function POST(req: NextRequest) {
               variant.images.map(async (image: string) => {
                 if (image.startsWith('data:image')) {
                   const uploadRes = await cloudinary.uploader.upload(image, {
-                    folder: `products/frame-colors/${variant.color}/images`,
+                    folder: `products/frame-colors/${variant.color.name}/images`,
                   });
                   return uploadRes.secure_url;
                 }
@@ -180,7 +185,6 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    // return handleError(error);
     return NextResponse.json(
       { message: error.message || 'Failed to create product' },
       { status: 500 }

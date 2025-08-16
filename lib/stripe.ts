@@ -88,10 +88,16 @@ export async function createCheckoutSession(
         `Adding product to Stripe checkout: ID=${item.product._id}, Name=${item.product.name}`
       );
 
+      // Handle color (could be string or ColorInfo object)
+      const colorName =
+        typeof item.color === 'string'
+          ? item.color
+          : item.color?.name || 'Default';
+
       // Create a detailed metadata object for each product
       const productMetadata = {
         productId: item.product._id?.toString() || '',
-        color: item.color || 'Default',
+        color: colorName,
         name: item.product.name,
         price: item.product.price.toString(),
         quantity: item.quantity.toString(),
@@ -105,7 +111,7 @@ export async function createCheckoutSession(
           currency: 'aud',
           product_data: {
             name: item.product.name,
-            description: `Color: ${item.color}`,
+            description: `Color: ${colorName}`,
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
             metadata: productMetadata,
           },
@@ -143,6 +149,7 @@ export async function createCheckoutSession(
       shipping_address_collection: {
         allowed_countries: ['AU'],
       },
+
       phone_number_collection: {
         enabled: true,
       },

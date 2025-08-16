@@ -52,7 +52,7 @@ export async function updateProductStock(
       // If color is specified, find and update that specific variant
       if (color) {
         const variantIndex = currentProduct.frameColorVariants.findIndex(
-          (v) => v.color === color
+          (v) => v.color.name === color
         );
         if (variantIndex === -1) {
           console.error(
@@ -95,7 +95,7 @@ export async function updateProductStock(
         }
 
         const variantIndex = currentProduct.frameColorVariants.findIndex(
-          (v) => v.color === availableVariant.color
+          (v) => v.color.name === availableVariant.color.name
         );
         const newStock = Math.max(
           0,

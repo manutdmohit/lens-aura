@@ -2,8 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, ArrowRight, Trash2, Plus, Minus } from 'lucide-react';
+import {
+  ShoppingBag,
+  ArrowRight,
+  Trash2,
+  Plus,
+  Minus,
+  AlertTriangle,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/cart-context';
 import CheckoutButton from '@/components/checkout-button';
 import Image from 'next/image';
@@ -15,6 +24,43 @@ export default function CartPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Function to get available stock for a cart item
+  const getAvailableStock = (item: any) => {
+    if (
+      item.product.productType === 'glasses' ||
+      item.product.productType === 'sunglasses'
+    ) {
+      // For glasses/sunglasses, check frame color variants
+      const variant = item.product.frameColorVariants?.find(
+        (v) =>
+          v.color.name ===
+          (typeof item.color === 'string' ? item.color : item.color?.name)
+      );
+      return variant?.stockQuantity || 0;
+    } else {
+      // For contacts/accessories, use direct stockQuantity
+      return item.product.stockQuantity || 0;
+    }
+  };
+
+  // Function to check if item is out of stock
+  const isItemOutOfStock = (item: any) => {
+    const availableStock = getAvailableStock(item);
+    return availableStock === 0;
+  };
+
+  // Function to check if item has low stock
+  const hasLowStock = (item: any) => {
+    const availableStock = getAvailableStock(item);
+    return availableStock > 0 && availableStock <= 5;
+  };
+
+  // Function to check if quantity exceeds available stock
+  const exceedsStock = (item: any) => {
+    const availableStock = getAvailableStock(item);
+    return item.quantity > availableStock;
+  };
 
   const handleCheckout = async (cartItems: any[]) => {
     try {
@@ -44,18 +90,48 @@ export default function CartPage() {
   const handleUpdateQuantity = (
     productId: string | undefined,
     quantity: number,
-    color: string
+    color: string | { name: string; hex: string; _id?: string }
   ) => {
     if (productId) {
+      // Find the item to check stock
+      const item = items.find(
+        (i) =>
+          i.product._id === productId &&
+          (typeof i.color === 'string' ? i.color : i.color?.name) ===
+            (typeof color === 'string' ? color : color?.name)
+      );
+
+      if (item) {
+        const availableStock = getAvailableStock(item);
+
+        // Don't allow quantity to exceed available stock
+        if (quantity > availableStock) {
+          quantity = availableStock;
+        }
+
+        // Don't allow negative quantities
+        if (quantity < 0) {
+          quantity = 0;
+        }
+      }
+
       updateQuantity(productId, quantity, color);
     }
   };
 
-  const handleRemoveItem = (productId: string | undefined, color: string) => {
+  const handleRemoveItem = (
+    productId: string | undefined,
+    color: string | { name: string; hex: string; _id?: string }
+  ) => {
     if (productId) {
       removeItem(productId, color);
     }
   };
+
+  // Check if any items have stock issues
+  const hasStockIssues = items.some(
+    (item) => isItemOutOfStock(item) || exceedsStock(item)
+  );
 
   if (!isClient) {
     return (
@@ -88,80 +164,147 @@ export default function CartPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
+            {/* Stock Issues Warning */}
+            {hasStockIssues && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-sm font-medium text-red-800 mb-1">
+                      Stock Issues Detected
+                    </h3>
+                    <p className="text-sm text-red-700">
+                      Some items in your cart have stock issues. Please review
+                      and update quantities before checkout.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="border rounded-lg overflow-hidden">
               <div className="divide-y">
-                {items.map((item) => (
-                  <div
-                    key={`${item.product._id}-${item.color}`}
-                    className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
-                  >
-                    <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                      <Image
-                        src={item.product.thumbnail || '/placeholder.svg'}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                        width={100}
-                        height={100}
-                        priority
-                      />
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex justify-between">
-                        <h3 className="font-medium">{item.product.name}</h3>
-                        <p className="font-medium">
-                          ${(item.product.price * item.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Color: {item.color}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        ${item.product.price.toFixed(2)} each
-                      </p>
+                {items.map((item) => {
+                  const availableStock = getAvailableStock(item);
+                  const isOutOfStock = isItemOutOfStock(item);
+                  const hasLowStockWarning = hasLowStock(item);
+                  const exceedsStockLimit = exceedsStock(item);
+                  const colorName =
+                    typeof item.color === 'string'
+                      ? item.color
+                      : item.color?.name;
 
-                      <div className="flex justify-between items-center mt-4">
-                        <div className="flex items-center border rounded-md">
+                  return (
+                    <div
+                      key={`${item.product._id}-${colorName}`}
+                      className={`p-4 sm:p-6 flex flex-col sm:flex-row gap-4 ${
+                        isOutOfStock || exceedsStockLimit ? 'bg-red-50' : ''
+                      }`}
+                    >
+                      <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                        <Image
+                          src={item.product.thumbnail || '/placeholder.svg'}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                          width={100}
+                          height={100}
+                          priority
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <div className="flex justify-between">
+                          <h3 className="font-medium">{item.product.name}</h3>
+                          <p className="font-medium">
+                            ${(item.product.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Color: {colorName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ${item.product.price.toFixed(2)} each
+                        </p>
+
+                        {/* Stock Status */}
+                        <div className="mt-2">
+                          {isOutOfStock ? (
+                            <Badge variant="destructive" className="text-xs">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Out of Stock
+                            </Badge>
+                          ) : hasLowStockWarning ? (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200"
+                            >
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Low Stock ({availableStock} left)
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-green-100 text-green-800 border-green-200"
+                            >
+                              In Stock ({availableStock} available)
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Stock Warning */}
+                        {exceedsStockLimit && (
+                          <div className="mt-2 p-2 bg-red-100 border border-red-200 rounded text-xs text-red-700">
+                            <AlertTriangle className="h-3 w-3 inline mr-1" />
+                            Quantity exceeds available stock. Maximum:{' '}
+                            {availableStock}
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center mt-4">
+                          <div className="flex items-center border rounded-md">
+                            <button
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product._id,
+                                  item.quantity - 1,
+                                  item.color
+                                )
+                              }
+                              className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label="Decrease quantity"
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="px-4">{item.quantity}</span>
+                            <button
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product._id,
+                                  item.quantity + 1,
+                                  item.color
+                                )
+                              }
+                              className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label="Increase quantity"
+                              disabled={item.quantity >= availableStock}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
                           <button
                             onClick={() =>
-                              handleUpdateQuantity(
-                                item.product._id,
-                                item.quantity - 1,
-                                item.color
-                              )
+                              handleRemoveItem(item.product._id, item.color)
                             }
-                            className="p-2 hover:bg-gray-100"
-                            aria-label="Decrease quantity"
+                            className="text-gray-500 hover:text-red-600"
+                            aria-label="Remove item"
                           >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <span className="px-4">{item.quantity}</span>
-                          <button
-                            onClick={() =>
-                              handleUpdateQuantity(
-                                item.product._id,
-                                item.quantity + 1,
-                                item.color
-                              )
-                            }
-                            className="p-2 hover:bg-gray-100"
-                            aria-label="Increase quantity"
-                          >
-                            <Plus className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </button>
                         </div>
-                        <button
-                          onClick={() =>
-                            handleRemoveItem(item.product._id, item.color)
-                          }
-                          className="text-gray-500 hover:text-red-600"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -186,7 +329,18 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <CheckoutButton onCheckout={handleCheckout} />
+              {/* Disable checkout if there are stock issues */}
+              {hasStockIssues ? (
+                <Button
+                  className="w-full bg-gray-400 text-white cursor-not-allowed"
+                  disabled
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Resolve Stock Issues
+                </Button>
+              ) : (
+                <CheckoutButton onCheckout={handleCheckout} />
+              )}
 
               <div className="mt-4 text-center text-sm text-gray-500">
                 <p>Secure checkout powered by Stripe</p>

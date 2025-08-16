@@ -1,0 +1,1562 @@
+[
+  {
+    "_id": {
+      "$oid": "6898491c0488fbbbe1fce218"
+    },
+    "name": "Nuvira",
+    "description": "Clean, modern, and unapologetically stylish — Nuvira redefines everyday luxury with a fresh perspective.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754810651/products/thumbnails/r2yl6u1zfvhuvf0sn5nv.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "men",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 8,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754810651/products/frame-colors/Black/images/bnqoccsmlwqgvw3mmbmm.jpg"
+        ],
+        "_id": {
+          "$oid": "6898491c0488fbbbe1fce219"
+        }
+      },
+      {
+        "color": {
+          "name": "Tiger",
+          "hex": "#8B4513"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 8,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754810651/products/frame-colors/Tiger/images/n4iqbafhqx0t7ecszknc.jpg"
+        ],
+        "_id": {
+          "$oid": "6898491c0488fbbbe1fce21a"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754810651/products/frame-colors/Silver/images/hy3skc5qachlhz31wlzo.jpg"
+        ],
+        "_id": {
+          "$oid": "6898491c0488fbbbe1fce21b"
+        }
+      },
+      {
+        "color": {
+          "name": "White Trans",
+          "hex": "#F5F5F5"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754810651/products/frame-colors/White%20Trans/images/wvsc2jks6eo9kp8t5jho.jpg"
+        ],
+        "_id": {
+          "$oid": "6898491c0488fbbbe1fce21c"
+        }
+      }
+    ],
+    "category": "essentials",
+    "style": "round",
+    "slug": "nuvira",
+    "createdAt": {
+      "$date": "2025-08-10T07:24:12.552Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:09:07.116Z"
+    },
+    "__v": 0,
+    "lensColor": "",
+    "polarized": true,
+    "uvProtection": true,
+    "dimensions": {
+      "eye": 47,
+      "bridge": 20,
+      "temple": 145
+    },
+    "frameColor": []
+  },
+  {
+    "_id": {
+      "$oid": "689878afad4497a01bc05638"
+    },
+    "name": "Zephira",
+    "description": "Light as a summer breeze, Zephira frames your face in airy elegance while making a lasting impression.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754822830/products/thumbnails/sydy05yreygudvh2v6yg.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "men",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Hawksbill Turtle Tea",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754822830/products/frame-colors/Hawksbill%20Turtle%20Tea/images/nygylejvzfpctbyk5lqc.jpg"
+        ],
+        "_id": {
+          "$oid": "689878afad4497a01bc05639"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754822830/products/frame-colors/Silver/images/xt8rw7q9l3at32fujnac.jpg"
+        ],
+        "_id": {
+          "$oid": "689878afad4497a01bc0563a"
+        }
+      },
+      {
+        "color": {
+          "name": "Orange Black",
+          "hex": "#FF8C00"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754822830/products/frame-colors/Orange%20Black/images/r8zp8grjebevxdpphnvo.jpg"
+        ],
+        "_id": {
+          "$oid": "689878afad4497a01bc0563b"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "round",
+    "slug": "zephira",
+    "createdAt": {
+      "$date": "2025-08-10T10:47:11.482Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:08:27.102Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 50,
+      "bridge": 20,
+      "temple": 150
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68987df6620820974e580b6e"
+    },
+    "name": "Luméra",
+    "description": "Infused with a soft inner glow, Luméra is a radiant choice for those who shine without trying.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824181/products/thumbnails/awvffo6smjqwcdjny4wy.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 8,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824181/products/frame-colors/Black/images/lvcd0lbtjv962fz81ies.jpg"
+        ],
+        "_id": {
+          "$oid": "68987df6620820974e580b6f"
+        }
+      },
+      {
+        "color": {
+          "name": "Tiger Brown",
+          "hex": "#8B4513"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 7,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824181/products/frame-colors/Tiger%20Brown/images/mkcmbpgb1g8js5zd2ceb.jpg"
+        ],
+        "_id": {
+          "$oid": "68987df6620820974e580b70"
+        }
+      },
+      {
+        "color": {
+          "name": "Olive Green",
+          "hex": "#556B2F"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 1,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824181/products/frame-colors/Olive%20Green/images/n5yxynwl4sl3fiifqts1.jpg"
+        ],
+        "_id": {
+          "$oid": "68987df6620820974e580b71"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 1,
+        "images": [],
+        "_id": {
+          "$oid": "68987df6620820974e580b72"
+        }
+      },
+      {
+        "color": {
+          "name": "Deep Gray",
+          "hex": "#696969"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 1,
+        "images": [],
+        "_id": {
+          "$oid": "68987df6620820974e580b73"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "round",
+    "slug": "lumera",
+    "createdAt": {
+      "$date": "2025-08-10T11:09:42.362Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-13T09:46:50.687Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 55,
+      "bridge": 18,
+      "temple": 147
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68987ff045591b7288d326e0"
+    },
+    "name": "Velrix",
+    "description": "Dark, textured, and confidently striking — Velrix is the perfect companion for a bold urban look.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824688/products/thumbnails/jsodfjzv965ef8heeyzz.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 14,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824688/products/frame-colors/Black/images/y22p2pzva2wcocnjkac9.jpg"
+        ],
+        "_id": {
+          "$oid": "68987ff045591b7288d326e1"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 1,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824688/products/frame-colors/Silver/images/eyghwjlqp3kzkspo79jp.jpg"
+        ],
+        "_id": {
+          "$oid": "68987ff045591b7288d326e2"
+        }
+      },
+      {
+        "color": {
+          "name": "Dark Grey",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824688/products/frame-colors/Dark%20Grey/images/intdykrnojjvx9hgtar0.jpg"
+        ],
+        "_id": {
+          "$oid": "68987ff045591b7288d326e3"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "square",
+    "slug": "velrix",
+    "createdAt": {
+      "$date": "2025-08-10T11:18:09.398Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:04:56.273Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 51,
+      "bridge": 21,
+      "temple": 145
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "689880bdc0ae6ac05792220c"
+    },
+    "name": "Solmira",
+    "description": "Bathed in sunlight and wonder, Solmira captures the brilliance of golden days in a sleek, wearable form.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824892/products/thumbnails/x7r509c4mywknevhrakt.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Deep Silver",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754824893/products/frame-colors/Deep%20Silver/images/zjjkoyctmvp6takdhn9l.jpg"
+        ],
+        "_id": {
+          "$oid": "689880bdc0ae6ac05792220d"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "solmira",
+    "createdAt": {
+      "$date": "2025-08-10T11:21:34.280Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:04:21.206Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 47,
+      "bridge": 14,
+      "temple": 145
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "6898839950b2bda1f4f67bde"
+    },
+    "name": "Cavara",
+    "description": "Rooted in classic craftsmanship yet undeniably modern, Cavara is a mark of strength and refinement.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825624/products/thumbnails/slmf34s69qxf7eemffkm.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825624/products/frame-colors/Black/images/azvyqbwgbxtwnfim3tl1.jpg"
+        ],
+        "_id": {
+          "$oid": "6898839950b2bda1f4f67bdf"
+        }
+      },
+      {
+        "color": {
+          "name": "Tea",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Black ",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825624/products/frame-colors/Tea/images/v2io8ktbhu3vsgio71em.jpg"
+        ],
+        "_id": {
+          "$oid": "6898839950b2bda1f4f67be0"
+        }
+      },
+      {
+        "color": {
+          "name": "Olive Green",
+          "hex": "#556B2F"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 9,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825624/products/frame-colors/Olive%20Green/images/w2hkraunuwdrxuvmmho9.jpg"
+        ],
+        "_id": {
+          "$oid": "6898839950b2bda1f4f67be1"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "cavara",
+    "createdAt": {
+      "$date": "2025-08-10T11:33:45.599Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:03:16.289Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 49,
+      "bridge": 20,
+      "temple": 145
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "6898848c50b2bda1f4f67c65"
+    },
+    "name": "Elaris",
+    "description": "Minimal, airy, and versatile — Elaris embodies modern elegance for any occasion.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825867/products/thumbnails/tifo61cd0jpz0nyts07o.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Tea",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825867/products/frame-colors/Tea/images/d0oocdzmvodoctnbuosp.jpg"
+        ],
+        "_id": {
+          "$oid": "6898848c50b2bda1f4f67c66"
+        }
+      },
+      {
+        "color": {
+          "name": "Olive Green",
+          "hex": "#556B2F"
+        },
+        "lensColor": "Olive Green ",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754825867/products/frame-colors/Olive%20Green/images/qdpbpqggu4dudrnvzvew.jpg"
+        ],
+        "_id": {
+          "$oid": "6898848c50b2bda1f4f67c67"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "square",
+    "slug": "elaris",
+    "createdAt": {
+      "$date": "2025-08-10T11:37:48.263Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:02:33.903Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 46,
+      "bridge": 22,
+      "temple": 144
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988519496ded04a3246e8a"
+    },
+    "name": "Niorin",
+    "description": "A contemporary twist on classic noir, Niorin delivers subtle mystery with flawless lines.",
+    "price": 95,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826008/products/thumbnails/wkwbj895xflinc3bfbis.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826008/products/frame-colors/Black/images/e8juwmtx8qui7xy9sdak.jpg"
+        ],
+        "_id": {
+          "$oid": "68988519496ded04a3246e8b"
+        }
+      },
+      {
+        "color": {
+          "name": "Yellow Tea",
+          "hex": "#DAA520"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826008/products/frame-colors/Yellow%20Tea/images/qpr5bfdvktc79taibukp.jpg"
+        ],
+        "_id": {
+          "$oid": "68988519496ded04a3246e8c"
+        }
+      },
+      {
+        "color": {
+          "name": "Tortoise Shell",
+          "hex": "#A0522D"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826008/products/frame-colors/Tortoise%20Shell/images/jmrywmtudexms2pjerjp.jpg"
+        ],
+        "_id": {
+          "$oid": "68988519496ded04a3246e8d"
+        }
+      },
+      {
+        "color": {
+          "name": "Green Black",
+          "hex": "#2F4F2F"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826008/products/frame-colors/Green%20Black/images/ceooqo9i47c5km0q0q8g.jpg"
+        ],
+        "_id": {
+          "$oid": "68988519496ded04a3246e8e"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "square",
+    "slug": "niorin",
+    "createdAt": {
+      "$date": "2025-08-10T11:40:09.350Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:01:54.776Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 52,
+      "bridge": 21,
+      "temple": 145
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988589496ded04a3246eca"
+    },
+    "name": "Aureon",
+    "description": "A timeless masterpiece in gold-inspired tones, Aureon radiates prestige and luxury for all seasons.",
+    "price": 94.98,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826121/products/thumbnails/bkif2p2h9uqw0mid4hcj.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826121/products/frame-colors/Black/images/ftxny1wf40pypot5tbpl.jpg"
+        ],
+        "_id": {
+          "$oid": "68988589496ded04a3246ecb"
+        }
+      },
+      {
+        "color": {
+          "name": "Rose Gold",
+          "hex": "#B76E79"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826121/products/frame-colors/Rose%20Gold/images/bvh27rmu7zb18iuuj5do.jpg"
+        ],
+        "_id": {
+          "$oid": "68988589496ded04a3246ecc"
+        }
+      }
+    ],
+    "category": "essentials",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "square",
+    "slug": "aureon",
+    "createdAt": {
+      "$date": "2025-08-10T11:42:02.041Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T12:00:39.492Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 53,
+      "bridge": 20,
+      "temple": 144
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "689886ad5f5eee771b403b63"
+    },
+    "name": "Noirelle",
+    "description": "A bold fusion of deep noir tones and refined curves, Noirelle radiates sophistication for those who command attention effortlessly.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826412/products/thumbnails/rvjhg9ltkprwdn18anj4.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826413/products/frame-colors/Black/images/y7zskcuvq81afqi0z9dq.jpg"
+        ],
+        "_id": {
+          "$oid": "689886ad5f5eee771b403b64"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826413/products/frame-colors/Silver/images/msp0dpj0bmytfrstcpep.jpg"
+        ],
+        "_id": {
+          "$oid": "689886ad5f5eee771b403b65"
+        }
+      },
+      {
+        "color": {
+          "name": "Brown",
+          "hex": "#8B4513"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826413/products/frame-colors/Brown/images/p60yshhpyupumxrm9n3x.jpg"
+        ],
+        "_id": {
+          "$oid": "689886ad5f5eee771b403b66"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "cat-eye",
+    "slug": "noirelle",
+    "createdAt": {
+      "$date": "2025-08-10T11:46:54.219Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:52:43.777Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 58,
+      "bridge": 15,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "689887a05f5eee771b403b81"
+    },
+    "name": "Solvane",
+    "description": "A sleek, sun-kissed silhouette inspired by golden horizons, Solvane embodies movement, light, and effortless style.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/thumbnails/vybxh6jiyklvjfhzn0bn.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 15,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/frame-colors/Black/images/pfrxito5pwzs2thqlg36.jpg"
+        ],
+        "_id": {
+          "$oid": "689887a05f5eee771b403b82"
+        }
+      },
+      {
+        "color": {
+          "name": "Red",
+          "hex": "#DC143C"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/frame-colors/Red/images/ejydaaz7lacgcwsf09fd.jpg"
+        ],
+        "_id": {
+          "$oid": "689887a05f5eee771b403b83"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/frame-colors/Silver/images/uhogof7pf2eej2scgqax.jpg"
+        ],
+        "_id": {
+          "$oid": "689887a05f5eee771b403b84"
+        }
+      },
+      {
+        "color": {
+          "name": "Green Grey",
+          "hex": "#6B8E23"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/frame-colors/Green%20Grey/images/m52jw0kanmrv5ywzf1ao.jpg"
+        ],
+        "_id": {
+          "$oid": "689887a05f5eee771b403b85"
+        }
+      },
+      {
+        "color": {
+          "name": "Brown",
+          "hex": "#8B4513"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826655/products/frame-colors/Brown/images/ek768k8f6optnyxmowwk.jpg"
+        ],
+        "_id": {
+          "$oid": "689887a05f5eee771b403b86"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "solvane",
+    "createdAt": {
+      "$date": "2025-08-10T11:50:56.217Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:59:06.892Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 56,
+      "bridge": 18,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "6898883d2a965689f124d7e3"
+    },
+    "name": "Auristé",
+    "description": "Luxuriously minimal with golden undertones, Auristé is where radiant aura meets timeless prestige.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826813/products/thumbnails/yucynnuqa1nwi933zp7a.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 15,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826813/products/frame-colors/Black/images/i0rbjtzhz6xvbf5zgldu.jpg"
+        ],
+        "_id": {
+          "$oid": "6898883d2a965689f124d7e4"
+        }
+      },
+      {
+        "color": {
+          "name": "Brownish Black",
+          "hex": "#2F1B14"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826813/products/frame-colors/Brownish%20Black/images/pvyopz50wu8ueavgisy5.jpg"
+        ],
+        "_id": {
+          "$oid": "6898883d2a965689f124d7e5"
+        }
+      },
+      {
+        "color": {
+          "name": "Grey",
+          "hex": "#808080"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 5,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826813/products/frame-colors/Grey/images/e5u8hoffy9p3m1pfizli.jpg"
+        ],
+        "_id": {
+          "$oid": "6898883d2a965689f124d7e6"
+        }
+      },
+      {
+        "color": {
+          "name": "Demi Brownish",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826813/products/frame-colors/Demi%20Brownish/images/lhaevwdpea971kxpo4g6.jpg"
+        ],
+        "_id": {
+          "$oid": "6898883d2a965689f124d7e7"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "auriste",
+    "createdAt": {
+      "$date": "2025-08-10T11:53:34.106Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:58:12.491Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 56,
+      "bridge": 19,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "689888d22a965689f124d816"
+    },
+    "name": "Veluna",
+    "description": "Soft velvet-like finish meets moonlit elegance — Veluna is your statement of refined mystery.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826961/products/thumbnails/tsci1mnhejaoxvbctvto.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 15,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826962/products/frame-colors/Black/images/kastdinvj64inbqawr9v.jpg"
+        ],
+        "_id": {
+          "$oid": "689888d22a965689f124d817"
+        }
+      },
+      {
+        "color": {
+          "name": "Brownish Black",
+          "hex": "#2F1B14"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826962/products/frame-colors/Brownish%20Black/images/xz916xpuhgfc2fkn3erv.jpg"
+        ],
+        "_id": {
+          "$oid": "689888d22a965689f124d818"
+        }
+      },
+      {
+        "color": {
+          "name": "Demi Brownish",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 5,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826962/products/frame-colors/Demi%20Brownish/images/wtxydc0hdf0mhhndmdh4.jpg"
+        ],
+        "_id": {
+          "$oid": "689888d22a965689f124d819"
+        }
+      },
+      {
+        "color": {
+          "name": "Deep Coffee Gray",
+          "hex": "#696969"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 4,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754826962/products/frame-colors/Deep%20Coffee%20Gray/images/eleoua2lr7daolu2e79k.jpg"
+        ],
+        "_id": {
+          "$oid": "689888d22a965689f124d81a"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "veluna",
+    "createdAt": {
+      "$date": "2025-08-10T11:56:03.082Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:57:21.874Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 61,
+      "bridge": 16,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "6898899e5f5eee771b403bcd"
+    },
+    "name": "Cielsar",
+    "description": "A sky-inspired frame with a regal edge, Cielsar captures light in every angle for a truly elevated look.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827165/products/thumbnails/gfuk977vqea4khtjjxcz.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 10,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827166/products/frame-colors/Black/images/ztclw2rq4zrd3yxc78dc.jpg"
+        ],
+        "_id": {
+          "$oid": "6898899e5f5eee771b403bce"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827166/products/frame-colors/Silver/images/aevq3croc4odvv7st0ig.jpg"
+        ],
+        "_id": {
+          "$oid": "6898899e5f5eee771b403bcf"
+        }
+      },
+      {
+        "color": {
+          "name": "Coffee",
+          "hex": "#8B4513"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827166/products/frame-colors/Coffee/images/aqxoaiwaveido57emcvq.jpg"
+        ],
+        "_id": {
+          "$oid": "6898899e5f5eee771b403bd0"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "cielsar",
+    "createdAt": {
+      "$date": "2025-08-10T11:59:27.079Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:56:21.809Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 56,
+      "bridge": 18,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988a55cdc1599800a5ece5"
+    },
+    "name": "Amaréll",
+    "description": "Eternal charm with a modern twist, Amaréll blends sleek lines with a touch of romantic allure.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827348/products/thumbnails/bzq6zk2pl7ayoz10zpvg.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 15,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827349/products/frame-colors/Black/images/rnnryeuq8kxd0avxutrw.jpg"
+        ],
+        "_id": {
+          "$oid": "68988a55cdc1599800a5ece6"
+        }
+      },
+      {
+        "color": {
+          "name": "Gradual Pink",
+          "hex": "#FFC0CB"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 6,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827348/products/frame-colors/Gradual%20Pink/images/zmdg6ek6mpwktql0vmmj.jpg"
+        ],
+        "_id": {
+          "$oid": "68988a55cdc1599800a5ece7"
+        }
+      },
+      {
+        "color": {
+          "name": "Demi Brownish",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827348/products/frame-colors/Demi%20Brownish/images/p1lg1jiddqwqpwaqoj4b.jpg"
+        ],
+        "_id": {
+          "$oid": "68988a55cdc1599800a5ece8"
+        }
+      },
+      {
+        "color": {
+          "name": "Deep Brownish",
+          "hex": "#654321"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 4,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827348/products/frame-colors/Deep%20Brownish/images/h7vbwbbislagwqnsinmq.jpg"
+        ],
+        "_id": {
+          "$oid": "68988a55cdc1599800a5ece9"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "square",
+    "slug": "amarell",
+    "createdAt": {
+      "$date": "2025-08-10T12:02:29.658Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:55:40.125Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 54,
+      "bridge": 18,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988ad9cdc1599800a5ed11"
+    },
+    "name": "Lunoxa",
+    "description": "Moonlight meets luxury in Lunoxa — a design that glows subtly while exuding quiet confidence.",
+    "price": 119,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827480/products/thumbnails/iep2gj3rbqgjdphlnhmp.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "medium",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 9,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827481/products/frame-colors/Black/images/foagcacnskcsdz7dvhea.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ad9cdc1599800a5ed12"
+        }
+      },
+      {
+        "color": {
+          "name": "White",
+          "hex": "#FFFFFF"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827481/products/frame-colors/White/images/ejhqmetdhmk0znyoflym.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ad9cdc1599800a5ed13"
+        }
+      },
+      {
+        "color": {
+          "name": "Coffee Grey",
+          "hex": "#8B7355"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 3,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827481/products/frame-colors/Coffee%20Grey/images/xirrra5w8nmqvjgfscqk.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ad9cdc1599800a5ed14"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "lunoxa",
+    "createdAt": {
+      "$date": "2025-08-10T12:04:41.840Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:54:56.009Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 56,
+      "bridge": 20,
+      "temple": 150
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988b4ecdc1599800a5ed3c"
+    },
+    "name": "Serelix",
+    "description": "Fluid contours and serene tones make Serelix the ultimate expression of calm sophistication.",
+    "price": 118.97,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827597/products/thumbnails/eeoyvqjrn02mbjnfvpkz.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "wide",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 12,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827598/products/frame-colors/Black/images/afhjrfexuwmuwwrci24j.jpg"
+        ],
+        "_id": {
+          "$oid": "68988b4ecdc1599800a5ed3d"
+        }
+      },
+      {
+        "color": {
+          "name": "Black Brownish",
+          "hex": "#2F1B14"
+        },
+        "lensColor": "Brown",
+        "stockQuantity": 4,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827598/products/frame-colors/Black%20Brownish/images/fpt5uknh63ognduflcaz.jpg"
+        ],
+        "_id": {
+          "$oid": "68988b4ecdc1599800a5ed3e"
+        }
+      },
+      {
+        "color": {
+          "name": "Transparent Grey",
+          "hex": "#D3D3D3"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827598/products/frame-colors/Transparent%20Grey/images/kd1qz0k7ykmchgatyu0e.jpg"
+        ],
+        "_id": {
+          "$oid": "68988b4ecdc1599800a5ed3f"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "wayfarer",
+    "slug": "serelix",
+    "createdAt": {
+      "$date": "2025-08-10T12:06:39.170Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:54:30.123Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 61,
+      "bridge": 16,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  },
+  {
+    "_id": {
+      "$oid": "68988ba6cdc1599800a5ed9e"
+    },
+    "name": "Vanture",
+    "description": "Daring and fashion-forward, Vanture combines deep tones with couture-inspired details for bold style seekers.",
+    "price": 118.98,
+    "isFeatured": false,
+    "thumbnail": "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827685/products/thumbnails/ezehunhhr7bhrftaqisn.jpg",
+    "images": [],
+    "stockQuantity": 0,
+    "inStock": true,
+    "productType": "sunglasses",
+    "colors": [],
+    "status": "active",
+    "frameType": "full-rim",
+    "frameMaterial": "acetate",
+    "frameWidth": "narrow",
+    "gender": "unisex",
+    "frameColorVariants": [
+      {
+        "color": {
+          "name": "Black",
+          "hex": "#000000"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 12,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827686/products/frame-colors/Black/images/tpbq50ayhqsqewz94l7b.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ba6cdc1599800a5ed9f"
+        }
+      },
+      {
+        "color": {
+          "name": "Silver",
+          "hex": "#C0C0C0"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 2,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827686/products/frame-colors/Silver/images/dz5u6w9a3vsyuyqgauap.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ba6cdc1599800a5eda0"
+        }
+      },
+      {
+        "color": {
+          "name": "Deep Coffee",
+          "hex": "#654321"
+        },
+        "lensColor": "Black",
+        "stockQuantity": 1,
+        "images": [
+          "https://res.cloudinary.com/dozzstn6l/image/upload/v1754827686/products/frame-colors/Deep%20Coffee/images/e6ure3jiplxygsqdbgh4.jpg"
+        ],
+        "_id": {
+          "$oid": "68988ba6cdc1599800a5eda1"
+        }
+      }
+    ],
+    "category": "signature",
+    "uvProtection": true,
+    "polarized": true,
+    "style": "cat-eye",
+    "slug": "vanture",
+    "createdAt": {
+      "$date": "2025-08-10T12:08:06.989Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-12T11:54:04.168Z"
+    },
+    "__v": 0,
+    "dimensions": {
+      "eye": 56,
+      "bridge": 17,
+      "temple": 148
+    },
+    "frameColor": [],
+    "lensColor": ""
+  }
+]

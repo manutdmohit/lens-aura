@@ -22,7 +22,7 @@ export default function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  console.log({ currentImage });
+  // console.log({ currentImage }); // Removed debug log
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

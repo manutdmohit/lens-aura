@@ -1,6 +1,12 @@
+// Color information interface for proper color handling
+export interface ColorInfo {
+  name: string; // "Coffee Grey", "Tortoise Shell", etc.
+  hex: string; // "#8B7355", "#A0522D", etc.
+}
+
 // Frame color variant interface for organizing products by frame colors
 export interface FrameColorVariant {
-  color: string;
+  color: ColorInfo;
   lensColor: string;
   stockQuantity: number | undefined; // Allow undefined for empty state
   images: string[];

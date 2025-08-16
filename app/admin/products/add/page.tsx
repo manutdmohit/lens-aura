@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Save, ArrowLeft, Loader2, Plus, X } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Plus, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,24 +43,28 @@ const fieldVariants = {
 };
 
 export default function AddProductPage() {
+  // console.log('AddProductPage component rendered'); // Removed debug log
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [colors, setColors] = useState<string[]>([]);
   const [colorInput, setColorInput] = useState('');
   const [frameColorVariants, setFrameColorVariants] = useState<
     FrameColorVariant[]
   >([]);
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid, isDirty },
     setValue,
     watch,
     reset,
     getValues,
     control,
+    trigger,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -74,10 +78,53 @@ export default function AddProductPage() {
       status: 'active',
       colors: [],
       isFeatured: false, // Added default value for isFeatured
+      frameColor: [], // Initialize frameColor as empty array
+      lensColor: '', // Initialize lensColor as empty string
+      frameColorVariants: [], // Initialize frameColorVariants as empty array
     },
+    mode: 'onChange', // Enable real-time validation
   });
 
   const watchProductType = watch('productType');
+
+  // Auto-set default frame color and lens color for sunglasses when no variants are present
+  useEffect(() => {
+    if (watchProductType === 'sunglasses' && frameColorVariants.length === 0) {
+      setValue('frameColor', ['Default']);
+      setValue('lensColor', 'Default');
+    } else if (
+      watchProductType === 'sunglasses' &&
+      frameColorVariants.length > 0
+    ) {
+      // Clear legacy fields when using variants
+      setValue('frameColor', []);
+      setValue('lensColor', '');
+    }
+  }, [watchProductType, frameColorVariants.length, setValue]);
+
+  // Keep form's frameColorVariants field in sync with state
+  useEffect(() => {
+    // Transform frameColorVariants to ensure stockQuantity is always a number
+    const transformedVariants = frameColorVariants.map((variant) => ({
+      ...variant,
+      stockQuantity: variant.stockQuantity ?? 0,
+    }));
+    setValue('frameColorVariants', transformedVariants as any);
+  }, [frameColorVariants, setValue]);
+
+  // Enhanced validation function
+  const validateForm = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      setShowValidationSummary(true);
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors below before submitting.',
+        variant: 'destructive',
+      });
+    }
+    return isValid;
+  };
 
   // Handle product type change
   const handleProductTypeChange = (
@@ -150,57 +197,84 @@ export default function AddProductPage() {
     setValue('colors', updatedColors, { shouldValidate: true });
   };
 
-  // Handle form submission
+  // Enhanced onSubmit with better validation
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
+    setShowValidationSummary(false);
 
     try {
-      // Prepare product data based on product type
-      const productData: any = {
+      // Pre-submission validation
+      const isFormValid = await validateForm();
+      if (!isFormValid) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Additional custom validation
+      const validationErrors: string[] = [];
+
+      // Check for required fields based on product type
+      if (data.productType === 'contacts' && colors.length === 0) {
+        validationErrors.push(
+          'At least one color is required for contact lenses'
+        );
+      }
+
+      if (
+        (data.productType === 'glasses' || data.productType === 'sunglasses') &&
+        frameColorVariants.length === 0
+      ) {
+        validationErrors.push(
+          `At least one frame color variant is required for ${data.productType}`
+        );
+      }
+
+      // Check frame color variants have valid stock quantities
+      if (frameColorVariants.length > 0) {
+        const invalidVariants = frameColorVariants.filter(
+          (variant) =>
+            variant.stockQuantity === undefined || variant.stockQuantity < 0
+        );
+        if (invalidVariants.length > 0) {
+          validationErrors.push(
+            'All frame color variants must have valid stock quantities'
+          );
+        }
+      }
+
+      // Show validation errors if any
+      if (validationErrors.length > 0) {
+        toast({
+          title: 'Validation Failed',
+          description: validationErrors.join(', '),
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare product data
+      const productData = {
         ...data,
-        status: 'active',
-        isFeatured: data.isFeatured,
+        images: watch('images') || [],
+        colors,
+        frameColorVariants: frameColorVariants,
       };
 
-      // Handle field assignment based on product type
-      if (watchProductType === 'sunglasses' || watchProductType === 'glasses') {
-        // For glasses/sunglasses: use frameColorVariants, remove redundant fields
-        // Convert undefined stockQuantity values to 0 for database storage
-        const processedVariants = frameColorVariants.map((variant) => ({
-          ...variant,
-          stockQuantity: variant.stockQuantity ?? 0,
-        }));
-        productData.frameColorVariants = processedVariants;
-        delete productData.stockQuantity; // Remove - use frameColorVariants.stockQuantity instead
-        delete productData.images; // Remove - use frameColorVariants.images instead
-        delete productData.colors; // Remove - use frameColorVariants.color instead
-      } else if (watchProductType === 'contacts') {
-        // For contacts: use colors as lens colors, keep stockQuantity and images
-        productData.colors = colors; // Lens colors for contacts
-        productData.stockQuantity = data.stockQuantity;
-        productData.images = data.images;
-        delete productData.frameColorVariants; // Not applicable for contacts
-      } else if (watchProductType === 'accessory') {
-        // For accessories: keep stockQuantity and images, colors optional
-        productData.stockQuantity = data.stockQuantity;
-        productData.images = data.images;
-        productData.colors = colors;
-        delete productData.frameColorVariants; // Not applicable for accessories
+      // Delete frameColorVariants if empty to satisfy validation
+      if (
+        !productData.frameColorVariants ||
+        productData.frameColorVariants.length === 0
+      ) {
+        (productData as any).frameColorVariants = undefined;
       }
 
-      // Set category only for sunglasses
-      if (watchProductType === 'sunglasses') {
-        productData.category = data.category;
-      } else {
-        delete productData.category;
-      }
-
-      // Send the request
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies for session authentication
         body: JSON.stringify(productData),
       });
 
@@ -209,23 +283,57 @@ export default function AddProductPage() {
         throw new Error(errorData.message || 'Failed to create product');
       }
 
+      const result = await response.json();
+
       toast({
-        title: 'Success',
-        description: 'Product created successfully',
+        title: 'Success!',
+        description: 'Product created successfully.',
       });
 
       router.push('/admin/products');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating product:', error);
       toast({
         title: 'Error',
         description:
-          error.message || 'Failed to create product. Please try again.',
+          error instanceof Error ? error.message : 'Failed to create product',
         variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Get all validation errors for summary
+  const getAllErrors = () => {
+    const errorMessages: string[] = [];
+
+    Object.keys(errors).forEach((key) => {
+      const error = errors[key as keyof typeof errors];
+      if (error?.message) {
+        errorMessages.push(
+          `${key.charAt(0).toUpperCase() + key.slice(1)}: ${error.message}`
+        );
+      }
+    });
+
+    // Add custom validation errors
+    if (watchProductType === 'contacts' && colors.length === 0) {
+      errorMessages.push(
+        'Colors: At least one color is required for contact lenses'
+      );
+    }
+
+    if (
+      (watchProductType === 'glasses' || watchProductType === 'sunglasses') &&
+      frameColorVariants.length === 0
+    ) {
+      errorMessages.push(
+        `Frame Color Variants: At least one frame color variant is required for ${watchProductType}`
+      );
+    }
+
+    return errorMessages;
   };
 
   return (
@@ -251,6 +359,78 @@ export default function AddProductPage() {
             </Button>
           </div>
 
+          {/* Validation Summary Alert */}
+          {showValidationSummary && getAllErrors().length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+            >
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-red-800 mb-2">
+                    Please fix the following errors:
+                  </h3>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    {getAllErrors().map((error, index) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <span className="text-red-500 mt-1">•</span>
+                        <span>{error}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowValidationSummary(false)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Form Status Indicator */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div
+                className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
+                  isValid && isDirty
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isValid && isDirty ? 'bg-green-500' : 'bg-yellow-500'
+                  }`}
+                />
+                <span>
+                  {isValid && isDirty
+                    ? 'Form is valid'
+                    : 'Please fill required fields'}
+                </span>
+              </div>
+              {Object.keys(errors).length > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  {Object.keys(errors).length} error
+                  {Object.keys(errors).length !== 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={validateForm}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              Validate Form
+            </Button>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Basic Information */}
@@ -267,8 +447,13 @@ export default function AddProductPage() {
                     initial="hidden"
                     animate="visible"
                   >
-                    <Label htmlFor="productType">
-                      Product Type <span className="text-red-500">*</span>
+                    <Label
+                      htmlFor="productType"
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Product Type</span>
+                      <span className="text-red-500 font-bold">*</span>
+                      <span className="text-gray-500 text-xs">(Required)</span>
                     </Label>
                     <Select
                       value={watchProductType}
@@ -299,8 +484,13 @@ export default function AddProductPage() {
                     initial="hidden"
                     animate="visible"
                   >
-                    <Label htmlFor="name">
-                      Product Name <span className="text-red-500">*</span>
+                    <Label
+                      htmlFor="name"
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Product Name</span>
+                      <span className="text-red-500 font-bold">*</span>
+                      <span className="text-gray-500 text-xs">(Required)</span>
                     </Label>
                     <Input
                       id="name"
@@ -319,8 +509,13 @@ export default function AddProductPage() {
                     initial="hidden"
                     animate="visible"
                   >
-                    <Label htmlFor="description">
-                      Description <span className="text-red-500">*</span>
+                    <Label
+                      htmlFor="description"
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Description</span>
+                      <span className="text-red-500 font-bold">*</span>
+                      <span className="text-gray-500 text-xs">(Required)</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -341,8 +536,15 @@ export default function AddProductPage() {
                       initial="hidden"
                       animate="visible"
                     >
-                      <Label htmlFor="price">
-                        Price ($) <span className="text-red-500">*</span>
+                      <Label
+                        htmlFor="price"
+                        className="flex items-center space-x-2"
+                      >
+                        <span>Price ($)</span>
+                        <span className="text-red-500 font-bold">*</span>
+                        <span className="text-gray-500 text-xs">
+                          (Required)
+                        </span>
                       </Label>
                       <Input
                         id="price"
@@ -1420,8 +1622,22 @@ export default function AddProductPage() {
               </Button>
               <Button
                 type="submit"
-                className="bg-blue-600 text-white hover:bg-blue-700"
-                disabled={isSubmitting}
+                className={`${
+                  isValid && isDirty
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                } text-white`}
+                disabled={isSubmitting || (!isValid && isDirty)}
+                onClick={() => {
+                  if (!isValid && isDirty) {
+                    setShowValidationSummary(true);
+                    toast({
+                      title: 'Validation Required',
+                      description: 'Please fix all errors before submitting.',
+                      variant: 'destructive',
+                    });
+                  }
+                }}
               >
                 {isSubmitting ? (
                   <>
@@ -1431,7 +1647,7 @@ export default function AddProductPage() {
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Create Product
+                    {isValid && isDirty ? 'Create Product ✓' : 'Create Product'}
                   </>
                 )}
               </Button>

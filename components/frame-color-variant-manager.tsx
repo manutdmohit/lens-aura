@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import ImageUpload from '@/components/image-upload';
 import MultiImageUpload from '@/components/multi-image-upload';
 import { Trash2, Plus, Image as ImageIcon } from 'lucide-react';
-import { type FrameColorVariant } from '@/types/product';
+import { type FrameColorVariant, type ColorInfo } from '@/types/product';
 
 interface FrameColorVariantManagerProps {
   variants: FrameColorVariant[];
@@ -23,22 +23,27 @@ export default function FrameColorVariantManager({
   onChange,
   productType,
 }: FrameColorVariantManagerProps) {
-  const [newColorInput, setNewColorInput] = useState('');
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorHex, setNewColorHex] = useState('#000000');
 
   // Add a new color variant
   const handleAddColorVariant = () => {
     if (
-      newColorInput.trim() &&
-      !variants.some((v) => v.color === newColorInput.trim())
+      newColorName.trim() &&
+      !variants.some((v) => v.color.name === newColorName.trim())
     ) {
       const newVariant: FrameColorVariant = {
-        color: newColorInput.trim(),
+        color: {
+          name: newColorName.trim(),
+          hex: newColorHex,
+        },
         lensColor: '',
         stockQuantity: undefined as any, // Start empty, not 0
         images: [],
       };
       onChange([...variants, newVariant]);
-      setNewColorInput('');
+      setNewColorName('');
+      setNewColorHex('#000000');
     }
   };
 
@@ -57,6 +62,16 @@ export default function FrameColorVariantManager({
       i === index ? { ...variant, ...updates } : variant
     );
     onChange(updatedVariants);
+  };
+
+  // Update color info for a specific variant
+  const updateColorInfo = (index: number, colorInfo: Partial<ColorInfo>) => {
+    const variant = variants[index];
+    if (variant) {
+      updateVariant(index, {
+        color: { ...variant.color, ...colorInfo },
+      });
+    }
   };
 
   // Handle multiple images upload for a specific variant
@@ -96,120 +111,168 @@ export default function FrameColorVariantManager({
         </p>
 
         {/* Add new color variant */}
-        <div className="flex items-center space-x-2">
-          <Input
-            value={newColorInput}
-            onChange={(e) => setNewColorInput(e.target.value)}
-            placeholder="Enter frame color (e.g., Black, Brown, Blue)"
-            className="flex-grow"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleAddColorVariant();
-              }
-            }}
-          />
-          <Button
-            type="button"
-            onClick={handleAddColorVariant}
-            variant="outline"
-            size="sm"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add Color
-          </Button>
-        </div>
+        <Card className="p-4 border-dashed border-2 border-gray-200">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="flex-1">
+                <Label htmlFor="colorName" className="text-sm font-medium">
+                  Color Name
+                </Label>
+                <Input
+                  id="colorName"
+                  value={newColorName}
+                  onChange={(e) => setNewColorName(e.target.value)}
+                  placeholder="e.g., Coffee Grey, Tortoise Shell"
+                  className="mt-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddColorVariant();
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="colorHex" className="text-sm font-medium">
+                  Color Hex
+                </Label>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Input
+                    id="colorHex"
+                    type="color"
+                    value={newColorHex}
+                    onChange={(e) => setNewColorHex(e.target.value)}
+                    className="w-16 h-10 p-1 border rounded"
+                  />
+                  <Input
+                    value={newColorHex}
+                    onChange={(e) => setNewColorHex(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <Button
+              type="button"
+              onClick={handleAddColorVariant}
+              variant="outline"
+              size="sm"
+              disabled={!newColorName.trim()}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Color Variant
+            </Button>
+          </div>
+        </Card>
 
         {/* Display existing variants */}
         {variants.length > 0 && (
           <div className="space-y-4">
             {variants.map((variant, index) => (
-              <Card
-                key={`${variant.color}-${index}`}
-                className="border-l-4 border-l-blue-500"
-              >
+              <Card key={index} className="overflow-hidden">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Badge variant="secondary">{variant.color}</Badge>
-                      <span className="text-sm text-gray-500">
-                        ({variant.images.length} images)
-                      </span>
-                    </CardTitle>
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-8 h-8 rounded-full border-2 border-gray-300"
+                        style={{ backgroundColor: variant.color.hex }}
+                      />
+                      <div>
+                        <CardTitle className="text-lg">
+                          {variant.color.name}
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          Hex: {variant.color.hex}
+                        </p>
+                      </div>
+                    </div>
                     <Button
                       type="button"
                       onClick={() => handleRemoveColorVariant(index)}
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
-                  {/* Stock Quantity */}
+                  {/* Color and Lens Color */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor={`stock-${index}`}>Stock Quantity</Label>
+                    <div>
+                      <Label className="text-sm font-medium">Color Name</Label>
                       <Input
-                        id={`stock-${index}`}
-                        type="number"
-                        min="0"
-                        value={variant.stockQuantity ?? ''}
+                        value={variant.color.name}
                         onChange={(e) =>
-                          handleStockQuantityChange(index, e.target.value)
+                          updateColorInfo(index, { name: e.target.value })
                         }
-                        placeholder="0"
+                        placeholder="Color name"
+                        className="mt-1"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`lens-color-${index}`}>
-                        Lens Color <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id={`lens-color-${index}`}
-                        value={variant.lensColor}
-                        onChange={(e) =>
-                          updateVariant(index, { lensColor: e.target.value })
-                        }
-                        placeholder="e.g., Gray, Brown, Green"
-                      />
+                    <div>
+                      <Label className="text-sm font-medium">Color Hex</Label>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Input
+                          type="color"
+                          value={variant.color.hex}
+                          onChange={(e) =>
+                            updateColorInfo(index, { hex: e.target.value })
+                          }
+                          className="w-12 h-10 p-1 border rounded"
+                        />
+                        <Input
+                          value={variant.color.hex}
+                          onChange={(e) =>
+                            updateColorInfo(index, { hex: e.target.value })
+                          }
+                          placeholder="#000000"
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Additional Images */}
-                  <div className="space-y-2">
-                    <Label>Images</Label>
+                  <div>
+                    <Label className="text-sm font-medium">Lens Color</Label>
+                    <Input
+                      value={variant.lensColor}
+                      onChange={(e) =>
+                        updateVariant(index, { lensColor: e.target.value })
+                      }
+                      placeholder="e.g., Clear, Brown, Blue"
+                      className="mt-1"
+                    />
+                  </div>
 
-                    {/* Display current images */}
-                    {variant.images.length > 0 && (
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
-                        {variant.images.map((imageUrl, imageIndex) => (
-                          <div
-                            key={imageIndex}
-                            className="relative group border rounded-lg overflow-hidden"
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={`${variant.color} view ${imageIndex + 1}`}
-                              className="w-full h-20 object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeImageFromVariant(index, imageIndex)
-                              }
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Stock Quantity
+                    </Label>
+                    <Input
+                      type="number"
+                      value={variant.stockQuantity || ''}
+                      onChange={(e) =>
+                        handleStockQuantityChange(index, e.target.value)
+                      }
+                      placeholder="Enter stock quantity"
+                      className="mt-1"
+                      min="0"
+                    />
+                  </div>
 
-                    {/* Upload new images */}
+                  {/* Images Section */}
+                  <div>
+                    <Label className="text-sm font-medium flex items-center">
+                      <ImageIcon className="w-4 h-4 mr-1" />
+                      Product Images
+                    </Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Upload images specific to this color variant
+                    </p>
                     <MultiImageUpload
                       onImagesUploaded={(urls) =>
                         handleImagesUpload(index, urls)
@@ -217,19 +280,41 @@ export default function FrameColorVariantManager({
                       currentImageCount={variant.images.length}
                     />
                   </div>
+
+                  {/* Preview */}
+                  {variant.images.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium">Preview</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                        {variant.images.map((image, imageIndex) => (
+                          <div
+                            key={imageIndex}
+                            className="relative aspect-square rounded-lg overflow-hidden border"
+                          >
+                            <img
+                              src={image}
+                              alt={`${variant.color.name} variant`}
+                              className="w-full h-full object-cover"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() =>
+                                removeImageFromVariant(index, imageIndex)
+                              }
+                              variant="ghost"
+                              size="sm"
+                              className="absolute top-1 right-1 w-6 h-6 p-0 bg-red-500 text-white hover:bg-red-600"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
-          </div>
-        )}
-
-        {variants.length === 0 && (
-          <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-            <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-            <p className="text-gray-500">No frame color variants added yet</p>
-            <p className="text-sm text-gray-400">
-              Add colors to organize your product by frame variants
-            </p>
           </div>
         )}
       </div>

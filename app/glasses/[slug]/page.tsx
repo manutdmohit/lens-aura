@@ -41,6 +41,7 @@ import { getCSSColor, getColorDisplayName } from '@/lib/color-utils';
 import { useCart } from '@/context/cart-context';
 import LoadingPage from '@/components/loading';
 import { type IProduct } from '@/models';
+import { type ColorInfo } from '@/types/product';
 
 // Animation variants
 const fadeIn = {
@@ -64,8 +65,9 @@ const slideUp = {
 };
 
 // Helper function to capitalize and format text
-const formatText = (text: string) => {
-  return text
+const formatText = (text: string | ColorInfo) => {
+  const textToFormat = typeof text === 'string' ? text : text.name;
+  return textToFormat
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -80,6 +82,7 @@ export default function GlassesProductPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedColorVariant, setSelectedColorVariant] = useState<any>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
   const { itemCount, items } = useCart();
@@ -183,8 +186,26 @@ export default function GlassesProductPage() {
   // }, [slug, product?.productType]);
 
   // Handle color selection
-  const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
+  const handleColorSelect = (color: string | ColorInfo) => {
+    setSelectedColor(typeof color === 'string' ? color : color.name);
+
+    // If we have frame color variants, find the matching variant and update images
+    if (product?.frameColorVariants && product.frameColorVariants.length > 0) {
+      const variant = product.frameColorVariants.find((v) =>
+        typeof color === 'string'
+          ? v.color.name === color
+          : v.color.name === color.name
+      );
+      if (variant) {
+        setSelectedColorVariant(variant);
+        setProductImages(
+          variant.images && variant.images.length > 0
+            ? variant.images
+            : ['/placeholder.svg']
+        );
+        setActiveImageIndex(0); // Reset to first image when switching colors
+      }
+    }
   };
 
   // Handle image selection
@@ -220,12 +241,16 @@ export default function GlassesProductPage() {
 
   // Determine which colors to display
   const displayColors =
-    product.frameColor && product.frameColor.length > 0
+    product.frameColorVariants && product.frameColorVariants.length > 0
+      ? product.frameColorVariants.map((variant) => variant.color)
+      : product.frameColor && product.frameColor.length > 0
       ? product.frameColor
       : product.colors || [];
 
   // Check if product is in stock
-  const isInStock = product.stockQuantity && product.stockQuantity > 0;
+  const isInStock = selectedColorVariant
+    ? selectedColorVariant.stockQuantity > 0
+    : product.stockQuantity && product.stockQuantity > 0;
 
   return (
     <motion.div
@@ -377,16 +402,28 @@ export default function GlassesProductPage() {
                         <div
                           className="w-8 h-8 rounded-full"
                           style={{
-                            backgroundColor: getCSSColor(color),
+                            backgroundColor:
+                              typeof color === 'string'
+                                ? getCSSColor(color)
+                                : color.hex,
                             border:
-                              color.toLowerCase() === 'white' ||
-                              color.toLowerCase() === '#ffffff'
+                              (typeof color === 'string'
+                                ? color.toLowerCase()
+                                : color.hex.toLowerCase()) === 'white' ||
+                              (typeof color === 'string'
+                                ? color.toLowerCase()
+                                : color.hex.toLowerCase()) === '#ffffff'
                                 ? '1px solid #e5e5e5'
                                 : 'none',
                           }}
-                          title={getColorDisplayName(color)}
+                          title={
+                            typeof color === 'string'
+                              ? getColorDisplayName(color)
+                              : color.name
+                          }
                         />
-                        {selectedColor === color && (
+                        {selectedColor ===
+                          (typeof color === 'string' ? color : color.name) && (
                           <motion.div
                             className="absolute inset-0 flex items-center justify-center"
                             initial={{ opacity: 0 }}
@@ -399,7 +436,11 @@ export default function GlassesProductPage() {
                                   '#ffffff',
                                   'yellow',
                                   '#ffff00',
-                                ].includes(color.toLowerCase())
+                                ].includes(
+                                  typeof color === 'string'
+                                    ? color.toLowerCase()
+                                    : color.hex.toLowerCase()
+                                )
                                   ? 'text-black'
                                   : 'text-white'
                               }`}
@@ -420,9 +461,13 @@ export default function GlassesProductPage() {
                   <Check className="h-5 w-5 mr-2 flex-shrink-0" />
                   <span className="text-sm font-medium">
                     In Stock
-                    {product.stockQuantity &&
-                      product.stockQuantity < 10 &&
-                      ` (Only ${product.stockQuantity} left)`}
+                    {selectedColorVariant
+                      ? selectedColorVariant.stockQuantity <= 5
+                        ? ` (Only ${selectedColorVariant.stockQuantity} left)`
+                        : ` (${selectedColorVariant.stockQuantity} in stock)`
+                      : product.stockQuantity &&
+                        product.stockQuantity <= 5 &&
+                        ` (Only ${product.stockQuantity} left)`}
                   </span>
                 </div>
               ) : (
@@ -620,7 +665,11 @@ export default function GlassesProductPage() {
                     <motion.div whileTap={{ scale: 0.98 }} className="w-full">
                       <AddToCartButton
                         product={product as unknown as IProduct}
-                        selectedColor={selectedColor}
+                        selectedColor={
+                          typeof selectedColor === 'string'
+                            ? selectedColor
+                            : selectedColor?.name || 'default'
+                        }
                       />
                     </motion.div>
                   )}

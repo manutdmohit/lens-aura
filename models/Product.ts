@@ -2,9 +2,15 @@ import { mongoose } from '@/lib/mongoose/db-config';
 import { Schema, type Document, type Model } from 'mongoose';
 import slugify from 'slugify';
 
+// Color information interface for proper color handling
+export interface IColorInfo {
+  name: string; // "Coffee Grey", "Tortoise Shell", etc.
+  hex: string; // "#8B7355", "#A0522D", etc.
+}
+
 // Frame color variant interface for organizing products by frame colors
 export interface IFrameColorVariant {
-  color: string;
+  color: IColorInfo;
   lensColor: string;
   stockQuantity: number | undefined; // Allow undefined for empty state
   images?: string[]; // Made optional
@@ -104,9 +110,15 @@ export interface IProduct extends Document {
   uvBlocking?: boolean;
 }
 
+// Color info schema
+const ColorInfoSchema = new Schema<IColorInfo>({
+  name: { type: String, required: true },
+  hex: { type: String, required: true, match: /^#[0-9A-Fa-f]{6}$/ },
+});
+
 // Frame color variant schema
 const FrameColorVariantSchema = new Schema<IFrameColorVariant>({
-  color: { type: String, required: true },
+  color: { type: ColorInfoSchema, required: true },
   lensColor: { type: String, required: true },
   stockQuantity: { type: Number, required: true, min: 0, default: 0 },
   images: { type: [String], default: [] }, // Made optional

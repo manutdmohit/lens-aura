@@ -40,6 +40,7 @@ import { TiTick } from 'react-icons/ti';
 import { TbXboxXFilled } from 'react-icons/tb';
 import type { ProductFormValues } from '@/lib/api/validation';
 import { getCSSColor, getColorDisplayName } from '@/lib/color-utils';
+import { ColorInfo } from '@/types/product';
 import { Metadata } from 'next';
 import { Span } from 'next/dist/trace';
 import LoadingPage from '@/components/loading';
@@ -68,8 +69,9 @@ const slideUp = {
 };
 
 // Helper function to capitalize and format text
-const formatText = (text: string) => {
-  return text
+const formatText = (text: string | ColorInfo) => {
+  const textToFormat = typeof text === 'string' ? text : text.name;
+  return textToFormat
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -174,12 +176,16 @@ export default function SunGlassesProductPage() {
   }, [slug, router]);
 
   // Handle color selection
-  const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
+  const handleColorSelect = (color: string | ColorInfo) => {
+    setSelectedColor(typeof color === 'string' ? color : color.name);
 
     // If we have frame color variants, find the matching variant and update images
     if (product?.frameColorVariants && product.frameColorVariants.length > 0) {
-      const variant = product.frameColorVariants.find((v) => v.color === color);
+      const variant = product.frameColorVariants.find((v) =>
+        typeof color === 'string'
+          ? v.color.name === color
+          : v.color.name === color.name
+      );
       if (variant) {
         setSelectedColorVariant(variant);
         setProductImages(
@@ -388,16 +394,28 @@ export default function SunGlassesProductPage() {
                         <div
                           className="w-8 h-8 rounded-full"
                           style={{
-                            backgroundColor: getCSSColor(color),
+                            backgroundColor:
+                              typeof color === 'string'
+                                ? getCSSColor(color)
+                                : color.hex,
                             border:
-                              color.toLowerCase() === 'white' ||
-                              color.toLowerCase() === '#ffffff'
+                              (typeof color === 'string'
+                                ? color.toLowerCase()
+                                : color.hex.toLowerCase()) === 'white' ||
+                              (typeof color === 'string'
+                                ? color.toLowerCase()
+                                : color.hex.toLowerCase()) === '#ffffff'
                                 ? '1px solid #e5e5e5'
                                 : 'none',
                           }}
-                          title={getColorDisplayName(color)}
+                          title={
+                            typeof color === 'string'
+                              ? getColorDisplayName(color)
+                              : color.name
+                          }
                         />
-                        {selectedColor === color && (
+                        {selectedColor ===
+                          (typeof color === 'string' ? color : color.name) && (
                           <motion.div
                             className="absolute inset-0 flex items-center justify-center"
                             initial={{ opacity: 0 }}
@@ -410,7 +428,11 @@ export default function SunGlassesProductPage() {
                                   '#ffffff',
                                   'yellow',
                                   '#ffff00',
-                                ].includes(color.toLowerCase())
+                                ].includes(
+                                  typeof color === 'string'
+                                    ? color.toLowerCase()
+                                    : color.hex.toLowerCase()
+                                )
                                   ? 'text-black'
                                   : 'text-white'
                               }`}
@@ -640,7 +662,11 @@ export default function SunGlassesProductPage() {
                     <motion.div whileTap={{ scale: 0.98 }} className="w-full">
                       <AddToCartButton
                         product={product as unknown as IProduct}
-                        selectedColor={selectedColor}
+                        selectedColor={
+                          typeof selectedColor === 'string'
+                            ? selectedColor
+                            : (selectedColor as any)?.name || 'default'
+                        }
                         selectedColorVariant={selectedColorVariant}
                       />
                     </motion.div>

@@ -13,7 +13,7 @@ import { IProduct } from '@/models';
 export interface CartItem {
   product: IProduct & { _id: string };
   quantity: number;
-  color: string;
+  color: string | { name: string; hex: string; _id?: string };
 }
 
 interface CartContextType {
@@ -22,10 +22,17 @@ interface CartContextType {
   addItem: (
     product: IProduct & { _id: string },
     quantity: number,
-    color: string
+    color: string | { name: string; hex: string; _id?: string }
   ) => void;
-  removeItem: (productId: string, color?: string) => void;
-  updateQuantity: (productId: string, quantity: number, color: string) => void;
+  removeItem: (
+    productId: string,
+    color?: string | { name: string; hex: string; _id?: string }
+  ) => void;
+  updateQuantity: (
+    productId: string,
+    quantity: number,
+    color: string | { name: string; hex: string; _id?: string }
+  ) => void;
   clearCart: () => void;
   subtotal: number;
 }
@@ -68,18 +75,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = (
     product: IProduct & { _id: string },
     quantity: number,
-    color: string
+    color: string | { name: string; hex: string; _id?: string }
   ) => {
     console.log('addItem called with product:', product);
     console.log('Product _id:', product._id);
     console.log('Product id:', (product as any).id);
 
+    // Normalize color to string for comparison
+    const colorString = typeof color === 'string' ? color : color.name;
+
     setItems((prevItems) => {
       if (!Array.isArray(prevItems)) return [];
 
-      const existingItemIndex = prevItems.findIndex(
-        (item) => item.product._id === product._id && item.color === color
-      );
+      const existingItemIndex = prevItems.findIndex((item) => {
+        const itemColorString =
+          typeof item.color === 'string' ? item.color : item.color.name;
+        return (
+          item.product._id === product._id && itemColorString === colorString
+        );
+      });
 
       if (existingItemIndex >= 0) {
         const updatedItems = [...prevItems];
@@ -91,13 +105,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string, color?: string) => {
+  const removeItem = (
+    productId: string,
+    color?: string | { name: string; hex: string; _id?: string }
+  ) => {
     setItems((prevItems) => {
       if (color) {
+        // Normalize color to string for comparison
+        const colorString = typeof color === 'string' ? color : color.name;
+
         // Remove specific product with specific color
-        return prevItems.filter(
-          (item) => !(item.product._id === productId && item.color === color)
-        );
+        return prevItems.filter((item) => {
+          const itemColorString =
+            typeof item.color === 'string' ? item.color : item.color.name;
+          return !(
+            item.product._id === productId && itemColorString === colorString
+          );
+        });
       } else {
         // Remove all items with this product ID (legacy behavior)
         return prevItems.filter((item) => item.product._id !== productId);
@@ -108,7 +132,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateQuantity = (
     productId: string,
     quantity: number,
-    color: string
+    color: string | { name: string; hex: string; _id?: string }
   ) => {
     console.log('updateQuantity called with:', { productId, quantity, color });
     console.log('Current items:', items);
@@ -118,15 +142,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Normalize color to string for comparison
+    const colorString = typeof color === 'string' ? color : color.name;
+
     setItems((prevItems) => {
       const updatedItems = prevItems.map((item) => {
         // Check both _id and id properties for flexibility
         const itemProductId = item.product._id || (item.product as any).id;
-        const matches = itemProductId === productId && item.color === color;
+        const itemColorString =
+          typeof item.color === 'string' ? item.color : item.color.name;
+        const matches =
+          itemProductId === productId && itemColorString === colorString;
 
         console.log('Checking item:', {
           itemId: itemProductId,
           itemColor: item.color,
+          itemColorString,
           matches: matches,
         });
 

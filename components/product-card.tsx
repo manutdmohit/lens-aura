@@ -159,15 +159,15 @@ export default function ProductCard({
                   : 'border-gray-300 hover:border-gray-400'
               }`}
               style={{
-                backgroundColor: variant.color.toLowerCase(),
+                backgroundColor: variant.color.hex,
               }}
-              title={`${variant.color} - ${variant.lensColor}`}
+              title={`${variant.color.name} - ${variant.lensColor}`}
             />
           ))}
         </div>
         {selectedVariant && (
           <span className="text-xs text-gray-600 font-medium">
-            {selectedVariant.color}
+            {selectedVariant.color.name}
           </span>
         )}
       </div>

@@ -164,9 +164,17 @@ export const reviewSchema = z.object({
   comment: z.string().min(1),
 });
 
+// Color info schema for proper color handling
+export const colorInfoSchema = z.object({
+  name: z.string().min(1, { message: 'Color name is required' }),
+  hex: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, { message: 'Invalid hex color format' }),
+});
+
 // Frame color variant schema for organizing products by frame colors
 export const frameColorVariantSchema = z.object({
-  color: z.string().min(1, { message: 'Frame color is required' }),
+  color: colorInfoSchema,
   lensColor: z.string().min(1, { message: 'Lens color is required' }),
   stockQuantity: z.coerce
     .number({ invalid_type_error: 'Stock quantity must be a number' })
@@ -545,13 +553,17 @@ export const productSchema = z
         const hasFrameColor = data.frameColor && data.frameColor.length > 0;
         const hasLensColor = data.lensColor && data.lensColor.trim() !== '';
 
-        // If frameColorVariants are present, frameColor and lensColor are optional
+        // If frameColorVariants are present and not empty, frameColor and lensColor are optional
         if (hasFrameColorVariants) {
           return true;
         }
 
-        // If no frameColorVariants, then frameColor and lensColor are required
-        return hasFrameColor && hasLensColor;
+        // If no frameColorVariants (or empty array), then frameColor and lensColor are required
+        if (!hasFrameColor || !hasLensColor) {
+          return false;
+        }
+
+        return true;
       }
       return true;
     },
@@ -569,12 +581,12 @@ export const productSchema = z
           data.frameColorVariants && data.frameColorVariants.length > 0;
         const hasFrameColor = data.frameColor && data.frameColor.length > 0;
 
-        // If frameColorVariants are present, frameColor is optional
+        // If frameColorVariants are present and not empty, frameColor is optional
         if (hasFrameColorVariants) {
           return true;
         }
 
-        // If no frameColorVariants, then frameColor is required
+        // If no frameColorVariants (or empty array), then frameColor is required
         return hasFrameColor;
       }
       return true;

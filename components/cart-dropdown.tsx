@@ -56,7 +56,7 @@ export default function CartDropdown() {
   const handleQuantityChange = (
     productId: string,
     newQuantity: number,
-    color: string
+    color: string | { name: string; hex: string; _id?: string }
   ) => {
     console.log('Cart dropdown handleQuantityChange called with:', {
       productId,
@@ -66,7 +66,10 @@ export default function CartDropdown() {
     updateQuantity(productId, newQuantity, color);
   };
 
-  const handleRemoveItem = (productId: string, color: string) => {
+  const handleRemoveItem = (
+    productId: string,
+    color: string | { name: string; hex: string; _id?: string }
+  ) => {
     removeItem(productId, color);
   };
 
@@ -130,7 +133,7 @@ export default function CartDropdown() {
                       ) {
                         // For glasses/sunglasses, check frame color variants
                         const variant = item.product.frameColorVariants?.find(
-                          (v) => v.color === item.color
+                          (v) => v.color.name === item.color
                         );
                         return variant?.stockQuantity || 0;
                       } else {
@@ -165,7 +168,10 @@ export default function CartDropdown() {
                             </p>
                           </div>
                           <p className="text-sm text-gray-500">
-                            Color: {item.color}
+                            Color:{' '}
+                            {typeof item.color === 'string'
+                              ? item.color
+                              : item.color?.name || 'Unknown'}
                           </p>
                           <p className="text-sm text-gray-500">
                             ${item.product.price.toFixed(2)} each

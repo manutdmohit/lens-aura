@@ -53,12 +53,18 @@ export async function createPendingOrder(
         );
         throw new Error(`Invalid product ID for ${item.product.name}`);
       }
+      // Handle color (could be string or ColorInfo object)
+      const colorName =
+        typeof item.color === 'string'
+          ? item.color
+          : item.color?.name || 'Default';
+
       return {
         productId: productId,
         name: item.product.name,
         price: item.product.price,
         quantity: item.quantity,
-        color: item.color,
+        color: colorName,
         imageUrl: item.product.thumbnail,
         productType: item.product.productType,
         product: item.product._id,

@@ -41,13 +41,17 @@ export async function POST(request: Request) {
 
         // If color is specified, check that specific variant
         if (item.color) {
-          const variant = product.frameColorVariants.find(
-            (v) => v.color === item.color
-          );
+          const colorName =
+            typeof item.color === 'string' ? item.color : item.color.name;
+          const variant = product.frameColorVariants.find((v) => {
+            const variantColorName =
+              typeof v.color === 'string' ? v.color : v.color.name;
+            return variantColorName === colorName;
+          });
           if (!variant) {
             return NextResponse.json(
               {
-                error: `Color variant '${item.color}' not found for ${product.name}`,
+                error: `Color variant '${colorName}' not found for ${product.name}`,
               },
               { status: 400 }
             );
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
           if (currentStock < item.quantity) {
             return NextResponse.json(
               {
-                error: `Insufficient stock for ${product.name} (${item.color}). Available: ${currentStock}, Requested: ${item.quantity}`,
+                error: `Insufficient stock for ${product.name} (${colorName}). Available: ${currentStock}, Requested: ${item.quantity}`,
               },
               { status: 400 }
             );

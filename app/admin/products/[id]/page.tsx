@@ -105,17 +105,21 @@ export default function ProductDetailPage() {
       setIsLoading(true);
       setError(null);
 
+      console.log('[DEBUG] Fetching product with ID:', productId);
+
       try {
         const response = await fetch(`/api/admin/products/${productId}`);
+        console.log('[DEBUG] Response status:', response.status);
 
         if (!response.ok) {
           const errorData = await response.json();
+          console.log('[DEBUG] Error response:', errorData);
           throw new Error(errorData.error || 'Failed to fetch product');
         }
 
         const data = await response.json();
-        console.log('Fetched product data:', data.product);
-        console.log('Product status from fetch:', data.product?.status);
+        console.log('[DEBUG] Fetched product data:', data.product);
+        console.log('[DEBUG] Product status from fetch:', data.product?.status);
         setProduct(data.product);
 
         // Set form values
@@ -625,7 +629,7 @@ export default function ProductDetailPage() {
                                 className="flex justify-between items-center p-2 bg-gray-50 rounded"
                               >
                                 <span className="text-sm font-medium">
-                                  {variant.color}
+                                  {variant.color.name}
                                 </span>
                                 <span
                                   className={`text-sm ${
