@@ -139,29 +139,34 @@ export default function ProductCard({
     if (
       !showColorSelector ||
       !product.frameColorVariants ||
-      product.frameColorVariants.length <= 1
+      product.frameColorVariants.length === 0
     ) {
       return null;
     }
 
     const selectedVariant = product.frameColorVariants[selectedColorIndex];
+    const isSingleVariant = product.frameColorVariants.length === 1;
 
     return (
       <div className="flex flex-col items-center gap-2">
         <div className="flex justify-center gap-2">
           {product.frameColorVariants.map((variant, index) => (
-            <button
+            <div
               key={index}
-              onClick={(e) => handleColorSelect(index, e)}
-              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                selectedColorIndex === index
-                  ? 'border-gray-800 shadow-md scale-110'
-                  : 'border-gray-300 hover:border-gray-400'
+              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${
+                isSingleVariant
+                  ? 'border-gray-400' // Static border for single variant
+                  : selectedColorIndex === index
+                  ? 'border-gray-800 shadow-md scale-110 cursor-pointer'
+                  : 'border-gray-300 hover:border-gray-400 cursor-pointer hover:scale-110'
               }`}
               style={{
                 backgroundColor: variant.color.hex,
               }}
               title={`${variant.color.name} - ${variant.lensColor}`}
+              onClick={
+                isSingleVariant ? undefined : (e) => handleColorSelect(index, e)
+              }
             />
           ))}
         </div>
