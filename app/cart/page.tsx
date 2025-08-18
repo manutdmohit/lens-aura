@@ -23,7 +23,16 @@ import {
 } from '@/lib/utils/discount';
 
 export default function CartPage() {
-  const { items, itemCount, removeItem, updateQuantity, subtotal } = useCart();
+  const {
+    items,
+    itemCount,
+    removeItem,
+    updateQuantity,
+    subtotal,
+    promotionalSavings,
+    regularSubtotal,
+    getItemPrice,
+  } = useCart();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -221,18 +230,34 @@ export default function CartPage() {
                           <h3 className="font-medium">{item.product.name}</h3>
                           <div className="text-right">
                             {(() => {
+                              const itemPricing = getItemPrice(item);
                               const discountInfo = calculateDiscount(
                                 item.product.price,
                                 item.product.discountedPrice
                               );
-                              const totalPrice =
-                                discountInfo.displayPrice * item.quantity;
 
-                              if (discountInfo.hasDiscount) {
+                              if (itemPricing.savings > 0) {
+                                return (
+                                  <div className="text-right">
+                                    <p className="font-medium text-green-600">
+                                      {formatPrice(itemPricing.totalPrice)}
+                                    </p>
+                                    <p className="text-xs text-gray-500 line-through">
+                                      {formatPrice(
+                                        discountInfo.displayPrice *
+                                          item.quantity
+                                      )}
+                                    </p>
+                                    <p className="text-xs text-green-600">
+                                      🎉 Save {formatPrice(itemPricing.savings)}
+                                    </p>
+                                  </div>
+                                );
+                              } else if (discountInfo.hasDiscount) {
                                 return (
                                   <div className="text-right">
                                     <p className="font-medium text-red-600">
-                                      {formatPrice(totalPrice)}
+                                      {formatPrice(itemPricing.totalPrice)}
                                     </p>
                                     <p className="text-xs text-gray-500 line-through">
                                       {formatPrice(
@@ -245,7 +270,7 @@ export default function CartPage() {
                               } else {
                                 return (
                                   <p className="font-medium">
-                                    {formatPrice(totalPrice)}
+                                    {formatPrice(itemPricing.totalPrice)}
                                   </p>
                                 );
                               }

@@ -24,7 +24,16 @@ import {
 
 export default function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, itemCount, subtotal, removeItem, updateQuantity } = useCart();
+  const {
+    items,
+    itemCount,
+    subtotal,
+    promotionalSavings,
+    regularSubtotal,
+    removeItem,
+    updateQuantity,
+    getItemPrice,
+  } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null!);
 
   // Close dropdown when clicking outside
@@ -170,31 +179,32 @@ export default function CartDropdown() {
                             <h3 className="font-medium">{item.product.name}</h3>
                             <div className="text-right">
                               {(() => {
-                                const discountInfo = calculateDiscount(
-                                  item.product.price,
-                                  item.product.discountedPrice
-                                );
-                                const totalPrice =
-                                  discountInfo.displayPrice * item.quantity;
+                                const itemPricing = getItemPrice(item);
+                                const regularPrice =
+                                  (item.product.discountedPrice &&
+                                  item.product.discountedPrice > 0
+                                    ? item.product.discountedPrice
+                                    : item.product.price) * item.quantity;
 
-                                if (discountInfo.hasDiscount) {
+                                if (itemPricing.savings > 0) {
                                   return (
                                     <div className="text-right">
-                                      <p className="font-medium text-red-600 text-sm">
-                                        {formatPrice(totalPrice)}
+                                      <p className="font-medium text-green-600 text-sm">
+                                        {formatPrice(itemPricing.totalPrice)}
                                       </p>
                                       <p className="text-xs text-gray-500 line-through">
-                                        {formatPrice(
-                                          discountInfo.originalPrice *
-                                            item.quantity
-                                        )}
+                                        {formatPrice(regularPrice)}
+                                      </p>
+                                      <p className="text-xs text-green-600">
+                                        🎉 Save{' '}
+                                        {formatPrice(itemPricing.savings)}
                                       </p>
                                     </div>
                                   );
                                 } else {
                                   return (
                                     <p className="font-medium text-sm">
-                                      {formatPrice(totalPrice)}
+                                      {formatPrice(itemPricing.totalPrice)}
                                     </p>
                                   );
                                 }
@@ -209,27 +219,34 @@ export default function CartDropdown() {
                           </p>
                           <div className="text-sm text-gray-500">
                             {(() => {
-                              const discountInfo = calculateDiscount(
-                                item.product.price,
-                                item.product.discountedPrice
-                              );
+                              const itemPricing = getItemPrice(item);
+                              const effectivePrice =
+                                item.product.discountedPrice &&
+                                item.product.discountedPrice > 0
+                                  ? item.product.discountedPrice
+                                  : item.product.price;
 
-                              if (discountInfo.hasDiscount) {
+                              if (itemPricing.savings > 0) {
                                 return (
                                   <div>
-                                    <span className="text-red-600 font-medium">
-                                      {formatPrice(discountInfo.displayPrice)}
+                                    <span className="text-green-600 font-medium">
+                                      {formatPrice(
+                                        itemPricing.totalPrice / item.quantity
+                                      )}{' '}
+                                      each
                                     </span>
                                     <span className="line-through ml-1">
-                                      {formatPrice(discountInfo.originalPrice)}
+                                      {formatPrice(effectivePrice)}
+                                    </span>
+                                    <span className="text-green-600 text-xs ml-1">
+                                      (promotional)
                                     </span>
                                   </div>
                                 );
                               } else {
                                 return (
                                   <span>
-                                    {formatPrice(discountInfo.displayPrice)}{' '}
-                                    each
+                                    {formatPrice(effectivePrice)} each
                                   </span>
                                 );
                               }

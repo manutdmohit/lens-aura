@@ -13,7 +13,14 @@ import { formatPrice } from '@/lib/utils/discount';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, itemCount } = useCart();
+  const {
+    items,
+    subtotal,
+    promotionalSavings,
+    regularSubtotal,
+    itemCount,
+    getItemPrice,
+  } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -97,7 +104,11 @@ export default function CheckoutPage() {
                   <div className="divide-y">
                     {items.map((item) => (
                       <div
-                        key={`${item.product.id}-${item.color}`}
+                        key={`${item.product._id || (item.product as any).id}-${
+                          typeof item.color === 'string'
+                            ? item.color
+                            : item.color.name
+                        }`}
                         className="py-4 flex items-center"
                       >
                         <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
@@ -110,21 +121,51 @@ export default function CheckoutPage() {
                         <div className="ml-4 flex-grow">
                           <h3 className="font-medium">{item.product.name}</h3>
                           <p className="text-sm text-gray-500">
-                            Color: {item.color}
+                            Color:{' '}
+                            {typeof item.color === 'string'
+                              ? item.color
+                              : item.color.name}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">
-                            {formatPrice(
+                          {(() => {
+                            const itemPricing = getItemPrice(item);
+                            const regularPrice =
                               (item.product.discountedPrice &&
                               item.product.discountedPrice > 0
                                 ? item.product.discountedPrice
-                                : item.product.price) * item.quantity
-                            )}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Qty: {item.quantity}
-                          </p>
+                                : item.product.price) * item.quantity;
+
+                            if (itemPricing.savings > 0) {
+                              return (
+                                <div>
+                                  <p className="font-medium text-green-600">
+                                    {formatPrice(itemPricing.totalPrice)}
+                                  </p>
+                                  <p className="text-xs text-gray-500 line-through">
+                                    {formatPrice(regularPrice)}
+                                  </p>
+                                  <p className="text-xs text-green-600">
+                                    🎉 Save {formatPrice(itemPricing.savings)}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Qty: {item.quantity}
+                                  </p>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div>
+                                  <p className="font-medium">
+                                    {formatPrice(itemPricing.totalPrice)}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Qty: {item.quantity}
+                                  </p>
+                                </div>
+                              );
+                            }
+                          })()}
                         </div>
                       </div>
                     ))}

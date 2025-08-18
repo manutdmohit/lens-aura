@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { IProduct } from '@/models';
+import { calculatePromotionalPricing } from '@/lib/utils/discount';
 
 export interface CartItem {
   product: IProduct & { _id: string };
@@ -35,6 +36,13 @@ interface CartContextType {
   ) => void;
   clearCart: () => void;
   subtotal: number;
+  promotionalSavings: number;
+  regularSubtotal: number;
+  getItemPrice: (item: CartItem) => {
+    totalPrice: number;
+    promotionalPrice: number;
+    savings: number;
+  };
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -86,10 +94,89 @@ export function CartProvider({ children }: { children: ReactNode }) {
       : product.price;
   };
 
-  const subtotal = items.reduce(
+  // Calculate subtotal with promotional pricing for "buy two" offers
+  const subtotal = items.reduce((total, item) => {
+    const effectivePrice = getEffectivePrice(item.product);
+    const quantity = item.quantity;
+
+    // Check if this product qualifies for promotional pricing
+    if (
+      (item.product.category === 'signature' ||
+        item.product.category === 'essentials') &&
+      quantity >= 2
+    ) {
+      const promo = calculatePromotionalPricing(
+        effectivePrice,
+        item.product.category as 'essentials' | 'signature'
+      );
+
+      // Calculate how many pairs (2 items) get promotional pricing
+      const promotionalPairs = Math.floor(quantity / 2);
+      const remainingItems = quantity % 2;
+
+      // Price for promotional pairs + remaining items at regular price
+      const promotionalPrice = promotionalPairs * promo.twoForPrice;
+      const regularPrice = remainingItems * effectivePrice;
+
+      return total + promotionalPrice + regularPrice;
+    } else {
+      // Regular pricing for non-promotional items or quantities less than 2
+      return total + effectivePrice * quantity;
+    }
+  }, 0);
+
+  // Calculate regular subtotal (without promotional pricing)
+  const regularSubtotal = items.reduce(
     (total, item) => total + getEffectivePrice(item.product) * item.quantity,
     0
   );
+
+  // Calculate promotional savings
+  const promotionalSavings = regularSubtotal - subtotal;
+
+  // Helper function to calculate item pricing with promotions
+  const getItemPrice = (item: CartItem) => {
+    const effectivePrice = getEffectivePrice(item.product);
+    const quantity = item.quantity;
+
+    // Check if this product qualifies for promotional pricing
+    if (
+      (item.product.category === 'signature' ||
+        item.product.category === 'essentials') &&
+      quantity >= 2
+    ) {
+      const promo = calculatePromotionalPricing(
+        effectivePrice,
+        item.product.category as 'essentials' | 'signature'
+      );
+
+      // Calculate how many pairs (2 items) get promotional pricing
+      const promotionalPairs = Math.floor(quantity / 2);
+      const remainingItems = quantity % 2;
+
+      // Price for promotional pairs + remaining items at regular price
+      const promotionalPrice = promotionalPairs * promo.twoForPrice;
+      const regularPrice = remainingItems * effectivePrice;
+      const totalPrice = promotionalPrice + regularPrice;
+
+      const regularTotalPrice = effectivePrice * quantity;
+      const savings = regularTotalPrice - totalPrice;
+
+      return {
+        totalPrice,
+        promotionalPrice,
+        savings,
+      };
+    } else {
+      // Regular pricing for non-promotional items or quantities less than 2
+      const totalPrice = effectivePrice * quantity;
+      return {
+        totalPrice,
+        promotionalPrice: totalPrice,
+        savings: 0,
+      };
+    }
+  };
 
   const addItem = (
     product: IProduct & { _id: string },
@@ -204,6 +291,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         clearCart,
         subtotal,
+        promotionalSavings,
+        regularSubtotal,
+        getItemPrice,
       }}
     >
       {children}

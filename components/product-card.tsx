@@ -12,6 +12,7 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
+  calculatePromotionalPricing,
 } from '@/lib/utils/discount';
 
 interface ProductCardProps {
@@ -191,7 +192,7 @@ export default function ProductCard({
     if (!showFeatures || variant === 'compact') return null;
 
     return (
-      <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
+      <div className="flex items-center justify-between text-xs text-gray-500 mt-3 min-h-[20px]">
         <span className="flex items-center gap-1">
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -288,8 +289,8 @@ export default function ProductCard({
               {product.name}
             </h3>
 
-            {/* Price Section */}
-            <div className="flex items-center justify-between">
+            {/* Price Section - Always reserve space for consistent height */}
+            <div className="flex items-center justify-between min-h-[60px]">
               <div className="flex items-baseline gap-2">
                 {(() => {
                   const discountInfo = calculateDiscount(
@@ -326,13 +327,21 @@ export default function ProductCard({
                     );
                   } else {
                     return (
-                      <span
-                        className={`font-bold text-gray-900 ${
-                          variant === 'compact' ? 'text-lg' : 'text-2xl'
-                        }`}
-                      >
-                        {formatPrice(discountInfo.displayPrice)}
-                      </span>
+                      <>
+                        <span
+                          className={`font-bold text-gray-900 ${
+                            variant === 'compact' ? 'text-lg' : 'text-2xl'
+                          }`}
+                        >
+                          {formatPrice(discountInfo.displayPrice)}
+                        </span>
+                        <div className="flex flex-col">
+                          <div className="h-[20px]"></div>{' '}
+                          {/* Spacer for original price */}
+                          <div className="h-[16px]"></div>{' '}
+                          {/* Spacer for savings text */}
+                        </div>
+                      </>
                     );
                   }
                 })()}
@@ -342,6 +351,36 @@ export default function ProductCard({
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Promotional Pricing - Always reserve space for consistent height */}
+            <div className="mt-3 min-h-[40px]">
+              {(product.category === 'signature' ||
+                product.category === 'essentials') &&
+              variant !== 'compact' ? (
+                <div className="p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-amber-800 font-medium">
+                      🎉 Buy Two Offer:
+                    </span>
+                    <span className="text-amber-600">
+                      {(() => {
+                        const promo = calculatePromotionalPricing(
+                          product.price,
+                          product.category as 'essentials' | 'signature'
+                        );
+                        return `Two for ${formatPrice(
+                          promo.twoForPrice
+                        )} (Save ${formatSavingsPercentage(
+                          promo.savingsPercentage
+                        )})`;
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[40px]"></div>
+              )}
             </div>
 
             {/* Product Features */}

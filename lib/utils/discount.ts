@@ -100,3 +100,35 @@ export function getDisplayPrice(
     : originalPrice;
 }
 
+/**
+ * Calculate promotional pricing for "buy two" offers
+ */
+export function calculatePromotionalPricing(
+  originalPrice: number,
+  productType: 'essentials' | 'signature'
+): {
+  twoForPrice: number;
+  savings: number;
+  savingsPercentage: number;
+} {
+  let multiplier: number;
+
+  if (productType === 'essentials') {
+    // Two for the price of (essentials + 0.25 * essentials) = 1.25x
+    multiplier = 1.25;
+  } else {
+    // Two for the price of (signature + 0.5 * signature) = 1.5x
+    multiplier = 1.5;
+  }
+
+  const twoForPrice = originalPrice * multiplier;
+  const regularTwoPrice = originalPrice * 2;
+  const savings = regularTwoPrice - twoForPrice;
+  const savingsPercentage = Math.round((savings / regularTwoPrice) * 100);
+
+  return {
+    twoForPrice,
+    savings,
+    savingsPercentage,
+  };
+}
