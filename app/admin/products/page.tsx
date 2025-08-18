@@ -534,6 +534,7 @@ export default function AdminProductsPage() {
                                     className="h-full w-full object-cover"
                                     height={48}
                                     width={48}
+                                    priority
                                   />
                                 </div>
                               </TableCell>
@@ -703,6 +704,7 @@ export default function AdminProductsPage() {
                                 className="h-full w-full object-cover"
                                 height={64}
                                 width={64}
+                                priority
                               />
                             </div>
                             <div className="flex-1 min-w-0">

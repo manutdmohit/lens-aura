@@ -728,6 +728,7 @@ export default function ProductDetailPage() {
                                   width={150}
                                   height={150}
                                   className="rounded-md object-cover w-full h-24"
+                                  priority
                                 />
                                 <button
                                   type="button"

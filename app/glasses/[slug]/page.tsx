@@ -350,6 +350,7 @@ export default function GlassesProductPage() {
                       fill
                       sizes="(max-width: 768px) 20vw, 10vw"
                       className="object-cover"
+                      priority
                     />
                   </motion.button>
                 ))}

@@ -268,6 +268,7 @@ export default function AccessoryProductPage() {
                       fill
                       sizes="(max-width: 768px) 25vw, 12vw"
                       className="object-cover"
+                      priority
                     />
                   </button>
                 ))}

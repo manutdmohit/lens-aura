@@ -78,6 +78,9 @@ export default function ProductCard({
     return product.thumbnail || '/placeholder.svg';
   };
 
+  // Get current image with key for smooth transitions
+  const currentImage = getCurrentImage();
+
   // Handle color selection
   const handleColorSelect = (index: number, e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -158,7 +161,7 @@ export default function ProductCard({
           {product.frameColorVariants.map((variant, index) => (
             <div
               key={index}
-              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${
+              className={`w-6 h-6 rounded-full border-2 transition-all duration-200 ${
                 isSingleVariant
                   ? 'border-gray-400' // Static border for single variant
                   : selectedColorIndex === index
@@ -176,7 +179,7 @@ export default function ProductCard({
           ))}
         </div>
         {selectedVariant && (
-          <span className="text-xs text-gray-600 font-medium">
+          <span className="text-xs text-gray-600 font-medium text-center">
             {selectedVariant.color.name}
           </span>
         )}
@@ -224,14 +227,28 @@ export default function ProductCard({
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="w-full h-full"
           >
-            <Image
-              src={getCurrentImage()}
-              alt={product.name}
-              className="w-full h-full object-contain transition-all duration-700"
-              width={500}
-              height={500}
-              priority={variant === 'featured'}
-            />
+            <motion.div
+              key={`${
+                (product as any)._id || (product as any).id
+              }-${selectedColorIndex}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full"
+            >
+              <Image
+                src={currentImage}
+                alt={product.name}
+                className="w-full h-full object-contain transition-all duration-700"
+                width={500}
+                height={500}
+                priority={variant === 'featured'}
+                style={{
+                  objectPosition: 'center center',
+                  transform: 'scale(1)',
+                }}
+              />
+            </motion.div>
           </motion.div>
 
           {/* Stock Status Badge */}

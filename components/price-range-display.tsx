@@ -63,14 +63,16 @@ export default function PriceRangeDisplay() {
         // Validate data before setting state
         if (data && typeof data === 'object') {
           const validatedData: PriceRanges = {
-            premiumSunglasses: data.sunglasses?.premium || {
-              lowest: null,
-              highest: null,
-            },
-            standardSunglasses: data.sunglasses?.standard || {
-              lowest: null,
-              highest: null,
-            },
+            premiumSunglasses: data.sunglasses?.signature ||
+              data.sunglasses || {
+                lowest: null,
+                highest: null,
+              },
+            standardSunglasses: data.sunglasses?.essentials ||
+              data.sunglasses || {
+                lowest: null,
+                highest: null,
+              },
           };
 
           setPriceRanges(validatedData);
@@ -166,11 +168,12 @@ export default function PriceRangeDisplay() {
                 alt="Premium Sunglasses"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-bold text-white mb-2">
-                  Premium Collection
+                  Signature Collection
                 </h3>
                 <p className="text-white/90 text-sm">
                   Luxury frames with premium polarized lenses
@@ -227,10 +230,10 @@ export default function PriceRangeDisplay() {
                 )}
 
                 <Link
-                  href="/sunglasses/premium"
+                  href="/sunglasses/signature"
                   className="block w-full bg-black text-white text-center py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors duration-300"
                 >
-                  Explore Premium Collection
+                  Explore Signature Collection
                 </Link>
               </div>
             </CardContent>
@@ -244,11 +247,12 @@ export default function PriceRangeDisplay() {
                 alt="Standard Sunglasses"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-bold text-white mb-2">
-                  Standard Collection
+                  Essentials Collection
                 </h3>
                 <p className="text-white/90 text-sm">
                   Quality everyday styles at great prices
@@ -305,10 +309,10 @@ export default function PriceRangeDisplay() {
                 )}
 
                 <Link
-                  href="/sunglasses/standard"
+                  href="/sunglasses/essentials"
                   className="block w-full bg-black text-white text-center py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors duration-300"
                 >
-                  Explore Standard Collection
+                  Explore Essentials Collection
                 </Link>
               </div>
             </CardContent>
