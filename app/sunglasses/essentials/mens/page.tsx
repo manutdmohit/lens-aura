@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Shield, ArrowLeft } from 'lucide-react';
 import AnimatedSection from '@/components/animated-section';
 import { Playfair_Display } from 'next/font/google';
+import { formatPrice } from '@/lib/utils/discount';
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 

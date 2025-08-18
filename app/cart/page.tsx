@@ -16,6 +16,11 @@ import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/cart-context';
 import CheckoutButton from '@/components/checkout-button';
 import Image from 'next/image';
+import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
 
 export default function CartPage() {
   const { items, itemCount, removeItem, updateQuantity, subtotal } = useCart();
@@ -33,7 +38,7 @@ export default function CartPage() {
     ) {
       // For glasses/sunglasses, check frame color variants
       const variant = item.product.frameColorVariants?.find(
-        (v) =>
+        (v: any) =>
           v.color.name ===
           (typeof item.color === 'string' ? item.color : item.color?.name)
       );
@@ -214,16 +219,75 @@ export default function CartPage() {
                       <div className="flex-grow">
                         <div className="flex justify-between">
                           <h3 className="font-medium">{item.product.name}</h3>
-                          <p className="font-medium">
-                            ${(item.product.price * item.quantity).toFixed(2)}
-                          </p>
+                          <div className="text-right">
+                            {(() => {
+                              const discountInfo = calculateDiscount(
+                                item.product.price,
+                                item.product.discountedPrice
+                              );
+                              const totalPrice =
+                                discountInfo.displayPrice * item.quantity;
+
+                              if (discountInfo.hasDiscount) {
+                                return (
+                                  <div className="text-right">
+                                    <p className="font-medium text-red-600">
+                                      {formatPrice(totalPrice)}
+                                    </p>
+                                    <p className="text-xs text-gray-500 line-through">
+                                      {formatPrice(
+                                        discountInfo.originalPrice *
+                                          item.quantity
+                                      )}
+                                    </p>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <p className="font-medium">
+                                    {formatPrice(totalPrice)}
+                                  </p>
+                                );
+                              }
+                            })()}
+                          </div>
                         </div>
                         <p className="text-sm text-gray-500 mt-1">
                           Color: {colorName}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          ${item.product.price.toFixed(2)} each
-                        </p>
+                        <div className="text-sm text-gray-500">
+                          {(() => {
+                            const discountInfo = calculateDiscount(
+                              item.product.price,
+                              item.product.discountedPrice
+                            );
+
+                            if (discountInfo.hasDiscount) {
+                              return (
+                                <div>
+                                  <span className="text-red-600 font-medium">
+                                    {formatPrice(discountInfo.displayPrice)}
+                                  </span>
+                                  <span className="line-through ml-2">
+                                    {formatPrice(discountInfo.originalPrice)}
+                                  </span>
+                                  <span className="text-green-600 text-xs ml-2">
+                                    Save{' '}
+                                    {formatSavingsPercentage(
+                                      discountInfo.savingsPercentage
+                                    )}
+                                  </span>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <span>
+                                  {formatPrice(discountInfo.displayPrice)} each
+                                </span>
+                              );
+                            }
+                          })()}
+                        </div>
 
                         {/* Stock Status */}
                         <div className="mt-2">
@@ -315,7 +379,7 @@ export default function CartPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
@@ -325,7 +389,7 @@ export default function CartPage() {
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
               </div>
 

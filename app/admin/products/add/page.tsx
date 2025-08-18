@@ -71,6 +71,7 @@ export default function AddProductPage() {
       name: '',
       description: '',
       price: undefined,
+      discountedPrice: undefined,
       thumbnail: '',
       images: [],
       stockQuantity: undefined,
@@ -558,6 +559,38 @@ export default function AddProductPage() {
                       {errors.price && (
                         <p className="text-red-500 text-sm mt-1">
                           {errors.price.message}
+                        </p>
+                      )}
+                    </motion.div>
+
+                    <motion.div
+                      variants={fieldVariants}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <Label htmlFor="discountedPrice">
+                        Discounted Price ($)
+                      </Label>
+                      <Input
+                        id="discountedPrice"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00 (optional)"
+                        {...register('discountedPrice', {
+                          valueAsNumber: true,
+                        })}
+                        className={
+                          errors.discountedPrice ? 'border-red-500' : ''
+                        }
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Leave empty if no discount is applied. Must be less than
+                        regular price.
+                      </p>
+                      {errors.discountedPrice && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.discountedPrice.message}
                         </p>
                       )}
                     </motion.div>

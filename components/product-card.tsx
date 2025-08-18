@@ -8,6 +8,11 @@ import { useState } from 'react';
 
 // Use the same Product type as the existing ProductGrid
 import type { ProductFormValues as Product } from '@/lib/api/validation';
+import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
 
 interface ProductCardProps {
   product: Product;
@@ -269,13 +274,51 @@ export default function ProductCard({
             {/* Price Section */}
             <div className="flex items-center justify-between">
               <div className="flex items-baseline gap-2">
-                <span
-                  className={`font-bold text-gray-900 ${
-                    variant === 'compact' ? 'text-lg' : 'text-2xl'
-                  }`}
-                >
-                  ${product.price.toFixed(2)}
-                </span>
+                {(() => {
+                  const discountInfo = calculateDiscount(
+                    product.price,
+                    product.discountedPrice
+                  );
+
+                  if (discountInfo.hasDiscount) {
+                    return (
+                      <>
+                        <div className="flex flex-col">
+                          <span
+                            className={`font-bold text-red-600 ${
+                              variant === 'compact' ? 'text-lg' : 'text-2xl'
+                            }`}
+                          >
+                            {formatPrice(discountInfo.displayPrice)}
+                          </span>
+                          <span
+                            className={`line-through text-gray-500 ${
+                              variant === 'compact' ? 'text-sm' : 'text-base'
+                            }`}
+                          >
+                            {formatPrice(discountInfo.originalPrice)}
+                          </span>
+                        </div>
+                        <span className="text-xs text-green-600 font-medium">
+                          Save{' '}
+                          {formatSavingsPercentage(
+                            discountInfo.savingsPercentage
+                          )}
+                        </span>
+                      </>
+                    );
+                  } else {
+                    return (
+                      <span
+                        className={`font-bold text-gray-900 ${
+                          variant === 'compact' ? 'text-lg' : 'text-2xl'
+                        }`}
+                      >
+                        {formatPrice(discountInfo.displayPrice)}
+                      </span>
+                    );
+                  }
+                })()}
                 {product.category === 'signature' && variant !== 'compact' && (
                   <span className="text-xs text-amber-600 font-medium">
                     Signature Quality

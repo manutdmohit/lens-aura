@@ -44,6 +44,7 @@ export interface IOrder extends Document {
   paymentIntent?: string;
   stripeSessionId: string;
   stockReduced: boolean;
+  emailSent: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -110,6 +111,7 @@ const OrderSchema = new Schema(
       index: true, // Add index for faster lookups
     },
     stockReduced: { type: Boolean, default: false },
+    emailSent: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

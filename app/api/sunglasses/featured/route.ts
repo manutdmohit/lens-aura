@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     })
       .sort({ createdAt: -1 })
       .select(
-        'name slug thumbnail productType price gender category isFeatured inStock stockQuantity frameColorVariants'
+        'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants'
       )
       .limit(limit);
 

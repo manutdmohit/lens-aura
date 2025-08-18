@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     })
       .sort({ createdAt: -1 })
       .select(
-        'name brand description slug productType price thumbnail stockQuantity inStock'
+        'name brand description slug productType price discountedPrice thumbnail stockQuantity inStock'
       )
       .skip(skip)
       .limit(limit);

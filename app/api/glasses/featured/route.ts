@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
       productType: 'glasses',
     })
       .sort({ createdAt: -1 })
-      .select('name slug productType price thumbnail gender')
+      .select('name slug productType price discountedPrice thumbnail gender')
       .limit(4);
 
     if (!products || products.length === 0) {

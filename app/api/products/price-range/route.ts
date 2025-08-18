@@ -13,13 +13,13 @@ export async function GET(req: NextRequest) {
     const sunglassesRange = await getPriceRange('sunglasses');
 
     // Get price ranges for signature and essentials sunglasses
-    const premiumSunglassesRange = await getPriceRangeWithCategory(
+    const signatureSunglassesRange = await getPriceRangeWithCategory(
       'sunglasses',
-      'premium'
+      'signature'
     );
-    const standardSunglassesRange = await getPriceRangeWithCategory(
+    const essentialsSunglassesRange = await getPriceRangeWithCategory(
       'sunglasses',
-      'standard'
+      'essentials'
     );
 
     // Get price ranges for accessories
@@ -30,8 +30,8 @@ export async function GET(req: NextRequest) {
         glasses: glassesRange,
         sunglasses: {
           ...sunglassesRange,
-          premium: premiumSunglassesRange,
-          standard: standardSunglassesRange,
+          signature: signatureSunglassesRange,
+          essentials: essentialsSunglassesRange,
         },
         accessories: accessoriesRange,
       },
@@ -50,28 +50,50 @@ export async function GET(req: NextRequest) {
 
 async function getPriceRange(productType: string) {
   try {
-    // Find the lowest priced active product
-    const lowestPriced = await Product.find({
+    // Find all active products with their prices and discounted prices
+    const products = await Product.find({
       status: 'active',
       productType,
       price: { $gt: 0 }, // Ensure price is greater than 0
-    })
-      .sort({ price: 1 })
-      .limit(1)
-      .select('price name slug');
+    }).select('price discountedPrice name slug');
 
-    // Find the highest priced active product
-    const highestPriced = await Product.find({
-      status: 'active',
-      productType,
-    })
-      .sort({ price: -1 })
-      .limit(1)
-      .select('price name slug');
+    if (products.length === 0) {
+      return {
+        lowest: null,
+        highest: null,
+      };
+    }
+
+    // Calculate effective prices (use discounted price if available, otherwise original price)
+    const productsWithEffectivePrices = products.map((product) => ({
+      ...product.toObject(),
+      effectivePrice:
+        product.discountedPrice && product.discountedPrice > 0
+          ? product.discountedPrice
+          : product.price,
+    }));
+
+    // Find lowest and highest effective prices
+    const lowestPriced = productsWithEffectivePrices.reduce((lowest, product) =>
+      product.effectivePrice < lowest.effectivePrice ? product : lowest
+    );
+
+    const highestPriced = productsWithEffectivePrices.reduce(
+      (highest, product) =>
+        product.effectivePrice > highest.effectivePrice ? product : highest
+    );
 
     return {
-      lowest: lowestPriced.length > 0 ? lowestPriced[0] : null,
-      highest: highestPriced.length > 0 ? highestPriced[0] : null,
+      lowest: {
+        price: lowestPriced.effectivePrice,
+        name: lowestPriced.name,
+        slug: lowestPriced.slug,
+      },
+      highest: {
+        price: highestPriced.effectivePrice,
+        name: highestPriced.name,
+        slug: highestPriced.slug,
+      },
     };
   } catch (error) {
     console.error(`Error getting price range for ${productType}:`, error);
@@ -87,30 +109,51 @@ async function getPriceRangeWithCategory(
   category: string
 ) {
   try {
-    // Find the lowest priced active product in the category
-    const lowestPriced = await Product.find({
+    // Find all active products in the category with their prices and discounted prices
+    const products = await Product.find({
       status: 'active',
       productType,
       category,
       price: { $gt: 0 }, // Ensure price is greater than 0
-    })
-      .sort({ price: 1 })
-      .limit(1)
-      .select('price name slug');
+    }).select('price discountedPrice name slug');
 
-    // Find the highest priced active product in the category
-    const highestPriced = await Product.find({
-      status: 'active',
-      productType,
-      category,
-    })
-      .sort({ price: -1 })
-      .limit(1)
-      .select('price name slug');
+    if (products.length === 0) {
+      return {
+        lowest: null,
+        highest: null,
+      };
+    }
+
+    // Calculate effective prices (use discounted price if available, otherwise original price)
+    const productsWithEffectivePrices = products.map((product) => ({
+      ...product.toObject(),
+      effectivePrice:
+        product.discountedPrice && product.discountedPrice > 0
+          ? product.discountedPrice
+          : product.price,
+    }));
+
+    // Find lowest and highest effective prices
+    const lowestPriced = productsWithEffectivePrices.reduce((lowest, product) =>
+      product.effectivePrice < lowest.effectivePrice ? product : lowest
+    );
+
+    const highestPriced = productsWithEffectivePrices.reduce(
+      (highest, product) =>
+        product.effectivePrice > highest.effectivePrice ? product : highest
+    );
 
     return {
-      lowest: lowestPriced.length > 0 ? lowestPriced[0] : null,
-      highest: highestPriced.length > 0 ? highestPriced[0] : null,
+      lowest: {
+        price: lowestPriced.effectivePrice,
+        name: lowestPriced.name,
+        slug: lowestPriced.slug,
+      },
+      highest: {
+        price: highestPriced.effectivePrice,
+        name: highestPriced.name,
+        slug: highestPriced.slug,
+      },
     };
   } catch (error) {
     console.error(

@@ -8,155 +8,164 @@ import { sendInvoiceEmail } from '@/lib/send-invoice';
 export async function POST(request: NextRequest) {
   try {
     const { sessionId } = await request.json();
-    
+
     if (!sessionId) {
-      return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Session ID is required' },
+        { status: 400 }
+      );
     }
-    
+
     // Clean the session ID to match frontend
     const cleanSessionId = sessionId
       .trim()
       .replace(/['"]/g, '')
       .replace(/^ccs_test/, 'cs_test');
-    
-    console.log(`Processing successful checkout for session: ${cleanSessionId}`);
-    
+
+    console.log(
+      `Processing successful checkout for session: ${cleanSessionId}`
+    );
+
     await connectToDatabase();
-    
+
     // Find the order by Stripe session ID
     const foundOrder = await Order.findOne({ stripeSessionId: cleanSessionId });
-    
+
     if (!foundOrder) {
       console.error(`Order not found for session: ${cleanSessionId}`);
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
-    
-    console.log(`Found order ${foundOrder._id}, payment status: ${foundOrder.paymentStatus}`);
-    
+
+    console.log(
+      `Found order ${foundOrder._id}, payment status: ${foundOrder.paymentStatus}`
+    );
+
     // Only process if the order is paid
     if (foundOrder.paymentStatus !== 'paid') {
-      console.log(`Order ${foundOrder._id} is not paid, skipping stock reduction`);
-      return NextResponse.json({ 
-        success: false, 
+      console.log(
+        `Order ${foundOrder._id} is not paid, skipping stock reduction`
+      );
+      return NextResponse.json({
+        success: false,
         message: 'Order not paid',
-        paymentStatus: foundOrder.paymentStatus
+        paymentStatus: foundOrder.paymentStatus,
       });
     }
-    
+
     // Check if stock has already been reduced
     if (foundOrder.stockReduced) {
       console.log(`Stock already reduced for order ${foundOrder._id}`);
-      // Send invoice if not already sent (idempotency is not handled here, but could be added)
-      if (foundOrder.customerEmail) {
-        try {
-          await sendInvoiceEmail({
-            to: foundOrder.customerEmail,
-            orderId: foundOrder.orderNumber || foundOrder._id.toString(),
-            items: foundOrder.items.map((item: any) => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              color: item.color,
-            })),
-            total: foundOrder.totalAmount,
-          });
-        } catch (e) {
-          console.error('Failed to send invoice email:', e);
-        }
-      }
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: 'Stock already reduced',
-        orderId: foundOrder._id
+        orderId: foundOrder._id,
       });
     }
-    
+
     // Process each order item to reduce stock
     const updateResults = [];
     let success = true;
-    
-    console.log(`Processing ${foundOrder.items.length} items for stock reduction`);
-    
+
+    console.log(
+      `Processing ${foundOrder.items.length} items for stock reduction`
+    );
+
     for (const item of foundOrder.items) {
       try {
         // Skip if no product
         if (!item.productId) {
-          console.warn(`Skipping stock update for item without product: ${item.name}`);
+          console.warn(
+            `Skipping stock update for item without product: ${item.name}`
+          );
           updateResults.push({
             product: item.name,
             success: false,
-            error: 'No product ID'
+            error: 'No product ID',
           });
           continue;
         }
-        
+
         // Convert productId to ObjectId if it's not already
-        const productId = item.productId instanceof mongoose.Types.ObjectId 
-          ? item.productId 
-          : new mongoose.Types.ObjectId(item.productId);
-        
-        console.log(`Updating stock for product ${productId}, reducing by ${item.quantity}`);
-        
+        const productId =
+          item.productId instanceof mongoose.Types.ObjectId
+            ? item.productId
+            : new mongoose.Types.ObjectId(item.productId);
+
+        console.log(
+          `Updating stock for product ${productId}, reducing by ${item.quantity}`
+        );
+
         // Get the original product data
         const originalProduct = await getProductById(productId.toString());
-        
+
         if (!originalProduct) {
           console.error(`Product not found: ${productId}`);
           updateResults.push({
             productId: productId,
             success: false,
-            error: 'Product not found'
+            error: 'Product not found',
           });
           success = false;
           continue;
         }
-        
+
         const originalStock = originalProduct.stockQuantity;
-        console.log(`Current stock for ${originalProduct.name}: ${originalStock}`);
-        
+        console.log(
+          `Current stock for ${originalProduct.name}: ${originalStock}`
+        );
+
         // Update the product stock (pass color if available)
-        const updatedProduct = await updateProductStock(productId.toString(), item.quantity, item.color);
-        
+        const updatedProduct = await updateProductStock(
+          productId.toString(),
+          item.quantity,
+          item.color
+        );
+
         if (!updatedProduct) {
           console.error(`Failed to update stock for product: ${productId}`);
           updateResults.push({
             productId: productId,
             success: false,
-            error: 'Failed to update stock'
+            error: 'Failed to update stock',
           });
           success = false;
           continue;
         }
-        
-        console.log(`Updated stock for ${updatedProduct.name}: ${updatedProduct.stockQuantity} (was ${originalStock})`);
-        
+
+        console.log(
+          `Updated stock for ${updatedProduct.name}: ${updatedProduct.stockQuantity} (was ${originalStock})`
+        );
+
         updateResults.push({
           productId: productId,
           name: updatedProduct.name,
           success: true,
           originalStock,
           newStock: updatedProduct.stockQuantity,
-          reduced: item.quantity
+          reduced: item.quantity,
         });
       } catch (error: any) {
-        console.error(`Error updating stock for product in order ${foundOrder._id}:`, error);
+        console.error(
+          `Error updating stock for product in order ${foundOrder._id}:`,
+          error
+        );
         updateResults.push({
           productId: item.productId,
           success: false,
-          error: error.message
+          error: error.message,
         });
         success = false;
       }
     }
-    
+
     console.log('Stock update completed for order:', foundOrder._id);
-    
+
     // Mark the order as having stock reduced
     foundOrder.stockReduced = true;
     await foundOrder.save();
 
-    // Send invoice email after stock is reduced and order is paid
-    if (foundOrder.customerEmail) {
+    // Send invoice email after stock is reduced and order is paid (only if not already sent)
+    if (foundOrder.customerEmail && !foundOrder.emailSent) {
       try {
         await sendInvoiceEmail({
           to: foundOrder.customerEmail,
@@ -169,21 +178,29 @@ export async function POST(request: NextRequest) {
           })),
           total: foundOrder.totalAmount,
         });
+
+        // Mark email as sent
+        foundOrder.emailSent = true;
+        await foundOrder.save();
+        console.log(`Invoice email sent for order ${foundOrder.orderNumber}`);
       } catch (e) {
         console.error('Failed to send invoice email:', e);
       }
+    } else if (foundOrder.emailSent) {
+      console.log(
+        `Invoice email already sent for order ${foundOrder.orderNumber}`
+      );
     }
-    
+
     // Return the results
     return NextResponse.json({
       success,
       orderId: foundOrder._id,
       orderNumber: foundOrder.orderNumber,
-      updates: updateResults
+      updates: updateResults,
     });
-    
   } catch (error: any) {
     console.error('Error processing successful checkout:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-} 
+}

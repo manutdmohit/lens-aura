@@ -9,6 +9,7 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
 ## Features
 
 ### Customer Features
+
 - 🛍️ Intuitive product browsing and filtering
 - 🔍 Advanced search functionality
 - 🛒 Real-time shopping cart
@@ -19,6 +20,7 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
 - 📦 Order tracking and history
 
 ### Admin Features
+
 - 📊 Comprehensive dashboard with analytics
 - 👥 User management system
 - 📦 Inventory and order management
@@ -29,6 +31,7 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
 ## Tech Stack
 
 - **Frontend:**
+
   - Next.js 14 (App Router)
   - TypeScript
   - Tailwind CSS
@@ -36,6 +39,7 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
   - Framer Motion
 
 - **Backend:**
+
   - Next.js API Routes
   - MongoDB with Mongoose
   - NextAuth.js for authentication
@@ -59,12 +63,14 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/lens-aura.git
    cd lens-aura
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    # or
@@ -73,15 +79,17 @@ Lens Aura is a modern, full-stack e-commerce platform specializing in premium ey
 
 3. Set up environment variables:
    Create a `.env.local` file in the root directory with the following variables:
+
    ```env
    MONGODB_URI=your_mongodb_uri
    NEXTAUTH_SECRET=your_nextauth_secret
    NEXTAUTH_URL=http://localhost:3000
    STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+
    ```
 
 4. Run the development server:
+
    ```bash
    npm run dev
    # or

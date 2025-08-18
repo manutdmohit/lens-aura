@@ -42,49 +42,57 @@ export default function AddToCartButton({
 
   const isOutOfStock = availableStock <= 0;
   const cartQuantity =
-    items.find((item) => item.product.id === product.id)?.quantity || 0;
+    items.find((item) => {
+      const itemProductId = item.product._id || (item.product as any).id;
+      const productId = product._id || (product as any).id;
+      return itemProductId === productId;
+    })?.quantity || 0;
 
   const hasInsufficientStock = cartQuantity + quantity > availableStock;
 
   const buttonDisabled = isAdding || isOutOfStock || hasInsufficientStock;
 
   const handleAddToCart = async () => {
-    if (buttonDisabled) return;
+    if (buttonDisabled || isAdding) return; // Prevent multiple rapid clicks
 
     setIsAdding(true);
 
-    // Use the first color if none is selected
-    const color =
-      selectedColor ||
-      (product.colors && product.colors.length > 0
-        ? product.colors[0]
-        : 'default');
+    try {
+      // Use the first color if none is selected
+      const color =
+        selectedColor ||
+        (product.colors && product.colors.length > 0
+          ? product.colors[0]
+          : 'default');
 
-    // Add item to cart
-    addItem(product, quantity, color);
+      // Add item to cart
+      addItem(product, quantity, color);
 
-    // Show success state
-    setIsAdded(true);
+      // Show success state
+      setIsAdded(true);
 
-    // Reset button state after delay
-    setTimeout(() => {
-      setIsAdding(false);
-      setIsAdded(false);
-
-      // Show toast notification AFTER the button state has changed for better UX
+      // Show toast notification
       toast.success('Added to Cart', {
         description: `${product.name} has been added to your cart.`,
         action: {
           label: 'View Cart',
           onClick: () => {
-            // You can add navigation to cart here if needed
             router.push('/cart');
           },
         },
         position: 'bottom-right',
         duration: 2000,
       });
-    }, 1000);
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+      toast.error('Failed to add item to cart');
+    } finally {
+      // Reset button state after delay
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsAdded(false);
+      }, 1000);
+    }
   };
 
   // Get icon based on button state

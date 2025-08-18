@@ -9,6 +9,7 @@ import { useCart } from '@/context/cart-context';
 import { createCheckoutSession } from '@/actions/checkout';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
+import { formatPrice } from '@/lib/utils/discount';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -114,7 +115,12 @@ export default function CheckoutPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            ${(item.product.price * item.quantity).toFixed(2)}
+                            {formatPrice(
+                              (item.product.discountedPrice &&
+                              item.product.discountedPrice > 0
+                                ? item.product.discountedPrice
+                                : item.product.price) * item.quantity
+                            )}
                           </p>
                           <p className="text-sm text-gray-500">
                             Qty: {item.quantity}
@@ -150,7 +156,7 @@ export default function CheckoutPage() {
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
@@ -160,7 +166,7 @@ export default function CheckoutPage() {
                   <div className="border-t pt-4 mb-6">
                     <div className="flex justify-between font-medium">
                       <span>Total</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>{formatPrice(subtotal)}</span>
                     </div>
                   </div>
 

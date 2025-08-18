@@ -20,6 +20,7 @@ import { ArrowRight, Star, Shield, Gem } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AnimatedSection from '@/components/animated-section';
 import { Playfair_Display } from 'next/font/google';
+import { formatPrice } from '@/lib/utils/discount';
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 
@@ -151,7 +152,7 @@ function SunglassesContent() {
                     {' '}
                     Starting from{' '}
                     <span className="font-semibold text-amber-600">
-                      ${priceRange.signature.lowest.price.toFixed(2)}
+                      {formatPrice(priceRange.signature.lowest.price)}
                     </span>
                   </>
                 )}
@@ -228,7 +229,7 @@ function SunglassesContent() {
                     {' '}
                     Starting from{' '}
                     <span className="font-semibold text-blue-600">
-                      ${priceRange.essentials.lowest.price.toFixed(2)}
+                      {formatPrice(priceRange.essentials.lowest.price)}
                     </span>
                   </>
                 )}

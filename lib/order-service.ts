@@ -59,10 +59,17 @@ export async function createPendingOrder(
           ? item.color
           : item.color?.name || 'Default';
 
+      // Calculate effective price (discounted if available, otherwise original)
+      const effectivePrice =
+        item.product.discountedPrice && item.product.discountedPrice > 0
+          ? item.product.discountedPrice
+          : item.product.price;
+
       return {
         productId: productId,
         name: item.product.name,
-        price: item.product.price,
+        price: effectivePrice,
+        originalPrice: item.product.price,
         quantity: item.quantity,
         color: colorName,
         imageUrl: item.product.thumbnail,
@@ -71,11 +78,14 @@ export async function createPendingOrder(
       };
     });
 
-    // Calculate total amount
-    const totalAmount = items.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0
-    );
+    // Calculate total amount using effective prices
+    const totalAmount = items.reduce((total, item) => {
+      const effectivePrice =
+        item.product.discountedPrice && item.product.discountedPrice > 0
+          ? item.product.discountedPrice
+          : item.product.price;
+      return total + effectivePrice * item.quantity;
+    }, 0);
 
     // Generate a unique order number
     const orderNumber = generateOrderNumber();

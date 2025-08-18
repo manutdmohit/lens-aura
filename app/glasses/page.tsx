@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import LoadingPage from '@/components/loading';
 import { Pagination } from '@/components/ui/pagination';
 import Link from 'next/link';
+import { formatPrice } from '@/lib/utils/discount';
 
 interface PaginationData {
   total: number;
@@ -121,8 +122,8 @@ function GlassesContent() {
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             {priceRange?.lowest ? (
               <>
-                Our prescription glasses start from just $
-                {priceRange.lowest.price.toFixed(2)}, including standard
+                Our prescription glasses start from just{' '}
+                {formatPrice(priceRange.lowest.price)}, including standard
                 single-vision lenses. Choose from our wide range of styles and
                 colors.{' '}
                 {priceRange.lowest && (

@@ -16,6 +16,11 @@ import { Button } from '@/components/ui/button';
 import { useCart, type CartItem } from '@/context/cart-context';
 import { useOnClickOutside } from '@/hooks/use-click-outside';
 import Image from 'next/image';
+import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
 
 export default function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -163,9 +168,38 @@ export default function CartDropdown() {
                         <div className="flex-grow">
                           <div className="flex justify-between">
                             <h3 className="font-medium">{item.product.name}</h3>
-                            <p className="font-medium">
-                              ${(item.product.price * item.quantity).toFixed(2)}
-                            </p>
+                            <div className="text-right">
+                              {(() => {
+                                const discountInfo = calculateDiscount(
+                                  item.product.price,
+                                  item.product.discountedPrice
+                                );
+                                const totalPrice =
+                                  discountInfo.displayPrice * item.quantity;
+
+                                if (discountInfo.hasDiscount) {
+                                  return (
+                                    <div className="text-right">
+                                      <p className="font-medium text-red-600 text-sm">
+                                        {formatPrice(totalPrice)}
+                                      </p>
+                                      <p className="text-xs text-gray-500 line-through">
+                                        {formatPrice(
+                                          discountInfo.originalPrice *
+                                            item.quantity
+                                        )}
+                                      </p>
+                                    </div>
+                                  );
+                                } else {
+                                  return (
+                                    <p className="font-medium text-sm">
+                                      {formatPrice(totalPrice)}
+                                    </p>
+                                  );
+                                }
+                              })()}
+                            </div>
                           </div>
                           <p className="text-sm text-gray-500">
                             Color:{' '}
@@ -173,9 +207,34 @@ export default function CartDropdown() {
                               ? item.color
                               : item.color?.name || 'Unknown'}
                           </p>
-                          <p className="text-sm text-gray-500">
-                            ${item.product.price.toFixed(2)} each
-                          </p>
+                          <div className="text-sm text-gray-500">
+                            {(() => {
+                              const discountInfo = calculateDiscount(
+                                item.product.price,
+                                item.product.discountedPrice
+                              );
+
+                              if (discountInfo.hasDiscount) {
+                                return (
+                                  <div>
+                                    <span className="text-red-600 font-medium">
+                                      {formatPrice(discountInfo.displayPrice)}
+                                    </span>
+                                    <span className="line-through ml-1">
+                                      {formatPrice(discountInfo.originalPrice)}
+                                    </span>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <span>
+                                    {formatPrice(discountInfo.displayPrice)}{' '}
+                                    each
+                                  </span>
+                                );
+                              }
+                            })()}
+                          </div>
 
                           <div className="flex justify-between items-center mt-2">
                             <div className="flex items-center border rounded-md">
@@ -244,7 +303,7 @@ export default function CartDropdown() {
                 <div className="p-4 border-t">
                   <div className="flex justify-between mb-4">
                     <span className="font-medium">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="space-y-2">
                     <Button

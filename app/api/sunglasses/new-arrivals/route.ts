@@ -6,13 +6,13 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    const products = await Product.find({
-      status: 'active',
-      productType: 'sunglasses',
-    })
+    const query = { productType: 'sunglasses' };
+    const limit = 8;
+
+    const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug productType price thumbnail gender')
-      .limit(5);
+      .select('name slug productType price discountedPrice thumbnail gender')
+      .limit(limit);
 
     return NextResponse.json({ products });
   } catch (error) {

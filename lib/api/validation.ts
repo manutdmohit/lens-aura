@@ -199,6 +199,11 @@ export const productSchema = z
     price: z.coerce
       .number({ invalid_type_error: 'Price must be a number' })
       .positive({ message: 'Price must be positive' }),
+    discountedPrice: z.coerce
+      .number({ invalid_type_error: 'Discounted price must be a number' })
+      .positive({ message: 'Discounted price must be positive' })
+      .min(0.01, { message: 'Discounted price must be greater than 0' })
+      .optional(),
     isFeatured: z.boolean().optional(),
     thumbnail: z.string().min(1, { message: 'Please provide an image URL' }),
 
@@ -595,6 +600,20 @@ export const productSchema = z
       message:
         'For glasses, either frame color variants must be present, or frame color is required',
       path: ['frameColorVariants'],
+    }
+  )
+  .refine(
+    (data) => {
+      // If discountedPrice is provided, it must be less than or equal to the regular price
+      if (data.discountedPrice !== undefined && data.discountedPrice !== null) {
+        return data.discountedPrice <= data.price;
+      }
+      return true;
+    },
+    {
+      message:
+        'Discounted price must be less than or equal to the regular price',
+      path: ['discountedPrice'],
     }
   );
 

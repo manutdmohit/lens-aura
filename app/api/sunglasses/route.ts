@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     const products = await Product.find(query)
       .sort({ [sort]: sortOrder })
       .select(
-        'name slug thumbnail inStock stockQuantity productType price colors gender category frameColorVariants status'
+        'name slug thumbnail inStock stockQuantity productType price discountedPrice colors gender category frameColorVariants status'
       )
       .skip(skip)
       .limit(limit);

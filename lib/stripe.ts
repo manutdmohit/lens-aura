@@ -94,12 +94,19 @@ export async function createCheckoutSession(
           ? item.color
           : item.color?.name || 'Default';
 
+      // Calculate effective price (discounted if available, otherwise original)
+      const effectivePrice =
+        item.product.discountedPrice && item.product.discountedPrice > 0
+          ? item.product.discountedPrice
+          : item.product.price;
+
       // Create a detailed metadata object for each product
       const productMetadata = {
         productId: item.product._id?.toString() || '',
         color: colorName,
         name: item.product.name,
-        price: item.product.price.toString(),
+        originalPrice: item.product.price.toString(),
+        effectivePrice: effectivePrice.toString(),
         quantity: item.quantity.toString(),
       };
 
@@ -115,7 +122,7 @@ export async function createCheckoutSession(
             images: validatedImageUrl ? [validatedImageUrl] : undefined,
             metadata: productMetadata,
           },
-          unit_amount: Math.round(item.product.price * 100), // Convert to cents
+          unit_amount: Math.round(effectivePrice * 100), // Convert to cents
         },
         quantity: item.quantity,
       };

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatPrice } from '@/lib/utils/discount';
 
 interface PriceRange {
   lowest: {
@@ -186,7 +187,9 @@ export default function PriceRangeDisplay() {
                         Starting from
                       </p>
                       <p className="font-semibold text-blue-600">
-                        ${priceRanges.premiumSunglasses.lowest.price.toFixed(2)}
+                        {formatPrice(
+                          priceRanges.premiumSunglasses.lowest.price
+                        )}
                       </p>
                     </div>
                     <div className="text-right">
@@ -207,8 +210,9 @@ export default function PriceRangeDisplay() {
                         Premium options
                       </p>
                       <p className="font-semibold text-amber-600">
-                        $
-                        {priceRanges.premiumSunglasses.highest.price.toFixed(2)}
+                        {formatPrice(
+                          priceRanges.premiumSunglasses.highest.price
+                        )}
                       </p>
                     </div>
                     <div className="text-right">
@@ -261,8 +265,9 @@ export default function PriceRangeDisplay() {
                         Starting from
                       </p>
                       <p className="font-semibold text-green-600">
-                        $
-                        {priceRanges.standardSunglasses.lowest.price.toFixed(2)}
+                        {formatPrice(
+                          priceRanges.standardSunglasses.lowest.price
+                        )}
                       </p>
                     </div>
                     <div className="text-right">
@@ -283,9 +288,8 @@ export default function PriceRangeDisplay() {
                         Premium options
                       </p>
                       <p className="font-semibold text-teal-600">
-                        $
-                        {priceRanges.standardSunglasses.highest.price.toFixed(
-                          2
+                        {formatPrice(
+                          priceRanges.standardSunglasses.highest.price
                         )}
                       </p>
                     </div>

@@ -13,6 +13,11 @@ import Link from 'next/link';
 import { useCart } from '@/context/cart-context';
 import { Pagination } from '@/components/ui/pagination';
 import { IProduct } from '@/models';
+import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
 
 interface PaginationData {
   total: number;
@@ -133,7 +138,11 @@ export default function ContactLensProducts() {
     e.stopPropagation();
 
     // Find this product in cart to check current quantity
-    const cartItem = items.find((item) => item.product.id === product.id);
+    const cartItem = items.find((item) => {
+      const itemProductId = item.product._id || (item.product as any).id;
+      const productId = (product as any)._id || (product as any).id;
+      return itemProductId === productId;
+    });
     const currentQuantity = cartItem ? cartItem.quantity : 0;
 
     // Check if adding one more would exceed stock
@@ -153,7 +162,11 @@ export default function ContactLensProducts() {
   };
 
   const isMaxLimitReached = (product: Product) => {
-    const cartItem = items.find((item) => item.product.id === product.id);
+    const cartItem = items.find((item) => {
+      const itemProductId = item.product._id || (item.product as any).id;
+      const productId = (product as any)._id || (product as any).id;
+      return itemProductId === productId;
+    });
     return cartItem && cartItem.quantity >= (product.stockQuantity || 0);
   };
 
@@ -173,8 +186,8 @@ export default function ContactLensProducts() {
       {priceRange?.lowest && (
         <div className="mb-8 text-center">
           <p className="text-lg text-gray-600">
-            Contact lenses start from just ${priceRange.lowest.price.toFixed(2)}
-            .{' '}
+            Contact lenses start from just{' '}
+            {formatPrice(priceRange.lowest.price)}.{' '}
             <Link
               href={`/contacts/${priceRange.lowest.slug}`}
               className="text-indigo-600 hover:underline"
@@ -244,9 +257,39 @@ export default function ContactLensProducts() {
                       </div>
                       <div className="mt-auto pt-3 border-t border-gray-100">
                         <div className="flex justify-between items-center">
-                          <p className="text-lg font-medium text-gray-900">
-                            ${product.price.toFixed(2)}
-                          </p>
+                          <div>
+                            {(() => {
+                              const discountInfo = calculateDiscount(
+                                product.price,
+                                product.discountedPrice
+                              );
+
+                              if (discountInfo.hasDiscount) {
+                                return (
+                                  <div>
+                                    <p className="text-lg font-medium text-red-600">
+                                      {formatPrice(discountInfo.displayPrice)}
+                                    </p>
+                                    <p className="text-sm line-through text-gray-500">
+                                      {formatPrice(discountInfo.originalPrice)}
+                                    </p>
+                                    <p className="text-xs text-green-600 font-medium">
+                                      Save{' '}
+                                      {formatSavingsPercentage(
+                                        discountInfo.savingsPercentage
+                                      )}
+                                    </p>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <p className="text-lg font-medium text-gray-900">
+                                    {formatPrice(discountInfo.displayPrice)}
+                                  </p>
+                                );
+                              }
+                            })()}
+                          </div>
                           {(product.stockQuantity ?? 0) > 0 && (
                             <div className="flex items-center text-xs text-gray-500">
                               <Package className="h-3 w-3 mr-1" />

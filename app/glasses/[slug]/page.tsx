@@ -12,6 +12,11 @@ import ProductColorSelector from '@/components/product-color-selector';
 import AddToCartButton from '@/components/add-to-cart-button';
 import { formatCurrency } from '@/lib/utils';
 import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
+import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
@@ -363,9 +368,39 @@ export default function GlassesProductPage() {
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
                   {product.name}
                 </h1>
-                <p className="text-2xl md:text-3xl font-bold text-blue-600">
-                  {formatCurrency(product.price)}
-                </p>
+                <div className="flex flex-col items-end">
+                  {(() => {
+                    const discountInfo = calculateDiscount(
+                      product.price,
+                      product.discountedPrice
+                    );
+
+                    if (discountInfo.hasDiscount) {
+                      return (
+                        <>
+                          <p className="text-2xl md:text-3xl font-bold text-red-600">
+                            {formatPrice(discountInfo.displayPrice)}
+                          </p>
+                          <p className="text-lg md:text-xl line-through text-gray-500">
+                            {formatPrice(discountInfo.originalPrice)}
+                          </p>
+                          <p className="text-sm text-green-600 font-medium">
+                            Save{' '}
+                            {formatSavingsPercentage(
+                              discountInfo.savingsPercentage
+                            )}
+                          </p>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <p className="text-2xl md:text-3xl font-bold text-blue-600">
+                          {formatPrice(discountInfo.displayPrice)}
+                        </p>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
             </motion.div>
 

@@ -61,6 +61,11 @@ import AdminLayout from '@/components/admin/admin-layout';
 import ProtectedRoute from '@/components/admin/protected-route';
 import type { ProductFormValues as Product } from '@/lib/api/validation';
 import Image from 'next/image';
+import {
+  calculateDiscount,
+  formatPrice,
+  formatSavingsPercentage,
+} from '@/lib/utils/discount';
 
 export default function AdminProductsPage() {
   const router = useRouter();
@@ -190,7 +195,9 @@ export default function AdminProductsPage() {
     const csvData = products.map((product) => [
       product.name,
       product.productType,
-      product.price,
+      product.discountedPrice && product.discountedPrice > 0
+        ? product.discountedPrice
+        : product.price,
       product.stockQuantity,
       product.status,
     ]);
@@ -544,7 +551,7 @@ export default function AdminProductsPage() {
                                 {product.productType}
                               </TableCell>
                               <TableCell>
-                                ${(product.price ?? 0).toFixed(2)}
+                                {formatPrice(product.price ?? 0)}
                               </TableCell>
                               <TableCell>
                                 {(() => {
@@ -787,9 +794,45 @@ export default function AdminProductsPage() {
                                     <span className="text-gray-500">
                                       Price:
                                     </span>
-                                    <span className="ml-1 font-medium">
-                                      ${product.price.toFixed(2)}
-                                    </span>
+                                    <div className="ml-1">
+                                      {(() => {
+                                        const discountInfo = calculateDiscount(
+                                          product.price,
+                                          product.discountedPrice
+                                        );
+
+                                        if (discountInfo.hasDiscount) {
+                                          return (
+                                            <div>
+                                              <span className="font-medium text-red-600">
+                                                {formatPrice(
+                                                  discountInfo.displayPrice
+                                                )}
+                                              </span>
+                                              <span className="text-xs line-through text-gray-500 ml-1">
+                                                {formatPrice(
+                                                  discountInfo.originalPrice
+                                                )}
+                                              </span>
+                                              <span className="text-xs text-green-600 font-medium ml-1">
+                                                Save{' '}
+                                                {formatSavingsPercentage(
+                                                  discountInfo.savingsPercentage
+                                                )}
+                                              </span>
+                                            </div>
+                                          );
+                                        } else {
+                                          return (
+                                            <span className="font-medium">
+                                              {formatPrice(
+                                                discountInfo.displayPrice
+                                              )}
+                                            </span>
+                                          );
+                                        }
+                                      })()}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

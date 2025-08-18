@@ -41,34 +41,53 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const isFirstRender = useRef(true);
-
+  // Load cart from localStorage on mount
   useEffect(() => {
-    if (isFirstRender.current) {
-      const storedCart = localStorage.getItem('cart');
-      if (storedCart) {
-        try {
-          setItems(JSON.parse(storedCart));
-        } catch (error) {
-          console.error('Failed to parse cart from localStorage:', error);
-          localStorage.removeItem('cart');
-        }
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        setItems(parsedCart);
+      } catch (error) {
+        console.error('Failed to parse cart from localStorage:', error);
+        localStorage.removeItem('cart');
       }
-      isFirstRender.current = false;
     }
+    setIsInitialized(true);
   }, []);
 
+  // Save cart to localStorage when items change (but only after initialization)
   useEffect(() => {
-    if (!isFirstRender.current) {
+    if (isInitialized) {
       localStorage.setItem('cart', JSON.stringify(items));
+      // Development-only logging to help debug
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Cart updated:', {
+          itemCount: items.length,
+          totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+          items: items.map((item) => ({
+            id: item.product._id || (item.product as any).id,
+            name: item.product.name,
+            quantity: item.quantity,
+          })),
+        });
+      }
     }
-  }, [items]);
+  }, [items, isInitialized]);
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
+  // Helper function to get effective price (discounted if available, otherwise original)
+  const getEffectivePrice = (product: IProduct & { _id: string }) => {
+    return product.discountedPrice && product.discountedPrice > 0
+      ? product.discountedPrice
+      : product.price;
+  };
+
   const subtotal = items.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+    (total, item) => total + getEffectivePrice(item.product) * item.quantity,
     0
   );
 
@@ -77,9 +96,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     quantity: number,
     color: string | { name: string; hex: string; _id?: string }
   ) => {
-    console.log('addItem called with product:', product);
-    console.log('Product _id:', product._id);
-    console.log('Product id:', (product as any).id);
+    // Don't allow cart modifications during initialization
+    if (!isInitialized) {
+      console.warn('Cart not initialized yet, ignoring addItem call');
+      return;
+    }
 
     // Normalize color to string for comparison
     const colorString = typeof color === 'string' ? color : color.name;
@@ -90,16 +111,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existingItemIndex = prevItems.findIndex((item) => {
         const itemColorString =
           typeof item.color === 'string' ? item.color : item.color.name;
-        return (
-          item.product._id === product._id && itemColorString === colorString
-        );
+        // Use both _id and id for comparison to handle both MongoDB ObjectId and string ID
+        const itemProductId = item.product._id || (item.product as any).id;
+        const productId = product._id || (product as any).id;
+
+        return itemProductId === productId && itemColorString === colorString;
       });
 
       if (existingItemIndex >= 0) {
+        // Update existing item quantity
         const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += quantity;
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + quantity,
+        };
         return updatedItems;
       } else {
+        // Add new item
         return [...prevItems, { product, quantity, color }];
       }
     });
@@ -118,13 +146,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return prevItems.filter((item) => {
           const itemColorString =
             typeof item.color === 'string' ? item.color : item.color.name;
+          // Use both _id and id for comparison
+          const itemProductId = item.product._id || (item.product as any).id;
           return !(
-            item.product._id === productId && itemColorString === colorString
+            itemProductId === productId && itemColorString === colorString
           );
         });
       } else {
         // Remove all items with this product ID (legacy behavior)
-        return prevItems.filter((item) => item.product._id !== productId);
+        return prevItems.filter((item) => {
+          const itemProductId = item.product._id || (item.product as any).id;
+          return itemProductId !== productId;
+        });
       }
     });
   };
@@ -134,9 +167,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     quantity: number,
     color: string | { name: string; hex: string; _id?: string }
   ) => {
-    console.log('updateQuantity called with:', { productId, quantity, color });
-    console.log('Current items:', items);
-
     if (quantity <= 0) {
       removeItem(productId, color);
       return;
@@ -154,16 +184,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const matches =
           itemProductId === productId && itemColorString === colorString;
 
-        console.log('Checking item:', {
-          itemId: itemProductId,
-          itemColor: item.color,
-          itemColorString,
-          matches: matches,
-        });
-
         return matches ? { ...item, quantity } : item;
       });
-      console.log('Updated items:', updatedItems);
       return updatedItems;
     });
   };

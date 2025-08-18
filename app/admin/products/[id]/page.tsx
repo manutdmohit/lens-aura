@@ -90,6 +90,7 @@ export default function ProductDetailPage() {
       name: '',
       description: '',
       price: 0,
+      discountedPrice: undefined,
       thumbnail: '',
       images: [],
       stockQuantity: 0,
@@ -485,6 +486,33 @@ export default function ProductDetailPage() {
                         {errors.price && (
                           <p className="text-red-500 text-sm">
                             {errors.price.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="discountedPrice">
+                          Discounted Price ($)
+                        </Label>
+                        <Input
+                          id="discountedPrice"
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00 (optional)"
+                          {...register('discountedPrice', {
+                            valueAsNumber: true,
+                          })}
+                          className={
+                            errors.discountedPrice ? 'border-red-500' : ''
+                          }
+                        />
+                        <p className="text-sm text-gray-500">
+                          Leave empty if no discount is applied. Must be less
+                          than regular price.
+                        </p>
+                        {errors.discountedPrice && (
+                          <p className="text-red-500 text-sm">
+                            {errors.discountedPrice.message}
                           </p>
                         )}
                       </div>
