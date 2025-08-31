@@ -9,7 +9,7 @@ import LoadingPage from '@/components/loading';
 import { Pagination } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Gem, ArrowLeft } from 'lucide-react';
+import { Gem, ArrowLeft, Sparkles } from 'lucide-react';
 import AnimatedSection from '@/components/animated-section';
 import { Playfair_Display } from 'next/font/google';
 import { formatPrice } from '@/lib/utils/discount';
