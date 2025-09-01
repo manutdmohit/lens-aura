@@ -9,7 +9,10 @@ import {
   type ReactNode,
 } from 'react';
 import { IProduct } from '@/models';
-import { calculatePromotionalPricing } from '@/lib/utils/discount';
+import {
+  calculatePromotionalPricing,
+  calculateSeptember2025Pricing,
+} from '@/lib/utils/discount';
 
 export interface CartItem {
   product: IProduct & { _id: string };
@@ -87,8 +90,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
-  // Helper function to get effective price (discounted if available, otherwise original)
+  // Helper function to get effective price (discounted, promotional, or original)
   const getEffectivePrice = (product: IProduct & { _id: string }) => {
+    // Check for September 2025 promotional pricing first
+    if (product.productType === 'sunglasses' && product.category) {
+      const septemberPricing = calculateSeptember2025Pricing(
+        product.price,
+        product.category as 'signature' | 'essentials'
+      );
+
+      if (septemberPricing.isActive) {
+        return septemberPricing.promotionalPrice;
+      }
+    }
+
+    // Fall back to regular discounted price or original price
     return product.discountedPrice && product.discountedPrice > 0
       ? product.discountedPrice
       : product.price;
@@ -105,16 +121,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
         item.product.category === 'essentials') &&
       quantity >= 2
     ) {
+      // Use the promotional price ($79/$39) for "buy two" calculations
+      const septemberPricing = calculateSeptember2025Pricing(
+        item.product.price,
+        item.product.category as 'signature' | 'essentials'
+      );
+
+      const promoPrice = septemberPricing.isActive
+        ? septemberPricing.promotionalPrice
+        : effectivePrice;
+
       const promo = calculatePromotionalPricing(
-        effectivePrice,
+        promoPrice,
         item.product.category as 'essentials' | 'signature'
       );
 
-      // Calculate how many pairs (2 items) get promotional pricing
-      const promotionalPairs = Math.floor(quantity / 2);
-      const remainingItems = quantity % 2;
+      // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+      const promotionalPairs = Math.min(1, Math.floor(quantity / 2)); // Only 1 pair gets promotional pricing
+      const remainingItems = quantity - promotionalPairs * 2; // All items beyond the first pair
 
-      // Price for promotional pairs + remaining items at regular price
+      // Price for 1 promotional pair + remaining items at regular price
       const promotionalPrice = promotionalPairs * promo.twoForPrice;
       const regularPrice = remainingItems * effectivePrice;
 
@@ -145,16 +171,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
         item.product.category === 'essentials') &&
       quantity >= 2
     ) {
+      // Use the promotional price ($79/$39) for "buy two" calculations
+      const septemberPricing = calculateSeptember2025Pricing(
+        item.product.price,
+        item.product.category as 'signature' | 'essentials'
+      );
+
+      const promoPrice = septemberPricing.isActive
+        ? septemberPricing.promotionalPrice
+        : effectivePrice;
+
       const promo = calculatePromotionalPricing(
-        effectivePrice,
+        promoPrice,
         item.product.category as 'essentials' | 'signature'
       );
 
-      // Calculate how many pairs (2 items) get promotional pricing
-      const promotionalPairs = Math.floor(quantity / 2);
-      const remainingItems = quantity % 2;
+      // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+      const promotionalPairs = Math.min(1, Math.floor(quantity / 2)); // Only 1 pair gets promotional pricing
+      const remainingItems = quantity - promotionalPairs * 2; // All items beyond the first pair
 
-      // Price for promotional pairs + remaining items at regular price
+      // Price for 1 promotional pair + remaining items at regular price
       const promotionalPrice = promotionalPairs * promo.twoForPrice;
       const regularPrice = remainingItems * effectivePrice;
       const totalPrice = promotionalPrice + regularPrice;

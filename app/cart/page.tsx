@@ -20,6 +20,7 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
+  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
 
 export default function CartPage() {
@@ -282,6 +283,40 @@ export default function CartPage() {
                         </p>
                         <div className="text-sm text-gray-500">
                           {(() => {
+                            // Check for August-September 2025 promotional pricing first
+                            const septemberPricing =
+                              calculateSeptember2025Pricing(
+                                item.product.price,
+                                item.product.category as
+                                  | 'signature'
+                                  | 'essentials'
+                              );
+
+                            if (septemberPricing.isActive) {
+                              return (
+                                <div>
+                                  <span className="text-purple-600 font-medium">
+                                    {formatPrice(
+                                      septemberPricing.promotionalPrice
+                                    )}
+                                  </span>
+                                  <span className="line-through ml-2">
+                                    {formatPrice(
+                                      septemberPricing.promotionalPrice +
+                                        septemberPricing.savings
+                                    )}
+                                  </span>
+                                  <span className="text-purple-600 text-xs ml-2">
+                                    {septemberPricing.saleMonth} Sale - Save{' '}
+                                    {formatSavingsPercentage(
+                                      septemberPricing.savingsPercentage
+                                    )}
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Fall back to regular discount logic
                             const discountInfo = calculateDiscount(
                               item.product.price,
                               item.product.discountedPrice

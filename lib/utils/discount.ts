@@ -132,3 +132,65 @@ export function calculatePromotionalPricing(
     savingsPercentage,
   };
 }
+
+/**
+ * Calculate August-September 2025 promotional pricing
+ * Signature: $79, Essentials: $39
+ */
+export function calculateSeptember2025Pricing(
+  originalPrice: number,
+  category: 'signature' | 'essentials'
+): {
+  promotionalPrice: number;
+  savings: number;
+  savingsPercentage: number;
+  isActive: boolean;
+  saleMonth: 'August' | 'September' | null;
+} {
+  const now = new Date();
+  const startDate = new Date('2025-08-31T00:00:00Z'); // Start from today (August 31, 2025)
+  const endDate = new Date('2025-09-30T23:59:59Z');
+
+  const isActive = now >= startDate && now <= endDate;
+
+  if (!isActive) {
+    return {
+      promotionalPrice: originalPrice,
+      savings: 0,
+      savingsPercentage: 0,
+      isActive: false,
+      saleMonth: null,
+    };
+  }
+
+  let promotionalPrice: number;
+
+  if (category === 'signature') {
+    promotionalPrice = 79;
+  } else if (category === 'essentials') {
+    promotionalPrice = 39;
+  } else {
+    return {
+      promotionalPrice: originalPrice,
+      savings: 0,
+      savingsPercentage: 0,
+      isActive: false,
+      saleMonth: null,
+    };
+  }
+
+  const savings = originalPrice - promotionalPrice;
+  const savingsPercentage = Math.round((savings / originalPrice) * 100);
+
+  // Determine which month the sale is active in
+  const currentMonth = now.getMonth(); // 7 for August, 8 for September
+  const saleMonth = currentMonth === 7 ? 'August' : 'September';
+
+  return {
+    promotionalPrice,
+    savings,
+    savingsPercentage,
+    isActive: true,
+    saleMonth,
+  };
+}

@@ -3,6 +3,10 @@ import type { CartItem } from '@/context/cart-context';
 import { connectToDatabase } from './api/db';
 import Order from '@/models/Order';
 import { updateOrderFromStripeSession } from './order-service';
+import {
+  calculateSeptember2025Pricing,
+  calculatePromotionalPricing,
+} from '@/lib/utils/discount';
 
 // Initialize Stripe with the secret key
 const getStripeSecretKey = () => {
@@ -78,14 +82,16 @@ export async function createCheckoutSession(
   }
 
   try {
-    // Format line items for Stripe
-    const lineItems = items.map((item) => {
+    // Format line items for Stripe with promotional pricing logic
+    const lineItems = [];
+
+    for (const item of items) {
       // Validate the image URL
       const validatedImageUrl = validateImageUrl(item.product.thumbnail);
 
       // Log product ID for debugging
       console.log(
-        `Adding product to Stripe checkout: ID=${item.product._id}, Name=${item.product.name}`
+        `Adding product to Stripe checkout: ID=${item.product._id}, Name=${item.product.name}, Quantity: ${item.quantity}`
       );
 
       // Handle color (could be string or ColorInfo object)
@@ -94,39 +100,151 @@ export async function createCheckoutSession(
           ? item.color
           : item.color?.name || 'Default';
 
-      // Calculate effective price (discounted if available, otherwise original)
-      const effectivePrice =
-        item.product.discountedPrice && item.product.discountedPrice > 0
+      // Check if this product qualifies for promotional pricing
+      if (
+        (item.product.category === 'signature' ||
+          item.product.category === 'essentials') &&
+        item.quantity >= 2
+      ) {
+        // Use the promotional price ($79/$39) for "buy two" calculations
+        const septemberPricing = calculateSeptember2025Pricing(
+          item.product.price,
+          item.product.category as 'signature' | 'essentials'
+        );
+
+        const promoPrice = septemberPricing.isActive
+          ? septemberPricing.promotionalPrice
+          : item.product.discountedPrice && item.product.discountedPrice > 0
           ? item.product.discountedPrice
           : item.product.price;
 
-      // Create a detailed metadata object for each product
-      const productMetadata = {
-        productId: item.product._id?.toString() || '',
-        color: colorName,
-        name: item.product.name,
-        originalPrice: item.product.price.toString(),
-        effectivePrice: effectivePrice.toString(),
-        quantity: item.quantity.toString(),
-      };
+        const promo = calculatePromotionalPricing(
+          promoPrice,
+          item.product.category as 'essentials' | 'signature'
+        );
 
-      // Log the metadata we're sending to Stripe
-      console.log('Product metadata:', JSON.stringify(productMetadata));
+        // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+        const promotionalPairs = Math.min(1, Math.floor(item.quantity / 2)); // Only 1 pair gets promotional pricing
+        const remainingItems = item.quantity - promotionalPairs * 2; // All items beyond the first pair
 
-      return {
-        price_data: {
-          currency: 'aud',
-          product_data: {
+        // Add promotional pair line item
+        if (promotionalPairs > 0) {
+          const promotionalMetadata = {
+            productId: item.product._id?.toString() || '',
+            color: colorName,
+            name: `${item.product.name} (Promotional Pair)`,
+            originalPrice: item.product.price.toString(),
+            effectivePrice: promo.twoForPrice.toString(),
+            quantity: '2',
+            promotionalPricing: 'true',
+            pricingType: 'promotional_pair',
+          };
+
+          lineItems.push({
+            price_data: {
+              currency: 'aud',
+              product_data: {
+                name: `${item.product.name} (Promotional Pair)`,
+                description: `Color: ${colorName} - Buy 2 for $${promo.twoForPrice}`,
+                images: validatedImageUrl ? [validatedImageUrl] : undefined,
+                metadata: promotionalMetadata,
+              },
+              unit_amount: Math.round(promo.twoForPrice * 100), // Convert to cents
+            },
+            quantity: promotionalPairs,
+          });
+        }
+
+        // Add remaining items at regular price
+        if (remainingItems > 0) {
+          const regularPrice = septemberPricing.isActive
+            ? septemberPricing.promotionalPrice
+            : item.product.discountedPrice && item.product.discountedPrice > 0
+            ? item.product.discountedPrice
+            : item.product.price;
+
+          const regularMetadata = {
+            productId: item.product._id?.toString() || '',
+            color: colorName,
             name: item.product.name,
-            description: `Color: ${colorName}`,
-            images: validatedImageUrl ? [validatedImageUrl] : undefined,
-            metadata: productMetadata,
+            originalPrice: item.product.price.toString(),
+            effectivePrice: regularPrice.toString(),
+            quantity: remainingItems.toString(),
+            promotionalPricing: 'false',
+            pricingType: 'regular',
+          };
+
+          lineItems.push({
+            price_data: {
+              currency: 'aud',
+              product_data: {
+                name: item.product.name,
+                description: `Color: ${colorName}`,
+                images: validatedImageUrl ? [validatedImageUrl] : undefined,
+                metadata: regularMetadata,
+              },
+              unit_amount: Math.round(regularPrice * 100), // Convert to cents
+            },
+            quantity: remainingItems,
+          });
+        }
+      } else {
+        // Regular pricing for non-promotional items or quantities less than 2
+        let effectivePrice = item.product.price;
+
+        // Check for August-September 2025 promotional pricing first
+        if (
+          item.product.productType === 'sunglasses' &&
+          item.product.category
+        ) {
+          const septemberPricing = calculateSeptember2025Pricing(
+            item.product.price,
+            item.product.category as 'signature' | 'essentials'
+          );
+
+          if (septemberPricing.isActive) {
+            effectivePrice = septemberPricing.promotionalPrice;
+          } else if (
+            item.product.discountedPrice &&
+            item.product.discountedPrice > 0
+          ) {
+            effectivePrice = item.product.discountedPrice;
+          }
+        } else if (
+          item.product.discountedPrice &&
+          item.product.discountedPrice > 0
+        ) {
+          effectivePrice = item.product.discountedPrice;
+        }
+
+        const productMetadata = {
+          productId: item.product._id?.toString() || '',
+          color: colorName,
+          name: item.product.name,
+          originalPrice: item.product.price.toString(),
+          effectivePrice: effectivePrice.toString(),
+          quantity: item.quantity.toString(),
+          promotionalPricing:
+            item.product.productType === 'sunglasses' && item.product.category
+              ? 'true'
+              : 'false',
+        };
+
+        lineItems.push({
+          price_data: {
+            currency: 'aud',
+            product_data: {
+              name: item.product.name,
+              description: `Color: ${colorName}`,
+              images: validatedImageUrl ? [validatedImageUrl] : undefined,
+              metadata: productMetadata,
+            },
+            unit_amount: Math.round(effectivePrice * 100), // Convert to cents
           },
-          unit_amount: Math.round(effectivePrice * 100), // Convert to cents
-        },
-        quantity: item.quantity,
-      };
-    });
+          quantity: item.quantity,
+        });
+      }
+    }
 
     // Also store product IDs and details in the session metadata for redundancy
     const sessionMetadata = {

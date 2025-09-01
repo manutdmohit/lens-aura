@@ -13,6 +13,7 @@ import {
   formatPrice,
   formatSavingsPercentage,
   calculatePromotionalPricing,
+  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
 
 interface ProductCardProps {
@@ -293,6 +294,45 @@ export default function ProductCard({
             <div className="flex items-center justify-between min-h-[60px]">
               <div className="flex items-baseline gap-2">
                 {(() => {
+                  // Check for September 2025 promotional pricing first
+                  const septemberPricing = calculateSeptember2025Pricing(
+                    product.price,
+                    product.category as 'signature' | 'essentials'
+                  );
+
+                  if (septemberPricing.isActive) {
+                    return (
+                      <>
+                        <div className="flex flex-col">
+                          <span
+                            className={`font-bold text-purple-600 ${
+                              variant === 'compact' ? 'text-lg' : 'text-2xl'
+                            }`}
+                          >
+                            {formatPrice(septemberPricing.promotionalPrice)}
+                          </span>
+                          <span
+                            className={`line-through text-gray-500 ${
+                              variant === 'compact' ? 'text-sm' : 'text-base'
+                            }`}
+                          >
+                            {formatPrice(
+                              septemberPricing.promotionalPrice +
+                                septemberPricing.savings
+                            )}
+                          </span>
+                        </div>
+                        <span className="text-xs text-purple-600 font-medium">
+                          {septemberPricing.saleMonth} Sale{' '}
+                          {formatSavingsPercentage(
+                            septemberPricing.savingsPercentage
+                          )}
+                        </span>
+                      </>
+                    );
+                  }
+
+                  // Fall back to regular discount logic
                   const discountInfo = calculateDiscount(
                     product.price,
                     product.discountedPrice
@@ -361,12 +401,22 @@ export default function ProductCard({
                 <div className="p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-amber-800 font-medium">
-                      🎉 Buy Two Offer:
+                      🎉 Buy Two & Save:
                     </span>
                     <span className="text-amber-600">
                       {(() => {
-                        const promo = calculatePromotionalPricing(
+                        // Use promotional price ($79/$39) for "buy two" calculations
+                        const septemberPricing = calculateSeptember2025Pricing(
                           product.price,
+                          product.category as 'essentials' | 'signature'
+                        );
+
+                        const promoPrice = septemberPricing.isActive
+                          ? septemberPricing.promotionalPrice
+                          : product.price;
+
+                        const promo = calculatePromotionalPricing(
+                          promoPrice,
                           product.category as 'essentials' | 'signature'
                         );
                         return `Two for ${formatPrice(

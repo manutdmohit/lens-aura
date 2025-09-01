@@ -175,6 +175,9 @@ export async function POST(request: NextRequest) {
             quantity: item.quantity,
             price: item.price,
             color: item.color,
+            productType: item.productType,
+            category: item.product?.category || item.category,
+            originalPrice: item.originalPrice,
           })),
           total: foundOrder.totalAmount,
         });

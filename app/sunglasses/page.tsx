@@ -20,7 +20,12 @@ import { ArrowRight, Star, Shield, Gem } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AnimatedSection from '@/components/animated-section';
 import { Playfair_Display } from 'next/font/google';
-import { formatPrice, calculatePromotionalPricing } from '@/lib/utils/discount';
+import {
+  formatPrice,
+  formatSavingsPercentage,
+  calculatePromotionalPricing,
+  calculateSeptember2025Pricing,
+} from '@/lib/utils/discount';
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 
@@ -125,6 +130,52 @@ function SunglassesContent() {
                 Discover our signature and essentials sunglasses collections.
                 From luxury designer frames to everyday essentials, we have the
                 perfect pair for every style and budget.
+              </p>
+            </AnimatedSection>
+          </div>
+        </section>
+
+        {/* September 2025 Promotional Banner */}
+        <section className="py-12 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <div className="max-w-6xl mx-auto px-4">
+            <AnimatedSection direction="up" className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                🎉{' '}
+                {(() => {
+                  const now = new Date();
+                  const currentMonth = now.getMonth();
+                  return currentMonth === 7
+                    ? 'August Sale - Active Now!'
+                    : 'September Sale - Active Now!';
+                })()}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Signature Collection
+                  </h3>
+                  <p className="text-white/90 mb-3">
+                    Limited time offer - all signature sunglasses
+                  </p>
+                  <div className="text-2xl font-bold text-white">
+                    Just {formatPrice(79)}
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Essentials Collection
+                  </h3>
+                  <p className="text-white/90 mb-3">
+                    Limited time offer - all essentials sunglasses
+                  </p>
+                  <div className="text-2xl font-bold text-white">
+                    Just {formatPrice(39)}
+                  </div>
+                </div>
+              </div>
+              <p className="text-white/80 mt-6 text-sm">
+                *Offer valid August 31 - September 30, 2025. Cannot be combined
+                with other promotions.
               </p>
             </AnimatedSection>
           </div>
@@ -422,7 +473,15 @@ function SunglassesContent() {
                     Two for the price of (Essentials + 25% of Essentials)
                   </p>
                   <div className="text-2xl font-bold text-white">
-                    Save up to 37.5%
+                    {(() => {
+                      const promo = calculatePromotionalPricing(
+                        39,
+                        'essentials'
+                      );
+                      return `Save up to ${formatSavingsPercentage(
+                        promo.savingsPercentage
+                      )}`;
+                    })()}
                   </div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
@@ -433,7 +492,15 @@ function SunglassesContent() {
                     Two for the price of (Signature + 50% of Signature)
                   </p>
                   <div className="text-2xl font-bold text-white">
-                    Save up to 25%
+                    {(() => {
+                      const promo = calculatePromotionalPricing(
+                        79,
+                        'signature'
+                      );
+                      return `Save up to ${formatSavingsPercentage(
+                        promo.savingsPercentage
+                      )}`;
+                    })()}
                   </div>
                 </div>
               </div>

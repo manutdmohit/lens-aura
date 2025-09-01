@@ -1,4 +1,8 @@
 import sgMail from '@sendgrid/mail';
+import {
+  calculateSeptember2025Pricing,
+  calculatePromotionalPricing,
+} from '@/lib/utils/discount';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
@@ -7,6 +11,9 @@ interface InvoiceItem {
   quantity: number;
   price: number;
   color?: string;
+  productType?: string;
+  category?: string;
+  originalPrice?: number;
 }
 
 export async function sendInvoiceEmail({
@@ -23,15 +30,51 @@ export async function sendInvoiceEmail({
   const logoUrl = 'https://lens-aura.vercel.app/images/logo.png'; // <-- Replace with your real logo URL
 
   const itemRows = items
-    .map(
-      (item) =>
-        `<tr>
-          <td style="padding: 8px 4px; border-bottom: 1px solid #eee;">${item.name}</td>
-          <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:center;">${item.color || '-'}</td>
-          <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:center;">${item.quantity}</td>
-          <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:right;">$${item.price.toFixed(2)}</td>
-        </tr>`
-    )
+    .map((item) => {
+      // Check if this item has promotional pricing
+      let priceDisplay = `$${item.price.toFixed(2)}`;
+      let promotionalNote = '';
+
+      if (
+        item.productType === 'sunglasses' &&
+        item.category &&
+        item.originalPrice
+      ) {
+        const septemberPricing = calculateSeptember2025Pricing(
+          item.originalPrice,
+          item.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          // Show promotional pricing with original price crossed out
+          priceDisplay = `
+            <span style="color: #dc2626; font-weight: 600;">$${item.price.toFixed(
+              2
+            )}</span>
+            <br>
+            <span style="text-decoration: line-through; color: #6b7280; font-size: 12px;">$${item.originalPrice.toFixed(
+              2
+            )}</span>
+          `;
+          promotionalNote = `<br><span style="color: #dc2626; font-size: 11px;">${
+            septemberPricing.saleMonth
+          } Sale - Save $${septemberPricing.savings.toFixed(2)}</span>`;
+        }
+      }
+
+      return `<tr>
+        <td style="padding: 8px 4px; border-bottom: 1px solid #eee;">
+          ${item.name}${promotionalNote}
+        </td>
+        <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:center;">${
+          item.color || '-'
+        }</td>
+        <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:center;">${
+          item.quantity
+        }</td>
+        <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align:right;">${priceDisplay}</td>
+      </tr>`;
+    })
     .join('');
 
   const html = `
@@ -60,7 +103,9 @@ export async function sendInvoiceEmail({
             </tbody>
           </table>
           <div style="text-align: right; margin-bottom: 32px;">
-            <span style="font-size: 18px; color: #222; font-weight: 600;">Total: $${total.toFixed(2)}</span>
+            <span style="font-size: 18px; color: #222; font-weight: 600;">Total: $${total.toFixed(
+              2
+            )}</span>
           </div>
           <div style="background: #f6f8fb; padding: 18px 24px; border-radius: 8px; color: #444; font-size: 15px;">
             <p style="margin: 0 0 8px 0;">If you have any questions about your order, simply reply to this email or contact our support team.</p>
@@ -91,4 +136,4 @@ export async function sendInvoiceEmail({
     console.error('SendGrid error:', e.response?.body || e);
     throw e;
   }
-} 
+}

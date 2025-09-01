@@ -3,6 +3,10 @@ import Order from '@/models/Order';
 import type { CartItem } from '@/context/cart-context';
 import mongoose from 'mongoose';
 import { updateProductStock } from './products';
+import {
+  calculateSeptember2025Pricing,
+  calculatePromotionalPricing,
+} from '@/lib/utils/discount';
 import type { IProduct } from '@/models/Product';
 import Product from '@/models/Product';
 
@@ -59,11 +63,30 @@ export async function createPendingOrder(
           ? item.color
           : item.color?.name || 'Default';
 
-      // Calculate effective price (discounted if available, otherwise original)
-      const effectivePrice =
-        item.product.discountedPrice && item.product.discountedPrice > 0
-          ? item.product.discountedPrice
-          : item.product.price;
+      // Calculate effective price (promotional pricing first, then discounted, then original)
+      let effectivePrice = item.product.price;
+
+      // Check for August-September 2025 promotional pricing first
+      if (item.product.productType === 'sunglasses' && item.product.category) {
+        const septemberPricing = calculateSeptember2025Pricing(
+          item.product.price,
+          item.product.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          effectivePrice = septemberPricing.promotionalPrice;
+        } else if (
+          item.product.discountedPrice &&
+          item.product.discountedPrice > 0
+        ) {
+          effectivePrice = item.product.discountedPrice;
+        }
+      } else if (
+        item.product.discountedPrice &&
+        item.product.discountedPrice > 0
+      ) {
+        effectivePrice = item.product.discountedPrice;
+      }
 
       return {
         productId: productId,
@@ -78,13 +101,80 @@ export async function createPendingOrder(
       };
     });
 
-    // Calculate total amount using effective prices
+    // Calculate total amount using promotional pricing logic (same as cart)
     const totalAmount = items.reduce((total, item) => {
-      const effectivePrice =
-        item.product.discountedPrice && item.product.discountedPrice > 0
+      const quantity = item.quantity;
+
+      // Check if this product qualifies for promotional pricing
+      if (
+        (item.product.category === 'signature' ||
+          item.product.category === 'essentials') &&
+        quantity >= 2
+      ) {
+        // Use the promotional price ($79/$39) for "buy two" calculations
+        const septemberPricing = calculateSeptember2025Pricing(
+          item.product.price,
+          item.product.category as 'signature' | 'essentials'
+        );
+
+        const promoPrice = septemberPricing.isActive
+          ? septemberPricing.promotionalPrice
+          : item.product.discountedPrice && item.product.discountedPrice > 0
           ? item.product.discountedPrice
           : item.product.price;
-      return total + effectivePrice * item.quantity;
+
+        const promo = calculatePromotionalPricing(
+          promoPrice,
+          item.product.category as 'essentials' | 'signature'
+        );
+
+        // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+        const promotionalPairs = Math.min(1, Math.floor(quantity / 2)); // Only 1 pair gets promotional pricing
+        const remainingItems = quantity - promotionalPairs * 2; // All items beyond the first pair
+
+        // Price for 1 promotional pair + remaining items at regular price
+        const promotionalPrice = promotionalPairs * promo.twoForPrice;
+        const regularPrice =
+          remainingItems *
+          (septemberPricing.isActive
+            ? septemberPricing.promotionalPrice
+            : item.product.discountedPrice && item.product.discountedPrice > 0
+            ? item.product.discountedPrice
+            : item.product.price);
+        const totalPrice = promotionalPrice + regularPrice;
+
+        return total + totalPrice;
+      } else {
+        // Regular pricing for non-promotional items or quantities less than 2
+        let effectivePrice = item.product.price;
+
+        // Check for August-September 2025 promotional pricing first
+        if (
+          item.product.productType === 'sunglasses' &&
+          item.product.category
+        ) {
+          const septemberPricing = calculateSeptember2025Pricing(
+            item.product.price,
+            item.product.category as 'signature' | 'essentials'
+          );
+
+          if (septemberPricing.isActive) {
+            effectivePrice = septemberPricing.promotionalPrice;
+          } else if (
+            item.product.discountedPrice &&
+            item.product.discountedPrice > 0
+          ) {
+            effectivePrice = item.product.discountedPrice;
+          }
+        } else if (
+          item.product.discountedPrice &&
+          item.product.discountedPrice > 0
+        ) {
+          effectivePrice = item.product.discountedPrice;
+        }
+
+        return total + effectivePrice * quantity;
+      }
     }, 0);
 
     // Generate a unique order number

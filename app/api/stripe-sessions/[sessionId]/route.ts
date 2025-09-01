@@ -4,6 +4,7 @@ import Order from '@/models/Order';
 import Stripe from 'stripe';
 import { createPendingOrder } from '@/lib/order-service';
 import { updateProductStock } from '@/lib/products';
+import { sendPaymentNotification, sendPaymentStatusUpdate } from '@/lib/telegram-utils';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -144,6 +145,14 @@ export async function GET(req: NextRequest, context: any) {
       }
 
       await order.save();
+
+      // Send payment notification to Telegram
+      try {
+        await sendPaymentNotification(order, session);
+        console.log('[DEBUG] Payment notification sent to Telegram');
+      } catch (error) {
+        console.error('[DEBUG] Failed to send payment notification to Telegram:', error);
+      }
     }
 
     return NextResponse.json({

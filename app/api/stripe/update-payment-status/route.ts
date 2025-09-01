@@ -3,6 +3,7 @@ import { checkPaymentStatus } from '@/lib/stripe-utils';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
 import { updateOrderFromStripeSession } from '@/lib/order-service';
+import { sendPaymentStatusUpdate } from '@/lib/telegram-utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,6 +48,14 @@ export async function GET(request: NextRequest) {
       // Update order status to paid
       order.paymentStatus = 'paid';
       await order.save();
+      
+      // Send payment status update to Telegram
+      try {
+        await sendPaymentStatusUpdate(order, 'paid', 'Payment completed successfully');
+        console.log('Payment status update sent to Telegram');
+      } catch (error) {
+        console.error('Failed to send payment status update to Telegram:', error);
+      }
       
       return NextResponse.json({
         success: true,

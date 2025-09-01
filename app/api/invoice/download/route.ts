@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
+import puppeteer from 'puppeteer';
+import {
+  calculateSeptember2025Pricing,
+  calculatePromotionalPricing,
+} from '@/lib/utils/discount';
 
 interface OrderItem {
   productId: string;
@@ -9,6 +14,9 @@ interface OrderItem {
   quantity: number;
   color: string;
   imageUrl?: string;
+  productType?: string;
+  category?: string;
+  originalPrice?: number;
 }
 
 interface OrderDetails {
@@ -105,6 +113,11 @@ export async function POST(req: NextRequest) {
             quantity: item.quantity,
             color: item.color,
             imageUrl: item.imageUrl,
+            productType: item.productType,
+            category: item.product?.category || item.category,
+            originalPrice: item.originalPrice
+              ? item.originalPrice * 100
+              : undefined, // Convert to cents
           })),
           totalAmount: order.totalAmount * 100, // Convert to cents
           paymentStatus: order.paymentStatus,
@@ -169,36 +182,53 @@ export async function POST(req: NextRequest) {
       orderNumber: completeOrderDetails.orderNumber,
     });
 
-    // Generate HTML invoice
-    const htmlContent = generateInvoiceHTML(completeOrderDetails);
+    // Generate PDF invoice
+    const pdfBuffer = await generateInvoicePDF(completeOrderDetails);
 
-    console.log('HTML invoice generated successfully');
+    console.log('PDF invoice generated successfully');
 
-    return new NextResponse(htmlContent, {
+    return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
-        'Content-Type': 'text/html',
-        'Content-Disposition': `attachment; filename="invoice-${completeOrderDetails.orderNumber}.html"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="invoice-${completeOrderDetails.orderNumber}.pdf"`,
         'Cache-Control': 'no-cache',
       },
     });
   } catch (error) {
     console.error('Error generating invoice:', error);
+
+    // Provide more specific error messages
+    let errorMessage = 'Failed to generate invoice';
+    let errorDetails = 'Unknown error';
+
+    if (error instanceof Error) {
+      errorDetails = error.message;
+      if (error.message.includes('PDFKit')) {
+        errorMessage = 'PDF generation library error';
+      } else if (error.message.includes('Order items')) {
+        errorMessage = 'Invalid order data';
+      } else if (error.message.includes('Customer details')) {
+        errorMessage = 'Missing customer information';
+      }
+    }
+
     return NextResponse.json(
       {
-        error: 'Failed to generate invoice',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
+        details: errorDetails,
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
   }
 }
 
-function generateInvoiceHTML(orderDetails: OrderDetails): string {
+async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
   const { customer_details, items, orderNumber, createdAt, amount_total } =
     orderDetails;
 
-  console.log('Generating HTML for order details:', {
+  console.log('Generating PDF for order details:', {
     orderNumber,
     items: items ? items.length : 'undefined',
     customer_details: customer_details ? 'present' : 'undefined',
@@ -218,71 +248,146 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
     throw new Error('Customer details are required for invoice generation');
   }
 
+  try {
+    // Generate HTML content
+    const htmlContent = generateInvoiceHTML(orderDetails);
+
+    // Launch browser
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    const page = await browser.newPage();
+
+    // Set content and wait for it to load
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      margin: {
+        top: '20mm',
+        right: '20mm',
+        bottom: '20mm',
+        left: '20mm',
+      },
+      printBackground: true,
+    });
+
+    await browser.close();
+
+    return pdfBuffer;
+  } catch (error) {
+    console.error('Error generating PDF with Puppeteer:', error);
+    throw new Error(
+      `PDF generation failed: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
+}
+
+function generateInvoiceHTML(orderDetails: OrderDetails): string {
+  const { customer_details, items, orderNumber, createdAt, amount_total } =
+    orderDetails;
+
   const itemsHTML = items
-    .map(
-      (item, index) => `
+    .map((item, index) => {
+      const itemQuantity = item.quantity || 0;
+      let effectivePrice = (item.price || 0) / 100;
+      let actualTotal = effectivePrice * itemQuantity;
+      let promotionalNote = '';
+
+      // Handle promotional pricing
+      if (
+        item.productType === 'sunglasses' &&
+        item.category &&
+        item.originalPrice &&
+        itemQuantity >= 2
+      ) {
+        const originalPrice = (item.originalPrice || 0) / 100;
+        const septemberPricing = calculateSeptember2025Pricing(
+          originalPrice,
+          item.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          const promo = calculatePromotionalPricing(
+            septemberPricing.promotionalPrice,
+            item.category as 'essentials' | 'signature'
+          );
+
+          const promotionalPairs = Math.min(1, Math.floor(itemQuantity / 2));
+          const remainingItems = itemQuantity - promotionalPairs * 2;
+
+          if (promotionalPairs > 0 && remainingItems > 0) {
+            const promotionalPrice = promotionalPairs * promo.twoForPrice;
+            const regularPrice =
+              remainingItems * septemberPricing.promotionalPrice;
+            actualTotal = promotionalPrice + regularPrice;
+            effectivePrice = actualTotal / itemQuantity;
+            promotionalNote = ` (Mixed pricing)`;
+          } else if (promotionalPairs > 0) {
+            actualTotal = promotionalPairs * promo.twoForPrice;
+            effectivePrice = actualTotal / itemQuantity;
+          }
+
+          if (septemberPricing.savings > 0) {
+            promotionalNote += ` - ${septemberPricing.saleMonth} Sale`;
+          }
+        }
+      }
+
+      return `
         <tr>
           <td>${index + 1}</td>
-          <td>${item.name || 'Unknown Product'}</td>
-          <td>${item.quantity || 0}</td>
-          <td>$${((item.price || 0) / 100).toFixed(2)}</td>
-          <td>$${(((item.price || 0) * (item.quantity || 0)) / 100).toFixed(
-            2
-          )}</td>
+          <td>${item.name || 'Unknown Product'}${promotionalNote}</td>
+          <td>${item.color || 'N/A'}</td>
+          <td>${itemQuantity}</td>
+          <td>$${effectivePrice.toFixed(2)}</td>
+          <td>$${actualTotal.toFixed(2)}</td>
         </tr>
-      `
-    )
+      `;
+    })
     .join('');
 
   return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html>
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Invoice ${orderNumber}</title>
+      <meta charset="utf-8">
+      <title>Invoice - ${orderNumber}</title>
       <style>
         body {
           font-family: Arial, sans-serif;
           margin: 0;
           padding: 20px;
-          background-color: #f5f5f5;
-        }
-        .invoice-container {
-          max-width: 800px;
-          margin: 0 auto;
-          background-color: white;
-          padding: 40px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          color: #333;
         }
         .header {
           text-align: center;
-          margin-bottom: 40px;
-          border-bottom: 2px solid #333;
-          padding-bottom: 20px;
+          margin-bottom: 30px;
         }
         .company-name {
-          font-size: 28px;
+          font-size: 24px;
           font-weight: bold;
-          color: #333;
           margin-bottom: 5px;
         }
         .company-tagline {
-          font-size: 14px;
+          font-size: 12px;
           color: #666;
           margin-bottom: 10px;
         }
         .company-info {
-          font-size: 12px;
-          color: #888;
+          font-size: 10px;
+          color: #666;
         }
         .invoice-title {
-          font-size: 24px;
+          font-size: 20px;
           font-weight: bold;
           text-align: center;
-          margin: 30px 0;
-          color: #333;
+          margin: 20px 0;
         }
         .invoice-details {
           display: flex;
@@ -294,118 +399,102 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
         }
         .invoice-info h3, .customer-info h3 {
           margin: 0 0 10px 0;
-          color: #333;
-          font-size: 16px;
+          font-size: 14px;
         }
         .invoice-info p, .customer-info p {
           margin: 5px 0;
-          color: #666;
-          font-size: 14px;
+          font-size: 12px;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          margin: 30px 0;
+          margin-bottom: 20px;
         }
         th, td {
-          padding: 12px;
+          border: 1px solid #ddd;
+          padding: 8px;
           text-align: left;
-          border-bottom: 1px solid #ddd;
+          font-size: 12px;
         }
         th {
-          background-color: #f8f9fa;
+          background-color: #f5f5f5;
           font-weight: bold;
-          color: #333;
         }
         .total {
           text-align: right;
-          font-size: 18px;
+          font-size: 14px;
           font-weight: bold;
           margin-top: 20px;
-          padding-top: 20px;
-          border-top: 2px solid #333;
         }
         .footer {
           text-align: center;
-          margin-top: 40px;
-          padding-top: 20px;
-          border-top: 1px solid #ddd;
+          margin-top: 30px;
+          font-size: 10px;
           color: #666;
-          font-size: 12px;
-        }
-        @media print {
-          body {
-            background-color: white;
-          }
-          .invoice-container {
-            box-shadow: none;
-            padding: 20px;
-          }
         }
       </style>
     </head>
     <body>
-      <div class="invoice-container">
-                 <div class="header">
-           <div class="company-name">LENS AURA</div>
-           <div class="company-tagline">Your Vision, Our Passion</div>
-           <div class="company-info">
-             Phone: +61 402 564 501 | Email: info@lensaura.com.au
-           </div>
-         </div>
-
-        <div class="invoice-title">INVOICE</div>
-
-        <div class="invoice-details">
-          <div class="invoice-info">
-            <h3>Invoice Details</h3>
-            <p><strong>Invoice Number:</strong> ${orderNumber}</p>
-            <p><strong>Date:</strong> ${new Date(
-              createdAt
-            ).toLocaleDateString()}</p>
-            <p><strong>Status:</strong> Paid</p>
-          </div>
-                     <div class="customer-info">
-             <h3>Bill To</h3>
-             <p><strong>${customer_details.name}</strong></p>
-             <p>${customer_details.email}</p>
-             <p>${customer_details.address.line1}</p>
-             ${
-               customer_details.address.line2
-                 ? `<p>${customer_details.address.line2}</p>`
-                 : ''
-             }
-             <p>${customer_details.address.city}, ${
+      <div class="header">
+        <div class="company-name">LENS AURA</div>
+        <div class="company-tagline">Where Vision Meets Aura</div>
+        <div class="company-info">
+          Phone: +61 402 564 501 | Email: info@lensaura.com.au
+        </div>
+      </div>
+      
+      <div class="invoice-title">INVOICE</div>
+      
+      <div class="invoice-details">
+        <div class="invoice-info">
+          <h3>Invoice Details</h3>
+          <p><strong>Invoice Number:</strong> ${orderNumber}</p>
+          <p><strong>Date:</strong> ${new Date(
+            createdAt
+          ).toLocaleDateString()}</p>
+          <p><strong>Status:</strong> Paid</p>
+        </div>
+        <div class="customer-info">
+          <h3>Bill To</h3>
+          <p>${customer_details.name}</p>
+          <p>${customer_details.email}</p>
+          <p>${customer_details.address.line1}</p>
+          ${
+            customer_details.address.line2
+              ? `<p>${customer_details.address.line2}</p>`
+              : ''
+          }
+          <p>${customer_details.address.city}, ${
     customer_details.address.state
   } ${customer_details.address.postal_code}</p>
-             <p>${customer_details.address.country}</p>
-           </div>
+          <p>${customer_details.address.country}</p>
         </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Description</th>
-              <th>Qty</th>
-              <th>Price</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHTML}
-          </tbody>
-        </table>
-
-        <div class="total">
-          Total: $${(amount_total / 100).toFixed(2)}
-        </div>
-
-                 <div class="footer">
-           <p>Thank you for your purchase!</p>
-           <p>For any questions, please contact us at info@lensaura.com.au</p>
-           <p>This invoice was generated automatically.</p>
-         </div>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHTML}
+        </tbody>
+      </table>
+      
+      <div class="total">
+        Total: $${(amount_total / 100).toFixed(2)}
+      </div>
+      
+      <div class="footer">
+        <p>Thank you for your purchase!</p>
+        <p>For any questions, please contact us at info@lensaura.com.au</p>
+        <p>This invoice was generated automatically.</p>
       </div>
     </body>
     </html>

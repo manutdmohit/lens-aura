@@ -107,3 +107,35 @@ The Telegram messages include:
 ✅ Error handling and logging  
 ✅ Test endpoint for verification  
 ✅ Subject mapping for better readability
+
+## Payment Notifications
+
+The system now also sends payment-related notifications to Telegram:
+
+### Payment Success Notifications
+- 💳 New payment received notifications
+- Complete order details including items, customer info, and shipping address
+- Payment method and Stripe session information
+- Quick action links for order management
+
+### Payment Status Updates
+- ✅ Payment status changes (paid, pending, failed)
+- Real-time updates when payment status changes
+- Additional context information when available
+
+### Payment Failure Notifications
+- ❌ Failed payment notifications
+- Error details and troubleshooting information
+- Customer contact information for follow-up
+
+### Order Management Notifications
+- 🚫 Order cancellation notifications
+- 💰 Refund processed notifications
+- Complete order history tracking
+
+### Notification Features
+- Rich formatting with emojis and HTML
+- Australian timezone timestamps
+- Quick action links for admin panel access
+- Customer contact information for immediate response
+- Comprehensive order details for quick assessment

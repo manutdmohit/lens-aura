@@ -231,15 +231,15 @@ export default function CheckoutSuccessPage() {
         );
       }
 
-      const htmlContent = await response.text();
-      console.log('Received HTML content length:', htmlContent.length);
+      const pdfBuffer = await response.arrayBuffer();
+      console.log('Received PDF buffer length:', pdfBuffer.byteLength);
 
-      // Create a blob with the HTML content
-      const blob = new Blob([htmlContent], { type: 'text/html' });
+      // Create a blob with the PDF content
+      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `invoice-${orderDetails.orderNumber}.html`;
+      link.download = `invoice-${orderDetails.orderNumber}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

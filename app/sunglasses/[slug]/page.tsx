@@ -15,6 +15,7 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
+  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
 import {
   AlertCircle,
@@ -366,6 +367,35 @@ export default function SunGlassesProductPage() {
                 </h1>
                 <div className="flex flex-col items-end">
                   {(() => {
+                    // Check for August-September 2025 promotional pricing first
+                    const septemberPricing = calculateSeptember2025Pricing(
+                      product.price,
+                      product.category as 'signature' | 'essentials'
+                    );
+
+                    if (septemberPricing.isActive) {
+                      return (
+                        <>
+                          <p className="text-2xl md:text-3xl font-bold text-purple-600">
+                            {formatPrice(septemberPricing.promotionalPrice)}
+                          </p>
+                          <p className="text-lg md:text-xl line-through text-gray-500">
+                            {formatPrice(
+                              septemberPricing.promotionalPrice +
+                                septemberPricing.savings
+                            )}
+                          </p>
+                          <p className="text-sm text-purple-600 font-medium">
+                            {septemberPricing.saleMonth} Sale - Save{' '}
+                            {formatSavingsPercentage(
+                              septemberPricing.savingsPercentage
+                            )}
+                          </p>
+                        </>
+                      );
+                    }
+
+                    // Fall back to regular discount logic
                     const discountInfo = calculateDiscount(
                       product.price,
                       product.discountedPrice

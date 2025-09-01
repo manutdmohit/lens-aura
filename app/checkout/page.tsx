@@ -9,7 +9,10 @@ import { useCart } from '@/context/cart-context';
 import { createCheckoutSession } from '@/actions/checkout';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
-import { formatPrice } from '@/lib/utils/discount';
+import {
+  formatPrice,
+  calculateSeptember2025Pricing,
+} from '@/lib/utils/discount';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -130,11 +133,24 @@ export default function CheckoutPage() {
                         <div className="text-right">
                           {(() => {
                             const itemPricing = getItemPrice(item);
-                            const regularPrice =
-                              (item.product.discountedPrice &&
-                              item.product.discountedPrice > 0
-                                ? item.product.discountedPrice
-                                : item.product.price) * item.quantity;
+
+                            // Calculate regular price considering August-September promotional pricing
+                            const septemberPricing =
+                              calculateSeptember2025Pricing(
+                                item.product.price,
+                                item.product.category as
+                                  | 'signature'
+                                  | 'essentials'
+                              );
+
+                            const effectivePrice = septemberPricing.isActive
+                              ? septemberPricing.promotionalPrice
+                              : item.product.discountedPrice &&
+                                item.product.discountedPrice > 0
+                              ? item.product.discountedPrice
+                              : item.product.price;
+
+                            const regularPrice = effectivePrice * item.quantity;
 
                             if (itemPricing.savings > 0) {
                               return (

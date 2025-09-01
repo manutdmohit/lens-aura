@@ -20,6 +20,7 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
+  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
 
 export default function CartDropdown() {
@@ -220,11 +221,22 @@ export default function CartDropdown() {
                           <div className="text-sm text-gray-500">
                             {(() => {
                               const itemPricing = getItemPrice(item);
-                              const effectivePrice =
-                                item.product.discountedPrice &&
-                                item.product.discountedPrice > 0
-                                  ? item.product.discountedPrice
-                                  : item.product.price;
+
+                              // Check for August-September 2025 promotional pricing first
+                              const septemberPricing =
+                                calculateSeptember2025Pricing(
+                                  item.product.price,
+                                  item.product.category as
+                                    | 'signature'
+                                    | 'essentials'
+                                );
+
+                              const effectivePrice = septemberPricing.isActive
+                                ? septemberPricing.promotionalPrice
+                                : item.product.discountedPrice &&
+                                  item.product.discountedPrice > 0
+                                ? item.product.discountedPrice
+                                : item.product.price;
 
                               if (itemPricing.savings > 0) {
                                 return (

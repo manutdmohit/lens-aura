@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatPrice } from '@/lib/utils/discount';
+import {
+  formatPrice,
+  calculateSeptember2025Pricing,
+} from '@/lib/utils/discount';
 
 interface PriceRange {
   lowest: {
@@ -190,9 +193,28 @@ export default function PriceRangeDisplay() {
                         Starting from
                       </p>
                       <p className="font-semibold text-blue-600">
-                        {formatPrice(
-                          priceRanges.premiumSunglasses.lowest.price
-                        )}
+                        {(() => {
+                          const septemberPricing =
+                            calculateSeptember2025Pricing(
+                              priceRanges.premiumSunglasses.lowest.price,
+                              'signature'
+                            );
+
+                          if (septemberPricing.isActive) {
+                            return (
+                              <span className="text-purple-600">
+                                {formatPrice(septemberPricing.promotionalPrice)}
+                                <span className="text-xs text-purple-500 ml-2">
+                                  {septemberPricing.saleMonth} Sale
+                                </span>
+                              </span>
+                            );
+                          }
+
+                          return formatPrice(
+                            priceRanges.premiumSunglasses.lowest.price
+                          );
+                        })()}
                       </p>
                     </div>
                     <div className="text-right">
@@ -213,9 +235,28 @@ export default function PriceRangeDisplay() {
                         Premium options
                       </p>
                       <p className="font-semibold text-amber-600">
-                        {formatPrice(
-                          priceRanges.premiumSunglasses.highest.price
-                        )}
+                        {(() => {
+                          const septemberPricing =
+                            calculateSeptember2025Pricing(
+                              priceRanges.premiumSunglasses.highest.price,
+                              'signature'
+                            );
+
+                          if (septemberPricing.isActive) {
+                            return (
+                              <span className="text-purple-600">
+                                {formatPrice(septemberPricing.promotionalPrice)}
+                                <span className="text-xs text-purple-500 ml-2">
+                                  {septemberPricing.saleMonth} Sale
+                                </span>
+                              </span>
+                            );
+                          }
+
+                          return formatPrice(
+                            priceRanges.premiumSunglasses.highest.price
+                          );
+                        })()}
                       </p>
                     </div>
                     <div className="text-right">
@@ -269,9 +310,28 @@ export default function PriceRangeDisplay() {
                         Starting from
                       </p>
                       <p className="font-semibold text-green-600">
-                        {formatPrice(
-                          priceRanges.standardSunglasses.lowest.price
-                        )}
+                        {(() => {
+                          const septemberPricing =
+                            calculateSeptember2025Pricing(
+                              priceRanges.standardSunglasses.lowest.price,
+                              'essentials'
+                            );
+
+                          if (septemberPricing.isActive) {
+                            return (
+                              <span className="text-purple-600">
+                                {formatPrice(septemberPricing.promotionalPrice)}
+                                <span className="text-xs text-purple-500 ml-2">
+                                  {septemberPricing.saleMonth} Sale
+                                </span>
+                              </span>
+                            );
+                          }
+
+                          return formatPrice(
+                            priceRanges.standardSunglasses.lowest.price
+                          );
+                        })()}
                       </p>
                     </div>
                     <div className="text-right">
@@ -292,9 +352,28 @@ export default function PriceRangeDisplay() {
                         Premium options
                       </p>
                       <p className="font-semibold text-teal-600">
-                        {formatPrice(
-                          priceRanges.standardSunglasses.highest.price
-                        )}
+                        {(() => {
+                          const septemberPricing =
+                            calculateSeptember2025Pricing(
+                              priceRanges.standardSunglasses.highest.price,
+                              'essentials'
+                            );
+
+                          if (septemberPricing.isActive) {
+                            return (
+                              <span className="text-purple-600">
+                                {formatPrice(septemberPricing.promotionalPrice)}
+                                <span className="text-xs text-purple-500 ml-2">
+                                  {septemberPricing.saleMonth} Sale
+                                </span>
+                              </span>
+                            );
+                          }
+
+                          return formatPrice(
+                            priceRanges.standardSunglasses.highest.price
+                          );
+                        })()}
                       </p>
                     </div>
                     <div className="text-right">
