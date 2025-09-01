@@ -30,22 +30,32 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-[90vh] min-h-[600px] md:min-h-[700px] overflow-hidden">
-      {/* Background image with subtle continuous zoom */}
+      {/* Background video with subtle continuous zoom */}
       <motion.div
         className="absolute inset-0 z-0"
         initial={{ scale: 1.1 }}
         animate={{ scale: [1.1, 1, 1.05, 1] }}
         transition={{ duration: 30, ease: 'easeInOut', repeat: Infinity }}
       >
-        <Image
-          // src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1800&auto=format&fit=crop"
-          src="/images/about-us.jpg"
-          alt="glasses, sunglasses, and contact lenses"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
           className="w-full h-full object-cover"
-          width={1800}
-          height={1200}
-          priority
-        />
+          poster="/images/about-us.jpg"
+        >
+          <source src="/about-us.mp4" type="video/mp4" />
+          {/* Fallback image if video fails to load */}
+          <Image
+            src="/images/about-us.jpg"
+            alt="glasses, sunglasses, and contact lenses"
+            className="w-full h-full object-cover"
+            width={1800}
+            height={1200}
+            priority
+          />
+        </video>
       </motion.div>
 
       {/* Gradient overlays with animated entrance */}
