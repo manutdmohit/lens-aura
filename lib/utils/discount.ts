@@ -111,18 +111,21 @@ export function calculatePromotionalPricing(
   savings: number;
   savingsPercentage: number;
 } {
-  let multiplier: number;
+  let twoForPrice: number;
+  let basePrice: number;
 
   if (productType === 'essentials') {
-    // Two for the price of (essentials + 0.25 * essentials) = 1.25x
-    multiplier = 1.25;
+    // Two essentials for $59 (current promotional pricing)
+    twoForPrice = 59;
+    basePrice = 39; // Current discounted price for essentials
   } else {
-    // Two for the price of (signature + 0.5 * signature) = 1.5x
-    multiplier = 1.5;
+    // Two signature for $139 (current promotional pricing)
+    twoForPrice = 139;
+    basePrice = 79; // Current discounted price for signature
   }
 
-  const twoForPrice = originalPrice * multiplier;
-  const regularTwoPrice = originalPrice * 2;
+  // Calculate savings based on current discounted price
+  const regularTwoPrice = basePrice * 2;
   const savings = regularTwoPrice - twoForPrice;
   const savingsPercentage = Math.round((savings / regularTwoPrice) * 100);
 
@@ -134,8 +137,13 @@ export function calculatePromotionalPricing(
 }
 
 /**
- * Calculate August-September 2025 promotional pricing
- * Signature: $79, Essentials: $39
+ * Calculate current promotional pricing
+ * Signature: $79 (was $99), Essentials: $39 (was $59)
+ * Two Signature: $139, Two Essentials: $59
+ *
+ * Note: This function now defaults to inactive to prevent showing promotions
+ * when they are not active in the database. Use the proper promotional pricing
+ * system instead.
  */
 export function calculateSeptember2025Pricing(
   originalPrice: number,
@@ -145,30 +153,21 @@ export function calculateSeptember2025Pricing(
   savings: number;
   savingsPercentage: number;
   isActive: boolean;
-  saleMonth: 'August' | 'September' | null;
+  saleMonth: 'Current' | null;
 } {
-  const now = new Date();
-  const startDate = new Date('2025-08-31T00:00:00Z'); // Start from today (August 31, 2025)
-  const endDate = new Date('2025-09-30T23:59:59Z');
-
-  const isActive = now >= startDate && now <= endDate;
-
-  if (!isActive) {
-    return {
-      promotionalPrice: originalPrice,
-      savings: 0,
-      savingsPercentage: 0,
-      isActive: false,
-      saleMonth: null,
-    };
-  }
+  // Default to inactive since we're phasing out hardcoded promotions
+  // Use the proper promotional pricing system instead
+  const isActive = false;
 
   let promotionalPrice: number;
+  let basePrice: number;
 
   if (category === 'signature') {
-    promotionalPrice = 79;
+    promotionalPrice = 79; // Current offer price
+    basePrice = 99; // Original price for signature
   } else if (category === 'essentials') {
-    promotionalPrice = 39;
+    promotionalPrice = 39; // Current offer price
+    basePrice = 59; // Original price for essentials
   } else {
     return {
       promotionalPrice: originalPrice,
@@ -179,18 +178,15 @@ export function calculateSeptember2025Pricing(
     };
   }
 
-  const savings = originalPrice - promotionalPrice;
-  const savingsPercentage = Math.round((savings / originalPrice) * 100);
-
-  // Determine which month the sale is active in
-  const currentMonth = now.getMonth(); // 7 for August, 8 for September
-  const saleMonth = currentMonth === 7 ? 'August' : 'September';
+  // Calculate savings based on original price vs promotional price
+  const savings = basePrice - promotionalPrice;
+  const savingsPercentage = Math.round((savings / basePrice) * 100);
 
   return {
     promotionalPrice,
     savings,
     savingsPercentage,
-    isActive: true,
-    saleMonth,
+    isActive,
+    saleMonth: 'Current',
   };
 }

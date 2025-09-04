@@ -7,6 +7,10 @@ export interface IOrderItem {
   quantity: number;
   color: string;
   imageUrl?: string;
+  productType?: string;
+  category?: string;
+  originalPrice?: number;
+  isPromotional?: boolean;
 }
 
 export interface IShippingAddress {
@@ -68,6 +72,9 @@ const OrderSchema = new Schema(
         color: { type: String, required: true },
         imageUrl: { type: String },
         productType: { type: String },
+        category: { type: String },
+        originalPrice: { type: Number },
+        isPromotional: { type: Boolean },
         product: { type: Schema.Types.ObjectId, ref: 'Product' },
       },
     ],

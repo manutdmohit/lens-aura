@@ -8,6 +8,7 @@ export { default as Review } from './Review';
 export { default as Coupon } from './Coupon';
 export { default as User } from './User';
 export { default as Cart } from './Cart';
+export { default as Promotion } from './Promotion';
 
 // Export interfaces
 export type { IProduct } from './Product';
@@ -19,3 +20,4 @@ export type { IReview } from './Review';
 export type { ICoupon } from './Coupon';
 export type { IUser } from './User';
 export type { ICart, ICartItem } from './Cart';
+export type { IPromotion } from './Promotion';

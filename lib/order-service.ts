@@ -36,70 +36,130 @@ export async function createPendingOrder(
     );
 
     // Create initial order data with proper ObjectId conversion
-    const orderItems = items.map((item) => {
-      console.log(
-        `[DEBUG] Processing item: ${item.product.name}, ID: ${item.product._id}`,
-        { item }
-      );
-      // Ensure the product ID exists and is valid
-      if (!item.product._id) {
-        console.error(
-          `[DEBUG] Missing product ID for ${item.product.name}`,
-          item.product
+    const orderItems = items
+      .map((item) => {
+        console.log(
+          `[DEBUG] Processing item: ${item.product.name}, ID: ${item.product._id}`,
+          { item }
         );
-        throw new Error(`Missing product ID for ${item.product.name}`);
-      }
-      const productId = item.product._id.toString();
-      if (!productId) {
-        console.error(
-          `[DEBUG] Invalid product ID for ${item.product.name}`,
-          item.product
-        );
-        throw new Error(`Invalid product ID for ${item.product.name}`);
-      }
-      // Handle color (could be string or ColorInfo object)
-      const colorName =
-        typeof item.color === 'string'
-          ? item.color
-          : item.color?.name || 'Default';
+        // Ensure the product ID exists and is valid
+        if (!item.product._id) {
+          console.error(
+            `[DEBUG] Missing product ID for ${item.product.name}`,
+            item.product
+          );
+          throw new Error(`Missing product ID for ${item.product.name}`);
+        }
+        const productId = item.product._id.toString();
+        if (!productId) {
+          console.error(
+            `[DEBUG] Invalid product ID for ${item.product.name}`,
+            item.product
+          );
+          throw new Error(`Invalid product ID for ${item.product.name}`);
+        }
+        // Handle color (could be string or ColorInfo object)
+        const colorName =
+          typeof item.color === 'string'
+            ? item.color
+            : item.color?.name || 'Default';
 
-      // Calculate effective price (promotional pricing first, then discounted, then original)
-      let effectivePrice = item.product.price;
+        // Calculate effective price (promotional pricing first, then discounted, then original)
+        let effectivePrice = item.product.price;
 
-      // Check for August-September 2025 promotional pricing first
-      if (item.product.productType === 'sunglasses' && item.product.category) {
-        const septemberPricing = calculateSeptember2025Pricing(
-          item.product.price,
-          item.product.category as 'signature' | 'essentials'
-        );
+        // Check for current promotional pricing first
+        if (
+          item.product.productType === 'sunglasses' &&
+          item.product.category
+        ) {
+          const septemberPricing = calculateSeptember2025Pricing(
+            item.product.price,
+            item.product.category as 'signature' | 'essentials'
+          );
 
-        if (septemberPricing.isActive) {
-          effectivePrice = septemberPricing.promotionalPrice;
+          if (septemberPricing.isActive) {
+            effectivePrice = septemberPricing.promotionalPrice;
+          } else if (
+            item.product.discountedPrice &&
+            item.product.discountedPrice > 0
+          ) {
+            effectivePrice = item.product.discountedPrice;
+          }
         } else if (
           item.product.discountedPrice &&
           item.product.discountedPrice > 0
         ) {
           effectivePrice = item.product.discountedPrice;
         }
-      } else if (
-        item.product.discountedPrice &&
-        item.product.discountedPrice > 0
-      ) {
-        effectivePrice = item.product.discountedPrice;
-      }
 
-      return {
-        productId: productId,
-        name: item.product.name,
-        price: effectivePrice,
-        originalPrice: item.product.price,
-        quantity: item.quantity,
-        color: colorName,
-        imageUrl: item.product.thumbnail,
-        productType: item.product.productType,
-        product: item.product._id,
-      };
-    });
+        // For "buy two" promotions, we need to create separate line items
+        if (
+          (item.product.category === 'signature' ||
+            item.product.category === 'essentials') &&
+          item.quantity >= 2
+        ) {
+          const promo = calculatePromotionalPricing(
+            effectivePrice,
+            item.product.category as 'essentials' | 'signature'
+          );
+
+          const promotionalPairs = Math.min(1, Math.floor(item.quantity / 2));
+          const remainingItems = item.quantity - promotionalPairs * 2;
+
+          const items = [];
+
+          // Add promotional pair line item
+          if (promotionalPairs > 0) {
+            items.push({
+              productId: productId,
+              name: `${item.product.name} (Buy 2 for $${promo.twoForPrice})`,
+              price: promo.twoForPrice / 2, // Price per item in the pair
+              originalPrice: item.product.price, // Use the original product price
+              quantity: 2,
+              color: colorName,
+              imageUrl: item.product.thumbnail,
+              productType: item.product.productType,
+              product: item.product._id,
+              isPromotional: true,
+            });
+          }
+
+          // Add remaining items line item
+          if (remainingItems > 0) {
+            items.push({
+              productId: productId,
+              name: item.product.name,
+              price: effectivePrice,
+              originalPrice: item.product.price,
+              quantity: remainingItems,
+              color: colorName,
+              imageUrl: item.product.thumbnail,
+              productType: item.product.productType,
+              product: item.product._id,
+              isPromotional: false,
+            });
+          }
+
+          return items;
+        } else {
+          // Regular single item
+          return [
+            {
+              productId: productId,
+              name: item.product.name,
+              price: effectivePrice,
+              originalPrice: item.product.price,
+              quantity: item.quantity,
+              color: colorName,
+              imageUrl: item.product.thumbnail,
+              productType: item.product.productType,
+              product: item.product._id,
+              isPromotional: false,
+            },
+          ];
+        }
+      })
+      .flat(); // Flatten the array of arrays
 
     // Calculate total amount using promotional pricing logic (same as cart)
     const totalAmount = items.reduce((total, item) => {
@@ -128,11 +188,11 @@ export async function createPendingOrder(
           item.product.category as 'essentials' | 'signature'
         );
 
-        // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+        // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
         const promotionalPairs = Math.min(1, Math.floor(quantity / 2)); // Only 1 pair gets promotional pricing
         const remainingItems = quantity - promotionalPairs * 2; // All items beyond the first pair
 
-        // Price for 1 promotional pair + remaining items at regular price
+        // Price for 1 promotional pair + remaining items at current discounted price
         const promotionalPrice = promotionalPairs * promo.twoForPrice;
         const regularPrice =
           remainingItems *
@@ -148,7 +208,7 @@ export async function createPendingOrder(
         // Regular pricing for non-promotional items or quantities less than 2
         let effectivePrice = item.product.price;
 
-        // Check for August-September 2025 promotional pricing first
+        // Check for current promotional pricing first
         if (
           item.product.productType === 'sunglasses' &&
           item.product.category

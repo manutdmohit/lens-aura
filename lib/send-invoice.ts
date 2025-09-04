@@ -56,9 +56,9 @@ export async function sendInvoiceEmail({
               2
             )}</span>
           `;
-          promotionalNote = `<br><span style="color: #dc2626; font-size: 11px;">${
-            septemberPricing.saleMonth
-          } Sale - Save $${septemberPricing.savings.toFixed(2)}</span>`;
+          promotionalNote = `<br><span style="color: #dc2626; font-size: 11px;">Current Offer - Save $${septemberPricing.savings.toFixed(
+            2
+          )}</span>`;
         }
       }
 

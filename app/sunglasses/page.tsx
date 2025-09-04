@@ -38,31 +38,11 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-interface PriceRange {
-  lowest: {
-    price: number;
-    name: string;
-    slug: string;
-  } | null;
-  highest: {
-    price: number;
-    name: string;
-    slug: string;
-  } | null;
-}
-
 // Separate the main content to a client component
 function SunglassesContent() {
   const [signatureProducts, setSignatureProducts] = useState<Product[]>([]);
   const [essentialsProducts, setEssentialsProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState<{
-    signature: PriceRange | null;
-    essentials: PriceRange | null;
-  }>({
-    signature: null,
-    essentials: null,
-  });
 
   const router = useRouter();
 
@@ -72,17 +52,14 @@ function SunglassesContent() {
         setLoading(true);
 
         // Fetch signature and essentials products in parallel
-        const [signatureResponse, essentialsResponse, priceRangeResponse] =
-          await Promise.all([
-            fetch('/api/sunglasses?category=signature&limit=6'),
-            fetch('/api/sunglasses?category=essentials&limit=6'),
-            fetch('/api/products/price-range'),
-          ]);
+        const [signatureResponse, essentialsResponse] = await Promise.all([
+          fetch('/api/sunglasses?category=signature&limit=6'),
+          fetch('/api/sunglasses?category=essentials&limit=6'),
+        ]);
 
-        const [signatureData, essentialsData, priceData] = await Promise.all([
+        const [signatureData, essentialsData] = await Promise.all([
           signatureResponse.json(),
           essentialsResponse.json(),
-          priceRangeResponse.json(),
         ]);
 
         if (signatureData?.products) {
@@ -91,13 +68,6 @@ function SunglassesContent() {
 
         if (essentialsData?.products) {
           setEssentialsProducts(essentialsData.products);
-        }
-
-        if (priceData?.sunglasses) {
-          setPriceRange({
-            signature: priceData.sunglasses.signature || null,
-            essentials: priceData.sunglasses.essentials || null,
-          });
         }
       } catch (error: any) {
         console.error('Error fetching sunglasses data:', error);
@@ -135,19 +105,12 @@ function SunglassesContent() {
           </div>
         </section>
 
-        {/* September 2025 Promotional Banner */}
+        {/* Current Promotional Banner */}
         <section className="py-12 bg-gradient-to-r from-purple-600 to-indigo-600">
           <div className="max-w-6xl mx-auto px-4">
             <AnimatedSection direction="up" className="text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                🎉{' '}
-                {(() => {
-                  const now = new Date();
-                  const currentMonth = now.getMonth();
-                  return currentMonth === 7
-                    ? 'August Sale - Active Now!'
-                    : 'September Sale - Active Now!';
-                })()}
+                🎉 Current Special Offer - Limited Time!
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
@@ -158,6 +121,9 @@ function SunglassesContent() {
                     Limited time offer - all signature sunglasses
                   </p>
                   <div className="text-2xl font-bold text-white">
+                    <span className="line-through text-white/60 mr-2">
+                      {formatPrice(99)}
+                    </span>
                     Just {formatPrice(79)}
                   </div>
                 </div>
@@ -169,13 +135,15 @@ function SunglassesContent() {
                     Limited time offer - all essentials sunglasses
                   </p>
                   <div className="text-2xl font-bold text-white">
+                    <span className="line-through text-white/60 mr-2">
+                      {formatPrice(59)}
+                    </span>
                     Just {formatPrice(39)}
                   </div>
                 </div>
               </div>
               <p className="text-white/80 mt-6 text-sm">
-                *Offer valid August 31 - September 30, 2025. Cannot be combined
-                with other promotions.
+                *Limited time offer. Cannot be combined with other promotions.
               </p>
             </AnimatedSection>
           </div>
@@ -198,15 +166,6 @@ function SunglassesContent() {
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Luxury designer frames with signature polarized lenses, superior
                 UV protection, and exceptional craftsmanship.
-                {priceRange.signature?.lowest && (
-                  <>
-                    {' '}
-                    Starting from{' '}
-                    <span className="font-semibold text-amber-600">
-                      {formatPrice(priceRange.signature.lowest.price)}
-                    </span>
-                  </>
-                )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
                 <Badge
@@ -275,15 +234,6 @@ function SunglassesContent() {
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Quality everyday sunglasses with excellent UV protection at
                 affordable prices. Perfect for daily wear and active lifestyles.
-                {priceRange.essentials?.lowest && (
-                  <>
-                    {' '}
-                    Starting from{' '}
-                    <span className="font-semibold text-blue-600">
-                      {formatPrice(priceRange.essentials.lowest.price)}
-                    </span>
-                  </>
-                )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
                 <Badge
@@ -470,7 +420,7 @@ function SunglassesContent() {
                     Essentials Collection
                   </h3>
                   <p className="text-white/90 mb-3">
-                    Two for the price of (Essentials + 25% of Essentials)
+                    Two for just {formatPrice(59)}
                   </p>
                   <div className="text-2xl font-bold text-white">
                     {(() => {
@@ -478,7 +428,7 @@ function SunglassesContent() {
                         39,
                         'essentials'
                       );
-                      return `Save up to ${formatSavingsPercentage(
+                      return `Save ${formatSavingsPercentage(
                         promo.savingsPercentage
                       )}`;
                     })()}
@@ -489,7 +439,7 @@ function SunglassesContent() {
                     Signature Collection
                   </h3>
                   <p className="text-white/90 mb-3">
-                    Two for the price of (Signature + 50% of Signature)
+                    Two for just {formatPrice(59)}
                   </p>
                   <div className="text-2xl font-bold text-white">
                     {(() => {
@@ -497,7 +447,7 @@ function SunglassesContent() {
                         79,
                         'signature'
                       );
-                      return `Save up to ${formatSavingsPercentage(
+                      return `Save ${formatSavingsPercentage(
                         promo.savingsPercentage
                       )}`;
                     })()}

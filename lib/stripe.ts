@@ -3,10 +3,8 @@ import type { CartItem } from '@/context/cart-context';
 import { connectToDatabase } from './api/db';
 import Order from '@/models/Order';
 import { updateOrderFromStripeSession } from './order-service';
-import {
-  calculateSeptember2025Pricing,
-  calculatePromotionalPricing,
-} from '@/lib/utils/discount';
+import { calculatePromotionalPricing } from '@/lib/utils/discount';
+import { getCategoryPromotionalPricing } from '@/lib/services/promotional-pricing';
 
 // Initialize Stripe with the secret key
 const getStripeSecretKey = () => {
@@ -106,24 +104,29 @@ export async function createCheckoutSession(
           item.product.category === 'essentials') &&
         item.quantity >= 2
       ) {
-        // Use the promotional price ($79/$39) for "buy two" calculations
-        const septemberPricing = calculateSeptember2025Pricing(
-          item.product.price,
-          item.product.category as 'signature' | 'essentials'
+        // Use promotional price from database if available, otherwise use regular price
+        const productCategory = item.product.category as
+          | 'signature'
+          | 'essentials';
+        const hookCategory =
+          productCategory === 'essentials' ? 'essential' : productCategory;
+        const categoryPricing = await getCategoryPromotionalPricing(
+          hookCategory
         );
 
-        const promoPrice = septemberPricing.isActive
-          ? septemberPricing.promotionalPrice
-          : item.product.discountedPrice && item.product.discountedPrice > 0
-          ? item.product.discountedPrice
-          : item.product.price;
+        const promoPrice =
+          categoryPricing && categoryPricing.isPromotional
+            ? categoryPricing.promotionalPrice
+            : item.product.discountedPrice && item.product.discountedPrice > 0
+            ? item.product.discountedPrice
+            : item.product.price;
 
         const promo = calculatePromotionalPricing(
           promoPrice,
           item.product.category as 'essentials' | 'signature'
         );
 
-        // Calculate pricing: 1 pair gets promotional pricing, rest pay original price
+        // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
         const promotionalPairs = Math.min(1, Math.floor(item.quantity / 2)); // Only 1 pair gets promotional pricing
         const remainingItems = item.quantity - promotionalPairs * 2; // All items beyond the first pair
 
@@ -155,13 +158,14 @@ export async function createCheckoutSession(
           });
         }
 
-        // Add remaining items at regular price
+        // Add remaining items at current discounted price
         if (remainingItems > 0) {
-          const regularPrice = septemberPricing.isActive
-            ? septemberPricing.promotionalPrice
-            : item.product.discountedPrice && item.product.discountedPrice > 0
-            ? item.product.discountedPrice
-            : item.product.price;
+          const regularPrice =
+            categoryPricing && categoryPricing.isPromotional
+              ? categoryPricing.promotionalPrice
+              : item.product.discountedPrice && item.product.discountedPrice > 0
+              ? item.product.discountedPrice
+              : item.product.price;
 
           const regularMetadata = {
             productId: item.product._id?.toString() || '',
@@ -192,18 +196,22 @@ export async function createCheckoutSession(
         // Regular pricing for non-promotional items or quantities less than 2
         let effectivePrice = item.product.price;
 
-        // Check for August-September 2025 promotional pricing first
+        // Check for current promotional pricing from database first
         if (
           item.product.productType === 'sunglasses' &&
           item.product.category
         ) {
-          const septemberPricing = calculateSeptember2025Pricing(
-            item.product.price,
-            item.product.category as 'signature' | 'essentials'
+          const productCategory = item.product.category as
+            | 'signature'
+            | 'essentials';
+          const hookCategory =
+            productCategory === 'essentials' ? 'essential' : productCategory;
+          const categoryPricing = await getCategoryPromotionalPricing(
+            hookCategory
           );
 
-          if (septemberPricing.isActive) {
-            effectivePrice = septemberPricing.promotionalPrice;
+          if (categoryPricing && categoryPricing.isPromotional) {
+            effectivePrice = categoryPricing.promotionalPrice;
           } else if (
             item.product.discountedPrice &&
             item.product.discountedPrice > 0

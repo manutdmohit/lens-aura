@@ -205,7 +205,7 @@ export default function PriceRangeDisplay() {
                               <span className="text-purple-600">
                                 {formatPrice(septemberPricing.promotionalPrice)}
                                 <span className="text-xs text-purple-500 ml-2">
-                                  {septemberPricing.saleMonth} Sale
+                                  Current Offer
                                 </span>
                               </span>
                             );
@@ -247,7 +247,7 @@ export default function PriceRangeDisplay() {
                               <span className="text-purple-600">
                                 {formatPrice(septemberPricing.promotionalPrice)}
                                 <span className="text-xs text-purple-500 ml-2">
-                                  {septemberPricing.saleMonth} Sale
+                                  Current Offer
                                 </span>
                               </span>
                             );
@@ -322,7 +322,7 @@ export default function PriceRangeDisplay() {
                               <span className="text-purple-600">
                                 {formatPrice(septemberPricing.promotionalPrice)}
                                 <span className="text-xs text-purple-500 ml-2">
-                                  {septemberPricing.saleMonth} Sale
+                                  Current Offer
                                 </span>
                               </span>
                             );
@@ -364,7 +364,7 @@ export default function PriceRangeDisplay() {
                               <span className="text-purple-600">
                                 {formatPrice(septemberPricing.promotionalPrice)}
                                 <span className="text-xs text-purple-500 ml-2">
-                                  {septemberPricing.saleMonth} Sale
+                                  Current Offer
                                 </span>
                               </span>
                             );

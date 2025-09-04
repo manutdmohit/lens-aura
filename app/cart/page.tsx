@@ -20,8 +20,8 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
-  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
+import { useCategoryPromotionalPricing } from '@/hooks/usePromotionalPricing';
 
 export default function CartPage() {
   const {
@@ -35,6 +35,15 @@ export default function CartPage() {
     getItemPrice,
   } = useCart();
   const [isClient, setIsClient] = useState(false);
+
+  // Get promotional pricing for the product category
+  const productCategory = items[0]?.product?.category as
+    | 'signature'
+    | 'essentials';
+  const hookCategory =
+    productCategory === 'essentials' ? 'essential' : productCategory;
+  const { categoryPricing, hasPromotions } =
+    useCategoryPromotionalPricing(hookCategory);
 
   useEffect(() => {
     setIsClient(true);
@@ -283,34 +292,40 @@ export default function CartPage() {
                         </p>
                         <div className="text-sm text-gray-500">
                           {(() => {
-                            // Check for August-September 2025 promotional pricing first
-                            const septemberPricing =
-                              calculateSeptember2025Pricing(
-                                item.product.price,
-                                item.product.category as
-                                  | 'signature'
-                                  | 'essentials'
+                            // Check for current promotional pricing from database first
+                            const itemProductCategory = item.product
+                              .category as 'signature' | 'essentials';
+                            const itemHookCategory =
+                              itemProductCategory === 'essentials'
+                                ? 'essential'
+                                : itemProductCategory;
+                            const {
+                              categoryPricing: itemCategoryPricing,
+                              hasPromotions: itemHasPromotions,
+                            } = useCategoryPromotionalPricing(itemHookCategory);
+
+                            if (itemHasPromotions && itemCategoryPricing) {
+                              const promotionalPrice =
+                                itemCategoryPricing.promotionalPrice;
+                              const originalPrice =
+                                itemCategoryPricing.originalPrice;
+                              const savingsAmount =
+                                originalPrice - promotionalPrice;
+                              const savingsPercentage = Math.round(
+                                (savingsAmount / originalPrice) * 100
                               );
 
-                            if (septemberPricing.isActive) {
                               return (
                                 <div>
                                   <span className="text-purple-600 font-medium">
-                                    {formatPrice(
-                                      septemberPricing.promotionalPrice
-                                    )}
+                                    {formatPrice(promotionalPrice)}
                                   </span>
                                   <span className="line-through ml-2">
-                                    {formatPrice(
-                                      septemberPricing.promotionalPrice +
-                                        septemberPricing.savings
-                                    )}
+                                    {formatPrice(originalPrice)}
                                   </span>
                                   <span className="text-purple-600 text-xs ml-2">
-                                    {septemberPricing.saleMonth} Sale - Save{' '}
-                                    {formatSavingsPercentage(
-                                      septemberPricing.savingsPercentage
-                                    )}
+                                    Current Offer - Save{' '}
+                                    {formatSavingsPercentage(savingsPercentage)}
                                   </span>
                                 </div>
                               );

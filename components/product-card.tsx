@@ -13,8 +13,8 @@ import {
   formatPrice,
   formatSavingsPercentage,
   calculatePromotionalPricing,
-  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
+import { useCategoryPromotionalPricing } from '@/hooks/usePromotionalPricing';
 
 interface ProductCardProps {
   product: Product;
@@ -36,6 +36,13 @@ export default function ProductCard({
   showColorSelector = true,
 }: ProductCardProps) {
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+
+  // Get promotional pricing for the product category from the database
+  const productCategory = product.category as 'signature' | 'essentials';
+  const hookCategory =
+    productCategory === 'essentials' ? 'essential' : productCategory;
+  const { categoryPricing, hasPromotions } =
+    useCategoryPromotionalPricing(hookCategory);
 
   const getCardHeight = () => {
     switch (variant) {
@@ -294,13 +301,15 @@ export default function ProductCard({
             <div className="flex items-center justify-between min-h-[60px]">
               <div className="flex items-baseline gap-2">
                 {(() => {
-                  // Check for September 2025 promotional pricing first
-                  const septemberPricing = calculateSeptember2025Pricing(
-                    product.price,
-                    product.category as 'signature' | 'essentials'
-                  );
+                  // Check for active promotional pricing from database first
+                  if (productCategory && hasPromotions && categoryPricing) {
+                    const promotionalPrice = categoryPricing.promotionalPrice;
+                    const originalPrice = categoryPricing.originalPrice;
+                    const savingsAmount = originalPrice - promotionalPrice;
+                    const savingsPercentage = Math.round(
+                      (savingsAmount / originalPrice) * 100
+                    );
 
-                  if (septemberPricing.isActive) {
                     return (
                       <>
                         <div className="flex flex-col">
@@ -309,30 +318,25 @@ export default function ProductCard({
                               variant === 'compact' ? 'text-lg' : 'text-2xl'
                             }`}
                           >
-                            {formatPrice(septemberPricing.promotionalPrice)}
+                            {formatPrice(promotionalPrice)}
                           </span>
                           <span
                             className={`line-through text-gray-500 ${
                               variant === 'compact' ? 'text-sm' : 'text-base'
                             }`}
                           >
-                            {formatPrice(
-                              septemberPricing.promotionalPrice +
-                                septemberPricing.savings
-                            )}
+                            {formatPrice(originalPrice)}
                           </span>
                         </div>
                         <span className="text-xs text-purple-600 font-medium">
-                          {septemberPricing.saleMonth} Sale{' '}
-                          {formatSavingsPercentage(
-                            septemberPricing.savingsPercentage
-                          )}
+                          Current Offer{' '}
+                          {formatSavingsPercentage(savingsPercentage)}
                         </span>
                       </>
                     );
                   }
 
-                  // Fall back to regular discount logic
+                  // Fall back to regular discount logic from product database
                   const discountInfo = calculateDiscount(
                     product.price,
                     product.discountedPrice
@@ -394,42 +398,92 @@ export default function ProductCard({
             </div>
 
             {/* Promotional Pricing - Always reserve space for consistent height */}
-            <div className="mt-3 min-h-[40px]">
+            <div className="mt-3 min-h-[48px]">
               {(product.category === 'signature' ||
                 product.category === 'essentials') &&
               variant !== 'compact' ? (
-                <div className="p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-amber-800 font-medium">
-                      🎉 Buy Two & Save:
-                    </span>
-                    <span className="text-amber-600">
-                      {(() => {
-                        // Use promotional price ($79/$39) for "buy two" calculations
-                        const septemberPricing = calculateSeptember2025Pricing(
-                          product.price,
-                          product.category as 'essentials' | 'signature'
-                        );
+                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-400 via-orange-400 to-amber-500 p-0.5 shadow-lg">
+                  <div className="relative bg-white rounded-[10px] p-3">
+                    {/* Animated background elements */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-60"></div>
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-200 to-orange-200 rounded-full opacity-20 -translate-y-2 translate-x-2"></div>
+                    <div className="absolute bottom-0 left-0 w-12 h-12 bg-gradient-to-br from-orange-200 to-amber-200 rounded-full opacity-20 translate-y-2 -translate-x-2"></div>
 
-                        const promoPrice = septemberPricing.isActive
-                          ? septemberPricing.promotionalPrice
-                          : product.price;
+                    {/* Main content */}
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full shadow-sm">
+                            <span className="text-white text-xs font-bold">
+                              🎉
+                            </span>
+                          </div>
+                          <span className="text-amber-800 font-semibold text-sm">
+                            Buy Two & Save
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full animate-pulse"></div>
+                          <div
+                            className="w-2 h-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full animate-pulse"
+                            style={{ animationDelay: '0.2s' }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full animate-pulse"
+                            style={{ animationDelay: '0.4s' }}
+                          ></div>
+                        </div>
+                      </div>
 
-                        const promo = calculatePromotionalPricing(
-                          promoPrice,
-                          product.category as 'essentials' | 'signature'
-                        );
-                        return `Two for ${formatPrice(
-                          promo.twoForPrice
-                        )} (Save ${formatSavingsPercentage(
-                          promo.savingsPercentage
-                        )})`;
-                      })()}
-                    </span>
+                      <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg p-2 border border-amber-200">
+                        <div className="text-center">
+                          <span className="text-amber-900 font-bold text-sm">
+                            {(() => {
+                              // Use promotional price from database if available, otherwise use regular price
+                              const basePriceForTwo =
+                                hasPromotions && categoryPricing
+                                  ? categoryPricing.promotionalPrice
+                                  : product.price;
+
+                              const promotionalTwoForPricing =
+                                calculatePromotionalPricing(
+                                  basePriceForTwo,
+                                  product.category as 'essentials' | 'signature'
+                                );
+                              return `Two for ${formatPrice(
+                                promotionalTwoForPricing.twoForPrice
+                              )}`;
+                            })()}
+                          </span>
+                          <div className="mt-1">
+                            <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold rounded-full shadow-sm">
+                              Save{' '}
+                              {(() => {
+                                const basePriceForTwo =
+                                  hasPromotions && categoryPricing
+                                    ? categoryPricing.promotionalPrice
+                                    : product.price;
+
+                                const promotionalTwoForPricing =
+                                  calculatePromotionalPricing(
+                                    basePriceForTwo,
+                                    product.category as
+                                      | 'essentials'
+                                      | 'signature'
+                                  );
+                                return formatSavingsPercentage(
+                                  promotionalTwoForPricing.savingsPercentage
+                                );
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="h-[40px]"></div>
+                <div className="h-[48px]"></div>
               )}
             </div>
 

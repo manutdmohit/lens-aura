@@ -92,7 +92,7 @@ export default function Home() {
                   <div className="group relative overflow-hidden rounded-2xl shadow-2xl h-[450px]">
                     <div className="absolute inset-0">
                       <Image
-                        src="/images/sunglasses.jpg"
+                        src="/images/sunglasses/mens-premium.jpg"
                         alt="Signature sunglasses collection"
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -136,7 +136,7 @@ export default function Home() {
                   <div className="group relative overflow-hidden rounded-2xl shadow-2xl h-[450px]">
                     <div className="absolute inset-0">
                       <Image
-                        src="/images/sunglasses.jpg"
+                        src="/images/sunglasses/womens-standard.jpg"
                         alt="Essentials sunglasses collection"
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

@@ -618,3 +618,79 @@ export const productSchema = z
   );
 
 export type ProductFormValues = z.infer<typeof productSchema>;
+
+// Promotion validation schema
+export const promotionSchema = z
+  .object({
+    offerName: z
+      .string()
+      .min(1, 'Offer name is required')
+      .max(100, 'Offer name cannot exceed 100 characters'),
+    offerValidFrom: z
+      .string({
+        required_error: 'Offer valid from date is required',
+        invalid_type_error: 'Invalid date format for offer valid from',
+      })
+      .refine((date) => !isNaN(Date.parse(date)), {
+        message: 'Invalid date format for offer valid from',
+      }),
+    offerValidTo: z
+      .string({
+        required_error: 'Offer valid to date is required',
+        invalid_type_error: 'Invalid date format for offer valid to',
+      })
+      .refine((date) => !isNaN(Date.parse(date)), {
+        message: 'Invalid date format for offer valid to',
+      }),
+    signatureOriginalPrice: z.number().min(0, 'Price cannot be negative'),
+    signatureDiscountedPrice: z.number().min(0, 'Price cannot be negative'),
+    signaturePriceForTwo: z.number().min(0, 'Price cannot be negative'),
+    essentialOriginalPrice: z.number().min(0, 'Price cannot be negative'),
+    essentialDiscountedPrice: z.number().min(0, 'Price cannot be negative'),
+    essentialPriceForTwo: z.number().min(0, 'Price cannot be negative'),
+    isActive: z.boolean().default(true),
+  })
+  .refine(
+    (data) => {
+      // Ensure offerValidTo is after offerValidFrom
+      return data.offerValidTo > data.offerValidFrom;
+    },
+    {
+      message: 'Offer valid to date must be after offer valid from date',
+      path: ['offerValidTo'],
+    }
+  )
+  .refine(
+    (data) => {
+      // Ensure discounted prices are not higher than original prices
+      const signatureValid =
+        data.signatureDiscountedPrice <= data.signatureOriginalPrice;
+      const essentialValid =
+        data.essentialDiscountedPrice <= data.essentialOriginalPrice;
+      return signatureValid && essentialValid;
+    },
+    {
+      message: 'Discounted prices cannot be higher than original prices',
+      path: ['signatureDiscountedPrice', 'essentialDiscountedPrice'],
+    }
+  )
+  .refine(
+    (data) => {
+      // Ensure offerValidFrom is not in the past
+      // Use local date to avoid timezone issues
+      const fromDate = data.offerValidFrom;
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      return fromDate >= todayStr;
+    },
+    {
+      message: 'Offer valid from date cannot be in the past',
+      path: ['offerValidFrom'],
+    }
+  );
+
+export type PromotionFormValues = z.infer<typeof promotionSchema>;

@@ -16,6 +16,7 @@ import {
   Bell,
   Search,
   Info,
+  Tag,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/admin-auth-context';
 import { hasPermission } from '@/lib/rbac';
@@ -48,6 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     '/admin/orders',
     '/admin/products',
     '/admin/users',
+    '/admin/promotions',
   ].includes(pathname as string);
 
   const user = session?.user;
@@ -88,6 +90,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       permission: { resource: 'orders', action: 'read' as const },
     },
     {
+      name: 'Promotions',
+      href: '/admin/promotions',
+      icon: <Tag className="h-5 w-5" />,
+      active: pathname.startsWith('/admin/promotions'),
+      permission: { resource: 'promotions', action: 'read' as const },
+    },
+    {
       name: 'About',
       href: '/admin/about',
       icon: <Info className="h-5 w-5" />,
@@ -104,7 +113,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   const filteredNavItems = navItems.filter((item) =>
-    hasPermission(user.role as UserRole, item.permission.resource, item.permission.action)
+    hasPermission(
+      user.role as UserRole,
+      item.permission.resource,
+      item.permission.action
+    )
   );
 
   return (
@@ -198,8 +211,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
             {/* Left: Welcome message with logo */}
             <div className="flex items-center space-x-3 min-w-0">
-              <Image src="/images/logo.png" alt="Lens Aura Logo" width={36} height={36} className="rounded-full" priority />
-              <span className="font-semibold text-lg text-gray-800 truncate">Welcome Admin</span>
+              <Image
+                src="/images/logo.png"
+                alt="Lens Aura Logo"
+                width={36}
+                height={36}
+                className="rounded-full"
+                priority
+              />
+              <span className="font-semibold text-lg text-gray-800 truncate">
+                Welcome Admin
+              </span>
             </div>
 
             {/* Right: User dropdown always right-aligned */}
@@ -207,7 +229,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <Image src="/images/logo.png" alt="Lens Aura Logo" width={32} height={32} className="rounded-full" priority />
+                    <Image
+                      src="/images/logo.png"
+                      alt="Lens Aura Logo"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                      priority
+                    />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

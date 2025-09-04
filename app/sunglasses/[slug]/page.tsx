@@ -15,8 +15,8 @@ import {
   calculateDiscount,
   formatPrice,
   formatSavingsPercentage,
-  calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
+import { useCategoryPromotionalPricing } from '@/hooks/usePromotionalPricing';
 import {
   AlertCircle,
   AlertTriangle,
@@ -96,6 +96,13 @@ export default function SunGlassesProductPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
   const { itemCount, items } = useCart();
+
+  // Get promotional pricing for the product category
+  const productCategory = product?.category as 'signature' | 'essentials';
+  const hookCategory =
+    productCategory === 'essentials' ? 'essential' : productCategory;
+  const { categoryPricing, hasPromotions } =
+    useCategoryPromotionalPricing(hookCategory);
 
   let quantityToAdd = 1;
 
@@ -367,29 +374,26 @@ export default function SunGlassesProductPage() {
                 </h1>
                 <div className="flex flex-col items-end">
                   {(() => {
-                    // Check for August-September 2025 promotional pricing first
-                    const septemberPricing = calculateSeptember2025Pricing(
-                      product.price,
-                      product.category as 'signature' | 'essentials'
-                    );
+                    // Check for current promotional pricing from database first
+                    if (productCategory && hasPromotions && categoryPricing) {
+                      const promotionalPrice = categoryPricing.promotionalPrice;
+                      const originalPrice = categoryPricing.originalPrice;
+                      const savingsAmount = originalPrice - promotionalPrice;
+                      const savingsPercentage = Math.round(
+                        (savingsAmount / originalPrice) * 100
+                      );
 
-                    if (septemberPricing.isActive) {
                       return (
                         <>
                           <p className="text-2xl md:text-3xl font-bold text-purple-600">
-                            {formatPrice(septemberPricing.promotionalPrice)}
+                            {formatPrice(promotionalPrice)}
                           </p>
                           <p className="text-lg md:text-xl line-through text-gray-500">
-                            {formatPrice(
-                              septemberPricing.promotionalPrice +
-                                septemberPricing.savings
-                            )}
+                            {formatPrice(originalPrice)}
                           </p>
                           <p className="text-sm text-purple-600 font-medium">
-                            {septemberPricing.saleMonth} Sale - Save{' '}
-                            {formatSavingsPercentage(
-                              septemberPricing.savingsPercentage
-                            )}
+                            Current Offer - Save{' '}
+                            {formatSavingsPercentage(savingsPercentage)}
                           </p>
                         </>
                       );

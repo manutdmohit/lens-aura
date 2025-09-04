@@ -222,7 +222,7 @@ export default function CartDropdown() {
                             {(() => {
                               const itemPricing = getItemPrice(item);
 
-                              // Check for August-September 2025 promotional pricing first
+                              // Check for current promotional pricing first
                               const septemberPricing =
                                 calculateSeptember2025Pricing(
                                   item.product.price,

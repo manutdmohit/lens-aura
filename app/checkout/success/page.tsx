@@ -10,7 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/cart-context';
 import { toast } from '@/components/ui/use-toast';
-import { formatPrice } from '@/lib/utils/discount';
+import {
+  formatPrice,
+  calculateSeptember2025Pricing,
+  calculatePromotionalPricing,
+} from '@/lib/utils/discount';
 
 interface OrderItem {
   productId: string;
@@ -19,6 +23,8 @@ interface OrderItem {
   quantity: number;
   color: string;
   imageUrl?: string;
+  productType?: string;
+  category?: string;
 }
 
 interface OrderDetails {
@@ -56,6 +62,220 @@ export default function CheckoutSuccessPage() {
   const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
   const { clearCart } = useCart();
   const processedSessionsRef = useRef<Set<string>>(new Set());
+
+  // Function to get the correct promotional price for display (using same logic as invoice)
+  const getPromotionalPrice = (item: OrderItem, orderTotal?: number) => {
+    console.log('[DEBUG] getPromotionalPrice called with:', {
+      name: item.name,
+      productType: item.productType,
+      category: item.category,
+      quantity: item.quantity,
+      price: item.price,
+      orderTotal,
+    });
+
+    if (item.productType === 'sunglasses' && item.category) {
+      let basePrice = 0;
+      if (item.category === 'signature') {
+        basePrice = 99; // Original Signature price
+      } else if (item.category === 'essentials') {
+        basePrice = 59; // Original Essentials price
+      }
+
+      if (basePrice > 0) {
+        const septemberPricing = calculateSeptember2025Pricing(
+          basePrice,
+          item.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          const promo = calculatePromotionalPricing(
+            septemberPricing.promotionalPrice,
+            item.category as 'essentials' | 'signature'
+          );
+
+          if (item.quantity === 1) {
+            // 1 item - individual discounted price
+            const result = septemberPricing.promotionalPrice;
+            console.log(
+              '[DEBUG] getPromotionalPrice result for qty=1:',
+              result
+            );
+            return result;
+          } else if (item.quantity === 2) {
+            // Exactly 2 items - apply "buy two" offer
+            const result = promo.twoForPrice / item.quantity;
+            console.log(
+              '[DEBUG] getPromotionalPrice result for qty=2:',
+              result
+            );
+            return result;
+          } else if (item.quantity > 2) {
+            // For quantities > 2, check if there's a discrepancy with actual amount paid
+            const promotionalPairs = Math.floor(item.quantity / 2);
+            const remainingItems = item.quantity - promotionalPairs * 2;
+            const promotionalPrice = promotionalPairs * promo.twoForPrice;
+            const regularPrice =
+              remainingItems * septemberPricing.promotionalPrice;
+
+            // Check if there's a discrepancy between calculated and actual amount
+            const calculatedTotal = promotionalPrice + regularPrice;
+            const actualAmountPaid = orderTotal ? orderTotal / 100 : 0;
+
+            // If there's a discrepancy, use the actual amount paid to calculate effective price
+            if (
+              actualAmountPaid > 0 &&
+              Math.abs(calculatedTotal - actualAmountPaid) > 0.01
+            ) {
+              const effectivePrice = actualAmountPaid / item.quantity;
+              console.log('[DEBUG] getPromotionalPrice using actual amount:', {
+                promotionalPairs,
+                remainingItems,
+                promotionalPrice,
+                regularPrice,
+                calculatedTotal,
+                actualAmountPaid,
+                effectivePrice,
+              });
+              return effectivePrice;
+            } else {
+              // Use the calculated total for the line item
+              const result = (promotionalPrice + regularPrice) / item.quantity;
+              console.log('[DEBUG] getPromotionalPrice result for qty>2:', {
+                promotionalPairs,
+                remainingItems,
+                promotionalPrice,
+                regularPrice,
+                result,
+              });
+              return result;
+            }
+          }
+        }
+      }
+    }
+    // Fallback: convert from cents to dollars
+    const fallbackPrice = (item.price || 0) / 100;
+    console.log('[DEBUG] getPromotionalPrice fallback result:', fallbackPrice);
+    return fallbackPrice;
+  };
+
+  // Function to get the total for an item (using same logic as invoice)
+  const getItemTotal = (item: OrderItem, orderTotal?: number) => {
+    console.log('[DEBUG] getItemTotal called with:', {
+      name: item.name,
+      productType: item.productType,
+      category: item.category,
+      quantity: item.quantity,
+      price: item.price,
+      orderTotal,
+    });
+    if (item.productType === 'sunglasses' && item.category) {
+      let basePrice = 0;
+      if (item.category === 'signature') {
+        basePrice = 99; // Original Signature price
+      } else if (item.category === 'essentials') {
+        basePrice = 59; // Original Essentials price
+      }
+
+      if (basePrice > 0) {
+        const septemberPricing = calculateSeptember2025Pricing(
+          basePrice,
+          item.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          const promo = calculatePromotionalPricing(
+            septemberPricing.promotionalPrice,
+            item.category as 'essentials' | 'signature'
+          );
+
+          if (item.quantity === 1) {
+            // 1 item - individual discounted price
+            return septemberPricing.promotionalPrice;
+          } else if (item.quantity === 2) {
+            // Exactly 2 items - apply "buy two" offer
+            return promo.twoForPrice;
+          } else if (item.quantity > 2) {
+            // For quantities > 2, check if there's a discrepancy with actual amount paid
+            const promotionalPairs = Math.floor(item.quantity / 2);
+            const remainingItems = item.quantity - promotionalPairs * 2;
+            const promotionalPrice = promotionalPairs * promo.twoForPrice;
+            const regularPrice =
+              remainingItems * septemberPricing.promotionalPrice;
+
+            // Check if there's a discrepancy between calculated and actual amount
+            const calculatedTotal = promotionalPrice + regularPrice;
+            const actualAmountPaid = orderTotal ? orderTotal / 100 : 0;
+
+            // If there's a discrepancy, use the actual amount paid
+            if (
+              actualAmountPaid > 0 &&
+              Math.abs(calculatedTotal - actualAmountPaid) > 0.01
+            ) {
+              return actualAmountPaid;
+            } else {
+              // Return the calculated total for this item
+              return promotionalPrice + regularPrice;
+            }
+          }
+        }
+      }
+    }
+    // Fallback: convert from cents to dollars and multiply by quantity
+    return ((item.price || 0) / 100) * item.quantity;
+  };
+
+  // Function to get promotional pricing information
+  const getPromotionalInfo = (item: OrderItem) => {
+    if (item.productType === 'sunglasses' && item.category) {
+      let basePrice = 0;
+      if (item.category === 'signature') {
+        basePrice = 99;
+      } else if (item.category === 'essentials') {
+        basePrice = 59;
+      }
+
+      if (basePrice > 0) {
+        const septemberPricing = calculateSeptember2025Pricing(
+          basePrice,
+          item.category as 'signature' | 'essentials'
+        );
+
+        if (septemberPricing.isActive) {
+          const promo = calculatePromotionalPricing(
+            septemberPricing.promotionalPrice,
+            item.category as 'essentials' | 'signature'
+          );
+
+          if (item.quantity === 1) {
+            return {
+              type: 'individual',
+              savings: basePrice - septemberPricing.promotionalPrice,
+            };
+          } else if (item.quantity === 2) {
+            return {
+              type: 'buy-two',
+              savings: basePrice * 2 - promo.twoForPrice,
+            };
+          } else if (item.quantity > 2) {
+            const promotionalPairs = Math.floor(item.quantity / 2);
+            const remainingItems = item.quantity - promotionalPairs * 2;
+            const promotionalPrice = promotionalPairs * promo.twoForPrice;
+            const regularPrice =
+              remainingItems * septemberPricing.promotionalPrice;
+            const totalWithPromo = promotionalPrice + regularPrice;
+            const totalWithoutPromo = basePrice * item.quantity;
+            return {
+              type: 'mixed',
+              savings: totalWithoutPromo - totalWithPromo,
+            };
+          }
+        }
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     // Prevent redundant fetching once order details have been loaded
@@ -426,21 +646,112 @@ export default function CheckoutSuccessPage() {
                   {orderDetails.items.map((item, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center"
+                      className="flex justify-between items-start p-4 bg-white rounded-lg border border-gray-200"
                     >
-                      <div>
-                        <p className="font-medium">
-                          {item.quantity}x {item.name}
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-lg">
+                            {item.quantity}x {item.name}
+                          </p>
+                          <Badge variant="outline" className="text-xs">
+                            #{index + 1}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                          <div>
+                            <span className="font-medium">Color:</span>{' '}
+                            {item.color || 'N/A'}
+                          </div>
+                          {item.productType && (
+                            <div>
+                              <span className="font-medium">Type:</span>{' '}
+                              {item.productType.charAt(0).toUpperCase() +
+                                item.productType.slice(1)}
+                            </div>
+                          )}
+                          {item.category && (
+                            <div>
+                              <span className="font-medium">Category:</span>{' '}
+                              {item.category.charAt(0).toUpperCase() +
+                                item.category.slice(1)}
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-medium">Price:</span>{' '}
+                            {formatPrice(
+                              getPromotionalPrice(
+                                item,
+                                orderDetails?.amount_total
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Promotional Information */}
+                        {(() => {
+                          const promoInfo = getPromotionalInfo(item);
+                          if (promoInfo) {
+                            return (
+                              <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                                <div className="flex items-center gap-2">
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-green-100 text-green-800 text-xs"
+                                  >
+                                    Current Offer
+                                  </Badge>
+                                  <span className="text-sm text-green-700 font-medium">
+                                    You saved {formatPrice(promoInfo.savings)}!
+                                  </span>
+                                </div>
+                                <p className="text-xs text-green-600 mt-1">
+                                  {promoInfo.type === 'individual' &&
+                                    'Individual discount applied'}
+                                  {promoInfo.type === 'buy-two' &&
+                                    'Buy Two offer applied'}
+                                  {promoInfo.type === 'mixed' &&
+                                    'Mixed promotional pricing applied'}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        {item.imageUrl && (
+                          <div className="mt-2">
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded-md border border-gray-200"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-right ml-4">
+                        <p className="font-bold text-lg text-green-600">
+                          {formatPrice(
+                            getItemTotal(item, orderDetails?.amount_total)
+                          )}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Color: {item.color}
+                          Total for {item.quantity} item
+                          {item.quantity > 1 ? 's' : ''}
                         </p>
                       </div>
-                      <p className="font-medium">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
                     </div>
                   ))}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Order Total:</span>
+                    <span className="text-2xl font-bold text-green-600">
+                      {formatPrice(orderDetails.amount_total / 100)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

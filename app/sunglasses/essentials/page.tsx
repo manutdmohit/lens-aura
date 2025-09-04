@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Shield, ArrowLeft } from 'lucide-react';
 import AnimatedSection from '@/components/animated-section';
 import { Playfair_Display } from 'next/font/google';
-import { formatPrice } from '@/lib/utils/discount';
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 
@@ -26,24 +25,11 @@ interface PaginationData {
   hasPrevPage: boolean;
 }
 
-interface PriceRange {
-  lowest: {
-    price: number;
-    name: string;
-    slug: string;
-  } | null;
-  highest: {
-    price: number;
-    name: string;
-    slug: string;
-  } | null;
-}
-
 // Separate the main content to a client component
 function EssentialsSunglassesContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState<PriceRange | null>(null);
+
   const [pagination, setPagination] = useState<PaginationData>({
     total: 0,
     page: 1,
@@ -59,20 +45,6 @@ function EssentialsSunglassesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1');
-
-  useEffect(() => {
-    const fetchPriceRange = async () => {
-      try {
-        const response = await fetch('/api/products/price-range');
-        const data = await response.json();
-        setPriceRange(data.sunglasses?.essentials || null);
-      } catch (error) {
-        console.error('Error fetching price range:', error);
-      }
-    };
-
-    fetchPriceRange();
-  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -142,15 +114,6 @@ function EssentialsSunglassesContent() {
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
                 Quality everyday sunglasses with excellent UV protection at
                 affordable prices. Perfect for daily wear and active lifestyles.
-                {priceRange?.lowest && (
-                  <>
-                    {' '}
-                    Starting from{' '}
-                    <span className="font-semibold text-blue-600">
-                      {formatPrice(priceRange.lowest.price)}
-                    </span>
-                  </>
-                )}
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
                 <Badge

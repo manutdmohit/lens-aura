@@ -17,6 +17,7 @@ interface OrderItem {
   productType?: string;
   category?: string;
   originalPrice?: number;
+  isPromotional?: boolean;
 }
 
 interface OrderDetails {
@@ -85,9 +86,11 @@ export async function POST(req: NextRequest) {
         if (orderDetails.orderNumber) {
           order = await Order.findOne({
             orderNumber: orderDetails.orderNumber,
-          });
+          }).populate('items.product');
         } else if (orderDetails.id) {
-          order = await Order.findById(orderDetails.id);
+          order = await Order.findById(orderDetails.id).populate(
+            'items.product'
+          );
         }
 
         if (!order) {
@@ -106,7 +109,7 @@ export async function POST(req: NextRequest) {
           id: order._id.toString(),
           orderNumber: order.orderNumber,
           customerEmail: order.customerEmail || '',
-          items: order.items.map((item) => ({
+          items: order.items.map((item: any) => ({
             productId: item.productId || '',
             name: item.name,
             price: item.price * 100, // Convert to cents
@@ -114,7 +117,7 @@ export async function POST(req: NextRequest) {
             color: item.color,
             imageUrl: item.imageUrl,
             productType: item.productType,
-            category: item.product?.category || item.category,
+            category: item.product?.category || item.category || 'N/A',
             originalPrice: item.originalPrice
               ? item.originalPrice * 100
               : undefined, // Convert to cents
@@ -127,6 +130,22 @@ export async function POST(req: NextRequest) {
         };
 
         console.log('Successfully fetched complete order data from database');
+        console.log(
+          'Sample item category data:',
+          completeOrderDetails.items[0]?.category
+        );
+        console.log(
+          'Sample item product data:',
+          completeOrderDetails.items[0]?.product
+        );
+        console.log(
+          'Sample item product category:',
+          completeOrderDetails.items[0]?.product?.category
+        );
+        console.log(
+          'Sample item product type:',
+          completeOrderDetails.items[0]?.product?.productType
+        );
       } catch (error) {
         console.error('Error fetching order from database:', error);
         return NextResponse.json(
@@ -254,7 +273,7 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
 
     // Launch browser
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
@@ -277,7 +296,7 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
 
     await browser.close();
 
-    return pdfBuffer;
+    return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('Error generating PDF with Puppeteer:', error);
     throw new Error(
@@ -292,57 +311,126 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
   const { customer_details, items, orderNumber, createdAt, amount_total } =
     orderDetails;
 
-  const itemsHTML = items
-    .map((item, index) => {
-      const itemQuantity = item.quantity || 0;
-      let effectivePrice = (item.price || 0) / 100;
-      let actualTotal = effectivePrice * itemQuantity;
-      let promotionalNote = '';
+  // Ensure customer_details exists for the HTML generation
+  if (!customer_details) {
+    throw new Error('Customer details are required for invoice generation');
+  }
 
-      // Handle promotional pricing
-      if (
-        item.productType === 'sunglasses' &&
-        item.category &&
-        item.originalPrice &&
-        itemQuantity >= 2
-      ) {
+  // Calculate line items with proper promotional pricing
+  const processedItems = items.map((item, index) => {
+    const itemQuantity = item.quantity || 0;
+    let effectivePrice = (item.price || 0) / 100;
+    let actualTotal = effectivePrice * itemQuantity;
+    let promotionalNote = '';
+
+    // For sunglasses with quantity >= 2, we need to apply the "buy two" promotion logic
+    if (
+      item.productType === 'sunglasses' &&
+      item.category &&
+      itemQuantity >= 2
+    ) {
+      const category = item.category as 'signature' | 'essentials';
+
+      // Get the current discounted price from the database
+      let currentDiscountedPrice = effectivePrice;
+      if (item.originalPrice && item.originalPrice > 0) {
+        currentDiscountedPrice = (item.originalPrice || 0) / 100;
+      }
+
+      // Calculate promotional pricing
+      const promo = calculatePromotionalPricing(
+        currentDiscountedPrice,
+        category
+      );
+
+      // For exactly 2 items, apply the "buy two" promotion
+      if (itemQuantity === 2) {
+        // Show the promotional pair pricing
+        actualTotal = promo.twoForPrice;
+        effectivePrice = actualTotal / itemQuantity;
+        promotionalNote = ` - Buy 2 for $${promo.twoForPrice.toFixed(2)}`;
+      } else if (itemQuantity > 2) {
+        // For quantities > 2, calculate mixed pricing
+        const promotionalPairs = Math.floor(itemQuantity / 2);
+        const remainingItems = itemQuantity - promotionalPairs * 2;
+
+        const promotionalPrice = promotionalPairs * promo.twoForPrice;
+        const regularPrice = remainingItems * currentDiscountedPrice;
+        actualTotal = promotionalPrice + regularPrice;
+        effectivePrice = actualTotal / itemQuantity;
+
+        promotionalNote = ` - Buy 2 Promotion: ${promotionalPairs} pair(s) at $${promo.twoForPrice.toFixed(
+          2
+        )} + ${remainingItems} individual at $${currentDiscountedPrice.toFixed(
+          2
+        )}`;
+      }
+    } else if (item.isPromotional) {
+      // Handle items that already have promotional structure
+      promotionalNote = ' - Buy 2 Promotion Applied';
+      const originalPrice = (item.originalPrice || 0) / 100;
+      if (originalPrice > effectivePrice) {
+        promotionalNote += ` (was $${originalPrice.toFixed(2)} each)`;
+      }
+    } else if (item.productType === 'sunglasses' && item.category) {
+      // Check if this item has current promotional pricing
+      if (item.originalPrice && item.originalPrice > 0) {
         const originalPrice = (item.originalPrice || 0) / 100;
-        const septemberPricing = calculateSeptember2025Pricing(
-          originalPrice,
-          item.category as 'signature' | 'essentials'
-        );
-
-        if (septemberPricing.isActive) {
-          const promo = calculatePromotionalPricing(
-            septemberPricing.promotionalPrice,
-            item.category as 'essentials' | 'signature'
-          );
-
-          const promotionalPairs = Math.min(1, Math.floor(itemQuantity / 2));
-          const remainingItems = itemQuantity - promotionalPairs * 2;
-
-          if (promotionalPairs > 0 && remainingItems > 0) {
-            const promotionalPrice = promotionalPairs * promo.twoForPrice;
-            const regularPrice =
-              remainingItems * septemberPricing.promotionalPrice;
-            actualTotal = promotionalPrice + regularPrice;
-            effectivePrice = actualTotal / itemQuantity;
-            promotionalNote = ` (Mixed pricing)`;
-          } else if (promotionalPairs > 0) {
-            actualTotal = promotionalPairs * promo.twoForPrice;
-            effectivePrice = actualTotal / itemQuantity;
-          }
-
-          if (septemberPricing.savings > 0) {
-            promotionalNote += ` - ${septemberPricing.saleMonth} Sale`;
-          }
+        if (Math.abs(originalPrice - effectivePrice) > 0.01) {
+          promotionalNote = ' - Current Offer';
         }
       }
+    }
+
+    return {
+      ...item,
+      processedPrice: effectivePrice,
+      processedTotal: actualTotal,
+      promotionalNote,
+    };
+  });
+
+  // Debug logging
+  console.log(
+    'Processed items for invoice:',
+    processedItems.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      processedPrice: item.processedPrice,
+      processedTotal: item.processedTotal,
+      total: item.processedTotal,
+    }))
+  );
+
+  const calculatedTotal = processedItems.reduce(
+    (sum, item) => sum + item.processedTotal,
+    0
+  );
+  console.log('Calculated total from line items:', calculatedTotal);
+  console.log('Actual amount total:', amount_total / 100);
+
+  const itemsHTML = processedItems
+    .map((item, index) => {
+      const itemQuantity = item.quantity || 0;
+      const effectivePrice = item.processedPrice;
+      const actualTotal = item.processedTotal;
+      const promotionalNote = item.promotionalNote;
+
+      // The promotional logic is already handled in processedItems above
 
       return `
         <tr>
           <td>${index + 1}</td>
-          <td>${item.name || 'Unknown Product'}${promotionalNote}</td>
+          <td>${
+            item.name || 'Unknown Product'
+          }${promotionalNote}<br><small style="color: #666;">Type: ${
+        (item.productType || 'N/A').charAt(0).toUpperCase() +
+        (item.productType || 'N/A').slice(1)
+      } | Category: ${
+        (item.category || 'N/A').charAt(0).toUpperCase() +
+        (item.category || 'N/A').slice(1)
+      }</small></td>
           <td>${item.color || 'N/A'}</td>
           <td>${itemQuantity}</td>
           <td>$${effectivePrice.toFixed(2)}</td>
@@ -456,18 +544,18 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
         </div>
         <div class="customer-info">
           <h3>Bill To</h3>
-          <p>${customer_details.name}</p>
-          <p>${customer_details.email}</p>
-          <p>${customer_details.address.line1}</p>
+          <p>${customer_details.name || 'N/A'}</p>
+          <p>${customer_details.email || 'N/A'}</p>
+          <p>${customer_details.address?.line1 || 'N/A'}</p>
           ${
-            customer_details.address.line2
+            customer_details.address?.line2
               ? `<p>${customer_details.address.line2}</p>`
               : ''
           }
-          <p>${customer_details.address.city}, ${
-    customer_details.address.state
-  } ${customer_details.address.postal_code}</p>
-          <p>${customer_details.address.country}</p>
+          <p>${customer_details.address?.city || 'N/A'}, ${
+    customer_details.address?.state || 'N/A'
+  } ${customer_details.address?.postal_code || 'N/A'}</p>
+          <p>${customer_details.address?.country || 'N/A'}</p>
         </div>
       </div>
       
@@ -487,8 +575,13 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
         </tbody>
       </table>
       
-      <div class="total">
-        Total: $${(amount_total / 100).toFixed(2)}
+      <div style="text-align: right; margin-top: 20px;">
+        <div style="margin-bottom: 10px;">
+          <strong>Subtotal:</strong> $${calculatedTotal.toFixed(2)}
+        </div>
+        <div style="margin-bottom: 10px;">
+          <strong>Total:</strong> $${(amount_total / 100).toFixed(2)}
+        </div>
       </div>
       
       <div class="footer">
