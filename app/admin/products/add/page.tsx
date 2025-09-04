@@ -113,6 +113,26 @@ export default function AddProductPage() {
     setValue('frameColorVariants', transformedVariants as any);
   }, [frameColorVariants, setValue]);
 
+  // Monitor discounted price changes for debugging
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'discountedPrice') {
+        console.log(
+          'Discounted price changed:',
+          value.discountedPrice,
+          'Type:',
+          typeof value.discountedPrice
+        );
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  // Ensure discounted price starts as undefined
+  useEffect(() => {
+    setValue('discountedPrice', undefined);
+  }, [setValue]);
+
   // Enhanced validation function
   const validateForm = async () => {
     const isValid = await trigger();
@@ -198,7 +218,7 @@ export default function AddProductPage() {
     setValue('colors', updatedColors, { shouldValidate: true });
   };
 
-  // Enhanced onSubmit with better validation
+  // Enhanced onSubmit with comprehensive error handling
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
     setShowValidationSummary(false);
@@ -211,7 +231,7 @@ export default function AddProductPage() {
         return;
       }
 
-      // Additional custom validation
+      // Comprehensive custom validation
       const validationErrors: string[] = [];
 
       // Check for required fields based on product type
@@ -243,26 +263,41 @@ export default function AddProductPage() {
         }
       }
 
+      // Validate discounted price logic
+      if (data.discountedPrice && data.discountedPrice > 0) {
+        if (data.discountedPrice >= data.price) {
+          validationErrors.push(
+            'Discounted price must be less than the regular price'
+          );
+        }
+      }
+
       // Show validation errors if any
       if (validationErrors.length > 0) {
+        setShowValidationSummary(true);
         toast({
           title: 'Validation Failed',
-          description: validationErrors.join(', '),
+          description: `${validationErrors.length} validation error(s) found. Please review the form.`,
           variant: 'destructive',
         });
         setIsSubmitting(false);
         return;
       }
 
-      // Prepare product data
+      // Prepare product data with proper type handling
       const productData = {
         ...data,
         images: watch('images') || [],
         colors,
         frameColorVariants: frameColorVariants,
+        // Handle discounted price properly
+        discountedPrice:
+          data.discountedPrice && data.discountedPrice > 0
+            ? data.discountedPrice
+            : undefined,
       };
 
-      // Delete frameColorVariants if empty to satisfy validation
+      // Clean up frameColorVariants if empty
       if (
         !productData.frameColorVariants ||
         productData.frameColorVariants.length === 0
@@ -270,21 +305,46 @@ export default function AddProductPage() {
         (productData as any).frameColorVariants = undefined;
       }
 
+      console.log('Submitting product data:', productData);
+
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include cookies for session authentication
+        credentials: 'include',
         body: JSON.stringify(productData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create product');
+        console.error('API Error Response:', errorData);
+
+        // Handle specific error types
+        if (response.status === 400) {
+          throw new Error(
+            `Validation Error: ${errorData.message || 'Invalid data provided'}`
+          );
+        } else if (response.status === 401) {
+          throw new Error('Authentication failed. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to create products.');
+        } else if (response.status === 409) {
+          throw new Error(
+            `Conflict: ${errorData.message || 'Product already exists'}`
+          );
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          throw new Error(
+            errorData.message ||
+              `HTTP ${response.status}: Failed to create product`
+          );
+        }
       }
 
       const result = await response.json();
+      console.log('Product created successfully:', result);
 
       toast({
         title: 'Success!',
@@ -294,45 +354,118 @@ export default function AddProductPage() {
       router.push('/admin/products');
     } catch (error) {
       console.error('Error creating product:', error);
+
+      // Enhanced error handling with specific error types
+      let errorMessage = 'Failed to create product';
+      let errorTitle = 'Error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+
+        // Categorize errors for better UX
+        if (errorMessage.includes('Validation Error')) {
+          errorTitle = 'Validation Error';
+          setShowValidationSummary(true);
+        } else if (errorMessage.includes('Authentication failed')) {
+          errorTitle = 'Authentication Error';
+        } else if (errorMessage.includes('permission')) {
+          errorTitle = 'Permission Denied';
+        } else if (errorMessage.includes('Conflict')) {
+          errorTitle = 'Product Conflict';
+        } else if (errorMessage.includes('Server error')) {
+          errorTitle = 'Server Error';
+        }
+      }
+
       toast({
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to create product',
+        title: errorTitle,
+        description: errorMessage,
         variant: 'destructive',
+        duration: 5000, // Show for 5 seconds
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Get all validation errors for summary
+  // Get all validation errors for summary with categorization
   const getAllErrors = () => {
     const errorMessages: string[] = [];
+    const categorizedErrors: { [key: string]: string[] } = {
+      'Basic Information': [],
+      'Product Details': [],
+      'Inventory & Pricing': [],
+      'Images & Media': [],
+      'Custom Validation': [],
+    };
 
+    // Process form validation errors
     Object.keys(errors).forEach((key) => {
       const error = errors[key as keyof typeof errors];
       if (error?.message) {
-        errorMessages.push(
-          `${key.charAt(0).toUpperCase() + key.slice(1)}: ${error.message}`
-        );
+        const errorMessage = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
+          error.message
+        }`;
+        errorMessages.push(errorMessage);
+
+        // Categorize errors
+        if (['name', 'description', 'productType'].includes(key)) {
+          categorizedErrors['Basic Information'].push(errorMessage);
+        } else if (
+          [
+            'frameType',
+            'frameMaterial',
+            'frameWidth',
+            'lensType',
+            'prescriptionType',
+            'gender',
+            'style',
+            'uvProtection',
+            'polarized',
+            'brand',
+            'packagingType',
+            'wearDuration',
+            'waterContent',
+            'diameter',
+            'baseCurve',
+            'quantity',
+            'forAstigmatism',
+            'forPresbyopia',
+            'uvBlocking',
+          ].includes(key)
+        ) {
+          categorizedErrors['Product Details'].push(errorMessage);
+        } else if (
+          ['price', 'discountedPrice', 'stockQuantity'].includes(key)
+        ) {
+          categorizedErrors['Inventory & Pricing'].push(errorMessage);
+        } else if (['thumbnail', 'images'].includes(key)) {
+          categorizedErrors['Images & Media'].push(errorMessage);
+        } else {
+          categorizedErrors['Basic Information'].push(errorMessage);
+        }
       }
     });
 
     // Add custom validation errors
     if (watchProductType === 'contacts' && colors.length === 0) {
-      errorMessages.push(
-        'Colors: At least one color is required for contact lenses'
-      );
+      const errorMessage =
+        'Colors: At least one color is required for contact lenses';
+      errorMessages.push(errorMessage);
+      categorizedErrors['Custom Validation'].push(errorMessage);
     }
 
     if (
       (watchProductType === 'glasses' || watchProductType === 'sunglasses') &&
       frameColorVariants.length === 0
     ) {
-      errorMessages.push(
-        `Frame Color Variants: At least one frame color variant is required for ${watchProductType}`
-      );
+      const errorMessage = `Frame Color Variants: At least one frame color variant is required for ${watchProductType}`;
+      errorMessages.push(errorMessage);
+      categorizedErrors['Custom Validation'].push(errorMessage);
     }
+
+    // Store categorized errors for display
+    (window as any).categorizedErrors = categorizedErrors;
 
     return errorMessages;
   };
@@ -360,77 +493,231 @@ export default function AddProductPage() {
             </Button>
           </div>
 
-          {/* Validation Summary Alert */}
+          {/* Enhanced Validation Summary Alert */}
           {showValidationSummary && getAllErrors().length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg shadow-sm"
             >
               <div className="flex items-start space-x-3">
                 <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium text-red-800 mb-2">
-                    Please fix the following errors:
-                  </h3>
-                  <ul className="text-sm text-red-700 space-y-1">
-                    {getAllErrors().map((error, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <span className="text-red-500 mt-1">•</span>
-                        <span>{error}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-red-800">
+                      ⚠️ Form Validation Errors ({getAllErrors().length})
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowValidationSummary(false)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="bg-white rounded-md p-3 border border-red-100">
+                    <ul className="text-sm text-red-700 space-y-2">
+                      {getAllErrors().map((error, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <span className="text-red-500 mt-1 font-bold">•</span>
+                          <span className="leading-relaxed">{error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-3 text-xs text-red-600">
+                    Please fix all errors before submitting the form.
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowValidationSummary(false)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </motion.div>
           )}
 
-          {/* Form Status Indicator */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div
-                className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
-                  isValid && isDirty
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}
+          {/* Enhanced Form Status Indicator */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-gray-700">Form Status</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={validateForm}
+                className="text-blue-600 hover:text-blue-700 border-blue-300"
               >
+                🔍 Validate Form
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {/* Form Validity Status */}
+              <div className="flex items-center space-x-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-3 h-3 rounded-full ${
                     isValid && isDirty ? 'bg-green-500' : 'bg-yellow-500'
                   }`}
                 />
-                <span>
-                  {isValid && isDirty
-                    ? 'Form is valid'
-                    : 'Please fill required fields'}
+                <span className="text-sm text-gray-600">
+                  {isValid && isDirty ? '✅ Form Valid' : '⚠️ Incomplete'}
                 </span>
               </div>
-              {Object.keys(errors).length > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {Object.keys(errors).length} error
-                  {Object.keys(errors).length !== 1 ? 's' : ''}
-                </Badge>
+
+              {/* Error Count */}
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <span className="text-sm text-gray-600">
+                  {Object.keys(errors).length} field error(s)
+                </span>
+              </div>
+
+              {/* Product Specific Details Status */}
+              {watchProductType !== 'accessory' && (
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      (() => {
+                        // Check if all required product-specific fields are filled
+                        if (
+                          watchProductType === 'glasses' ||
+                          watchProductType === 'sunglasses'
+                        ) {
+                          return (
+                            watch('frameType') &&
+                            watch('frameMaterial') &&
+                            watch('frameWidth') &&
+                            watch('lensType') &&
+                            watch('prescriptionType') &&
+                            watch('gender') &&
+                            (watchProductType === 'sunglasses'
+                              ? watch('category') && watch('style')
+                              : true)
+                          );
+                        }
+                        if (watchProductType === 'contacts') {
+                          return (
+                            watch('brand') &&
+                            watch('packagingType') &&
+                            watch('wearDuration') &&
+                            watch('replacementFrequency') &&
+                            watch('waterContent') &&
+                            watch('diameter') &&
+                            watch('baseCurve') &&
+                            watch('quantity')
+                          );
+                        }
+                        return true;
+                      })()
+                        ? 'bg-green-500'
+                        : 'bg-red-500'
+                    }`}
+                  />
+                  <span className="text-sm text-gray-600">
+                    {(() => {
+                      if (
+                        watchProductType === 'glasses' ||
+                        watchProductType === 'sunglasses'
+                      ) {
+                        const requiredFields = [
+                          'frameType',
+                          'frameMaterial',
+                          'frameWidth',
+                          'lensType',
+                          'prescriptionType',
+                          'gender',
+                        ];
+                        if (watchProductType === 'sunglasses') {
+                          requiredFields.push('category', 'style');
+                        }
+                        const filledFields = requiredFields.filter((field) =>
+                          watch(field as any)
+                        );
+                        return `📋 ${filledFields.length}/${requiredFields.length} fields`;
+                      }
+                      if (watchProductType === 'contacts') {
+                        const requiredFields = [
+                          'brand',
+                          'packagingType',
+                          'wearDuration',
+                          'replacementFrequency',
+                          'waterContent',
+                          'diameter',
+                          'baseCurve',
+                          'quantity',
+                        ];
+                        const filledFields = requiredFields.filter((field) =>
+                          watch(field as any)
+                        );
+                        return `📋 ${filledFields.length}/${requiredFields.length} fields`;
+                      }
+                      return '✅ Complete';
+                    })()}
+                  </span>
+                </div>
               )}
+
+              {/* Frame Color Variants Status */}
+              {(watchProductType === 'sunglasses' ||
+                watchProductType === 'glasses') && (
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      frameColorVariants.length > 0
+                        ? 'bg-green-500'
+                        : 'bg-red-500'
+                    }`}
+                  />
+                  <span className="text-sm text-gray-600">
+                    {frameColorVariants.length > 0
+                      ? `✅ ${frameColorVariants.length} variant(s)`
+                      : '❌ No variants'}
+                  </span>
+                </div>
+              )}
+
+              {/* Form State */}
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-sm text-gray-600">
+                  {isDirty ? '📝 Modified' : '📋 Pristine'}
+                </span>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={validateForm}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              Validate Form
-            </Button>
+
+            {/* Detailed Error Summary */}
+            {Object.keys(errors).length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-xs text-gray-500 mb-2">
+                  Fields with errors: {Object.keys(errors).join(', ')}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowValidationSummary(true)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                >
+                  👁️ View All Errors
+                </Button>
+              </div>
+            )}
           </div>
+
+          {/* Loading Overlay */}
+          {isSubmitting && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 shadow-xl">
+                <div className="flex items-center space-x-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Creating Product...
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Please wait while we save your product
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -568,30 +855,132 @@ export default function AddProductPage() {
                       initial="hidden"
                       animate="visible"
                     >
-                      <Label htmlFor="discountedPrice">
-                        Discounted Price ($)
+                      <Label
+                        htmlFor="discountedPrice"
+                        className="flex items-center space-x-2"
+                      >
+                        <span>Discounted Price ($)</span>
+                        <span className="text-gray-400 text-xs">
+                          (Optional)
+                        </span>
                       </Label>
                       <Input
                         id="discountedPrice"
                         type="number"
                         step="0.01"
                         min="0"
-                        placeholder="0.00 (optional)"
+                        placeholder="0.00 (leave empty for no discount)"
                         {...register('discountedPrice', {
-                          valueAsNumber: true,
+                          setValueAs: (value) => {
+                            console.log(
+                              'setValueAs called with:',
+                              value,
+                              'Type:',
+                              typeof value
+                            );
+
+                            // Handle empty string and convert to number or undefined
+                            if (
+                              value === '' ||
+                              value === null ||
+                              value === undefined ||
+                              value === 0 ||
+                              value === '0'
+                            ) {
+                              console.log(
+                                'Returning undefined for empty/zero value'
+                              );
+                              return undefined;
+                            }
+
+                            const num = parseFloat(value);
+                            console.log(
+                              'Parsed number:',
+                              num,
+                              'isNaN:',
+                              isNaN(num)
+                            );
+
+                            if (isNaN(num) || num <= 0) {
+                              console.log(
+                                'Returning undefined for invalid number'
+                              );
+                              return undefined;
+                            }
+
+                            console.log('Returning valid number:', num);
+                            return num;
+                          },
                         })}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || value === '0') {
+                            setValue('discountedPrice', undefined);
+                          }
+                        }}
                         className={
                           errors.discountedPrice ? 'border-red-500' : ''
                         }
                       />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Leave empty if no discount is applied. Must be less than
-                        regular price.
-                      </p>
-                      {errors.discountedPrice && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.discountedPrice.message}
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-gray-500">
+                          💡 Leave empty if no discount is applied
                         </p>
+                        <p className="text-xs text-gray-400">
+                          Must be less than regular price when provided
+                        </p>
+                        {(() => {
+                          const price = watch('price');
+                          const discountedPrice = watch('discountedPrice');
+
+                          // Debug logging
+                          console.log('Price:', price, 'Type:', typeof price);
+                          console.log(
+                            'Discounted Price:',
+                            discountedPrice,
+                            'Type:',
+                            typeof discountedPrice
+                          );
+
+                          // Only show validation if both values are valid numbers
+                          if (
+                            typeof price === 'number' &&
+                            typeof discountedPrice === 'number' &&
+                            discountedPrice > 0
+                          ) {
+                            const isValid = discountedPrice < price;
+                            return (
+                              <div
+                                className={`text-xs p-2 rounded ${
+                                  isValid
+                                    ? 'bg-green-50 text-green-700 border border-green-200'
+                                    : 'bg-red-50 text-red-700 border border-red-200'
+                                }`}
+                              >
+                                {isValid
+                                  ? `✅ Valid discount: Save $${(
+                                      price - discountedPrice
+                                    ).toFixed(2)}`
+                                  : `❌ Invalid: Discounted price must be less than $${price}`}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                      {errors.discountedPrice && (
+                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                          <span className="font-medium">Error:</span>{' '}
+                          {errors.discountedPrice.message?.replace(
+                            'NaN',
+                            'Invalid value'
+                          ) || 'Invalid discounted price'}
+                          <div className="mt-1 text-xs text-red-600">
+                            Current value:{' '}
+                            {JSON.stringify(watch('discountedPrice'))} (Type:{' '}
+                            {typeof watch('discountedPrice')})
+                          </div>
+                        </div>
                       )}
                     </motion.div>
 
@@ -789,9 +1178,19 @@ export default function AddProductPage() {
             {/* Frame Color Variants - for Sunglasses and Glasses */}
             {(watchProductType === 'sunglasses' ||
               watchProductType === 'glasses') && (
-              <Card className="shadow-sm">
+              <Card
+                className={`shadow-sm ${
+                  frameColorVariants.length === 0
+                    ? 'border-red-300 bg-red-50'
+                    : ''
+                }`}
+              >
                 <CardHeader>
-                  <CardTitle>Frame Color Variants</CardTitle>
+                  <CardTitle className="flex items-center space-x-2">
+                    <span>Frame Color Variants</span>
+                    <span className="text-red-500 font-bold">*</span>
+                    <span className="text-gray-500 text-sm">(Required)</span>
+                  </CardTitle>
                   <CardDescription>
                     Organize your {watchProductType} by frame colors. Each color
                     can have its own images and stock quantity.
@@ -803,19 +1202,335 @@ export default function AddProductPage() {
                     onChange={setFrameColorVariants}
                     productType={watchProductType}
                   />
+
+                  {/* Validation Error Display */}
+                  {frameColorVariants.length === 0 && (
+                    <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg">
+                      <div className="flex items-center space-x-2 text-red-700">
+                        <span className="text-red-500 font-bold">⚠️</span>
+                        <span className="text-sm font-medium">
+                          At least one frame color variant is required for{' '}
+                          {watchProductType}
+                        </span>
+                      </div>
+                      <p className="text-xs text-red-600 mt-1">
+                        Please add at least one color variant with images and
+                        stock quantity.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Success State */}
+                  {frameColorVariants.length > 0 && (
+                    <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                      <div className="flex items-center space-x-2 text-green-700">
+                        <span className="text-green-500 font-bold">✅</span>
+                        <span className="text-sm font-medium">
+                          {frameColorVariants.length} frame color variant
+                          {frameColorVariants.length !== 1 ? 's' : ''}{' '}
+                          configured
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
 
             {/* Product Type Specific Fields */}
             {watchProductType !== 'accessory' && (
-              <Card className="shadow-sm">
+              <Card
+                className={`shadow-sm ${
+                  (() => {
+                    // Check if there are any product-specific field errors
+                    if (
+                      watchProductType === 'glasses' ||
+                      watchProductType === 'sunglasses'
+                    ) {
+                      return (
+                        errors.frameType ||
+                        errors.frameMaterial ||
+                        errors.frameWidth ||
+                        errors.lensType ||
+                        errors.prescriptionType ||
+                        errors.gender ||
+                        (watchProductType === 'sunglasses'
+                          ? errors.category || errors.style
+                          : false)
+                      );
+                    }
+                    if (watchProductType === 'contacts') {
+                      return (
+                        errors.brand ||
+                        errors.packagingType ||
+                        errors.wearDuration ||
+                        errors.replacementFrequency ||
+                        errors.waterContent ||
+                        errors.diameter ||
+                        errors.baseCurve ||
+                        errors.quantity
+                      );
+                    }
+                    return false;
+                  })()
+                    ? 'border-red-300 bg-red-50'
+                    : ''
+                }`}
+              >
                 <CardHeader>
-                  <CardTitle>Product Specific Details</CardTitle>
+                  <CardTitle className="flex items-center space-x-2">
+                    <span>Product Specific Details</span>
+                    {(() => {
+                      // Check if there are any product-specific field errors
+                      if (
+                        watchProductType === 'glasses' ||
+                        watchProductType === 'sunglasses'
+                      ) {
+                        return (
+                          errors.frameType ||
+                          errors.frameMaterial ||
+                          errors.frameWidth ||
+                          errors.lensType ||
+                          errors.prescriptionType ||
+                          errors.gender ||
+                          (watchProductType === 'sunglasses'
+                            ? errors.category || errors.style
+                            : false)
+                        );
+                      }
+                      if (watchProductType === 'contacts') {
+                        return (
+                          errors.brand ||
+                          errors.packagingType ||
+                          errors.wearDuration ||
+                          errors.replacementFrequency ||
+                          errors.waterContent ||
+                          errors.diameter ||
+                          errors.baseCurve ||
+                          errors.quantity
+                        );
+                      }
+                      return false;
+                    })() && (
+                      <Badge variant="destructive" className="text-xs">
+                        ⚠️ Has Errors
+                      </Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription>
                     Enter details specific to {watchProductType.toLowerCase()}
                   </CardDescription>
+
+                  {/* Completion Status Indicator */}
+                  <div className="px-6 pb-2">
+                    {(() => {
+                      let totalFields = 0;
+                      let filledFields = 0;
+
+                      if (
+                        watchProductType === 'glasses' ||
+                        watchProductType === 'sunglasses'
+                      ) {
+                        const requiredFields = [
+                          'frameType',
+                          'frameMaterial',
+                          'frameWidth',
+                          'lensType',
+                          'prescriptionType',
+                          'gender',
+                        ];
+                        if (watchProductType === 'sunglasses') {
+                          requiredFields.push('category', 'style');
+                        }
+                        totalFields = requiredFields.length;
+                        filledFields = requiredFields.filter((field) =>
+                          watch(field as any)
+                        ).length;
+                      } else if (watchProductType === 'contacts') {
+                        const requiredFields = [
+                          'brand',
+                          'packagingType',
+                          'wearDuration',
+                          'replacementFrequency',
+                          'waterContent',
+                          'diameter',
+                          'baseCurve',
+                          'quantity',
+                        ];
+                        totalFields = requiredFields.length;
+                        filledFields = requiredFields.filter((field) =>
+                          watch(field as any)
+                        ).length;
+                      }
+
+                      if (totalFields === 0) return null;
+
+                      const completionPercentage = Math.round(
+                        (filledFields / totalFields) * 100
+                      );
+                      const isComplete = filledFields === totalFields;
+
+                      return (
+                        <div
+                          className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+                            isComplete
+                              ? 'bg-green-100 text-green-800 border border-green-200'
+                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}
+                        >
+                          <span>{isComplete ? '✅' : '📋'}</span>
+                          <span>
+                            {isComplete
+                              ? 'Complete'
+                              : `${filledFields}/${totalFields} fields filled (${completionPercentage}%)`}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </CardHeader>
+
+                {/* Product Specific Details Validation Summary */}
+                {(() => {
+                  const productSpecificErrors: string[] = [];
+
+                  // Collect all product-specific field errors
+                  if (
+                    watchProductType === 'glasses' ||
+                    watchProductType === 'sunglasses'
+                  ) {
+                    if (errors.frameType)
+                      productSpecificErrors.push(
+                        `Frame Type: ${errors.frameType.message}`
+                      );
+                    if (errors.frameMaterial)
+                      productSpecificErrors.push(
+                        `Frame Material: ${errors.frameMaterial.message}`
+                      );
+                    if (errors.frameWidth)
+                      productSpecificErrors.push(
+                        `Frame Width: ${errors.frameWidth.message}`
+                      );
+                    if (errors.lensType)
+                      productSpecificErrors.push(
+                        `Lens Type: ${errors.lensType.message}`
+                      );
+                    if (errors.prescriptionType)
+                      productSpecificErrors.push(
+                        `Prescription Type: ${errors.prescriptionType.message}`
+                      );
+                    if (errors.gender)
+                      productSpecificErrors.push(
+                        `Gender: ${errors.gender.message}`
+                      );
+                    if (errors.style)
+                      productSpecificErrors.push(
+                        `Style: ${errors.style.message}`
+                      );
+                  }
+
+                  if (watchProductType === 'sunglasses') {
+                    if (errors.category)
+                      productSpecificErrors.push(
+                        `Category: ${errors.category.message}`
+                      );
+                  }
+
+                  if (watchProductType === 'contacts') {
+                    if (errors.brand)
+                      productSpecificErrors.push(
+                        `Brand: ${errors.brand.message}`
+                      );
+                    if (errors.packagingType)
+                      productSpecificErrors.push(
+                        `Packaging Type: ${errors.packagingType.message}`
+                      );
+                    if (errors.wearDuration)
+                      productSpecificErrors.push(
+                        `Wear Duration: ${errors.wearDuration.message}`
+                      );
+                    if (errors.replacementFrequency)
+                      productSpecificErrors.push(
+                        `Replacement Frequency: ${errors.replacementFrequency.message}`
+                      );
+                    if (errors.waterContent)
+                      productSpecificErrors.push(
+                        `Water Content: ${errors.waterContent.message}`
+                      );
+                    if (errors.diameter)
+                      productSpecificErrors.push(
+                        `Diameter: ${errors.diameter.message}`
+                      );
+                    if (errors.baseCurve)
+                      productSpecificErrors.push(
+                        `Base Curve: ${errors.baseCurve.message}`
+                      );
+                    if (errors.quantity)
+                      productSpecificErrors.push(
+                        `Quantity: ${errors.quantity.message}`
+                      );
+                  }
+
+                  return productSpecificErrors.length > 0 ? (
+                    <div className="px-6 pb-4">
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start space-x-2">
+                          <span className="text-red-500 font-bold text-sm">
+                            ⚠️
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-800 mb-2">
+                              Product Specific Details Validation Errors (
+                              {productSpecificErrors.length})
+                            </p>
+                            <div className="bg-white rounded-md p-3 border border-red-100">
+                              <ul className="text-sm text-red-700 space-y-1">
+                                {productSpecificErrors.map((error, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start space-x-2"
+                                  >
+                                    <span className="text-red-500 mt-1 font-bold">
+                                      •
+                                    </span>
+                                    <span className="leading-relaxed">
+                                      {error}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <p className="text-xs text-red-600 mt-2">
+                              Please complete all required fields marked with{' '}
+                              <span className="text-red-500">*</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Show success state when no errors
+                    <div className="px-6 pb-4">
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start space-x-2">
+                          <span className="text-green-500 font-bold text-sm">
+                            ✅
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-800">
+                              Product Specific Details Complete
+                            </p>
+                            <p className="text-xs text-green-700 mt-1">
+                              All required fields for {watchProductType} have
+                              been filled correctly
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <CardContent>
                   {/* Glasses Specific Fields */}
                   {watchProductType === 'glasses' && (
@@ -1657,9 +2372,11 @@ export default function AddProductPage() {
                 type="submit"
                 className={`${
                   isValid && isDirty
-                    ? 'bg-green-600 hover:bg-green-700'
+                    ? 'bg-green-600 hover:bg-green-700 shadow-lg'
                     : 'bg-blue-600 hover:bg-blue-700'
-                } text-white`}
+                } text-white transition-all duration-200 ${
+                  isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
                 disabled={isSubmitting || (!isValid && isDirty)}
                 onClick={() => {
                   if (!isValid && isDirty) {
@@ -1675,7 +2392,7 @@ export default function AddProductPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    Creating Product...
                   </>
                 ) : (
                   <>

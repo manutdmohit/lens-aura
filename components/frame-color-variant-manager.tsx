@@ -169,8 +169,55 @@ export default function FrameColorVariantManager({
         {/* Display existing variants */}
         {variants.length > 0 && (
           <div className="space-y-4">
+            {/* Validation Summary */}
+            <div
+              className={`p-3 rounded-lg border ${
+                variants.some(
+                  (v) =>
+                    !v.color.name || !v.stockQuantity || v.images.length === 0
+                )
+                  ? 'bg-yellow-50 border-yellow-300 text-yellow-800'
+                  : 'bg-green-50 border-green-300 text-green-800'
+              }`}
+            >
+              <div className="flex items-center space-x-2 text-sm">
+                {variants.some(
+                  (v) =>
+                    !v.color.name || !v.stockQuantity || v.images.length === 0
+                ) ? (
+                  <>
+                    <span>⚠️</span>
+                    <span>
+                      {
+                        variants.filter(
+                          (v) =>
+                            !v.color.name ||
+                            !v.stockQuantity ||
+                            v.images.length === 0
+                        ).length
+                      }{' '}
+                      of {variants.length} variants need completion
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>✅</span>
+                    <span>All {variants.length} variants are complete</span>
+                  </>
+                )}
+              </div>
+            </div>
             {variants.map((variant, index) => (
-              <Card key={index} className="overflow-hidden">
+              <Card
+                key={index}
+                className={`overflow-hidden ${
+                  !variant.color.name ||
+                  !variant.stockQuantity ||
+                  variant.images.length === 0
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-green-200 bg-green-50'
+                }`}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -187,15 +234,35 @@ export default function FrameColorVariantManager({
                         </p>
                       </div>
                     </div>
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveColorVariant(index)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      {/* Validation Status Badge */}
+                      {(!variant.color.name ||
+                        !variant.stockQuantity ||
+                        variant.images.length === 0) && (
+                        <Badge variant="destructive" className="text-xs">
+                          ⚠️ Incomplete
+                        </Badge>
+                      )}
+                      {variant.color.name &&
+                        variant.stockQuantity &&
+                        variant.images.length > 0 && (
+                          <Badge
+                            variant="default"
+                            className="text-xs bg-green-600"
+                          >
+                            ✅ Complete
+                          </Badge>
+                        )}
+                      <Button
+                        type="button"
+                        onClick={() => handleRemoveColorVariant(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -250,7 +317,7 @@ export default function FrameColorVariantManager({
 
                   <div>
                     <Label className="text-sm font-medium">
-                      Stock Quantity
+                      Stock Quantity <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       type="number"
@@ -259,16 +326,23 @@ export default function FrameColorVariantManager({
                         handleStockQuantityChange(index, e.target.value)
                       }
                       placeholder="Enter stock quantity"
-                      className="mt-1"
+                      className={`mt-1 ${
+                        !variant.stockQuantity ? 'border-red-500 bg-red-50' : ''
+                      }`}
                       min="0"
                     />
+                    {!variant.stockQuantity && (
+                      <p className="text-red-500 text-xs mt-1">
+                        Stock quantity is required
+                      </p>
+                    )}
                   </div>
 
                   {/* Images Section */}
                   <div>
                     <Label className="text-sm font-medium flex items-center">
                       <ImageIcon className="w-4 h-4 mr-1" />
-                      Product Images
+                      Product Images <span className="text-red-500">*</span>
                     </Label>
                     <p className="text-xs text-gray-500 mb-2">
                       Upload images specific to this color variant
@@ -279,6 +353,11 @@ export default function FrameColorVariantManager({
                       }
                       currentImageCount={variant.images.length}
                     />
+                    {variant.images.length === 0 && (
+                      <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-700 text-xs">
+                        ⚠️ At least one image is required for this variant
+                      </div>
+                    )}
                   </div>
 
                   {/* Preview */}
