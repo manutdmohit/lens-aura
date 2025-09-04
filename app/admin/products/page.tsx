@@ -18,7 +18,6 @@ import {
   ChevronRight,
   AlertTriangle,
   Package,
-  DollarSign,
   TrendingUp,
   X,
   Check,
@@ -82,12 +81,11 @@ export default function AdminProductsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  // Analytics state
+  // Analytics state - calculated from products data
   const [analytics, setAnalytics] = useState({
     totalProducts: 0,
     activeProducts: 0,
     lowStockProducts: 0,
-    totalValue: 0,
   });
 
   // Fetch products with server-side pagination
@@ -126,33 +124,56 @@ export default function AdminProductsPage() {
       setProducts(data.products);
       setTotalPages(data.pagination.pages);
       setTotalProducts(data.pagination.total);
+
+      // Fetch analytics separately to get accurate counts from entire database
+      try {
+        const analyticsResponse = await fetch('/api/admin/analytics');
+        if (analyticsResponse.ok) {
+          const analyticsData = await analyticsResponse.json();
+          setAnalytics({
+            totalProducts: analyticsData.totalProducts,
+            activeProducts: analyticsData.activeProducts,
+            lowStockProducts: analyticsData.lowStockProducts,
+          });
+
+          console.log('Analytics fetched successfully:', analyticsData);
+        } else {
+          console.error('Failed to fetch analytics:', analyticsResponse.status);
+          // Fallback to pagination data (less accurate)
+          setAnalytics({
+            totalProducts: data.pagination.total,
+            activeProducts: 0,
+            lowStockProducts: 0,
+          });
+        }
+      } catch (analyticsError) {
+        console.error('Error fetching analytics:', analyticsError);
+        // Fallback to pagination data (less accurate)
+        setAnalytics({
+          totalProducts: data.pagination.total,
+          activeProducts: 0,
+          lowStockProducts: 0,
+        });
+      }
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to fetch products');
+
+      // Set default analytics values on error
+      setAnalytics({
+        totalProducts: 0,
+        activeProducts: 0,
+        lowStockProducts: 0,
+      });
+
       setLoading(false);
-    }
-  };
-
-  // Fetch analytics separately
-  const fetchAnalytics = async () => {
-    try {
-      const response = await fetch('/api/admin/analytics');
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
-      }
-
-      const data = await response.json();
-      setAnalytics(data);
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      toast.error('Failed to fetch analytics');
     }
   };
 
   useEffect(() => {
     fetchProducts();
-    fetchAnalytics();
   }, [
     currentPage,
     itemsPerPage,
@@ -191,14 +212,13 @@ export default function AdminProductsPage() {
   };
 
   const exportToCSV = () => {
-    const csvHeaders = ['Name', 'Category', 'Price', 'Stock', 'Status'];
+    const csvHeaders = ['Name', 'Category', 'Price', 'Status'];
     const csvData = products.map((product) => [
       product.name,
       product.productType,
       product.discountedPrice && product.discountedPrice > 0
         ? product.discountedPrice
         : product.price,
-      product.stockQuantity,
       product.status,
     ]);
 
@@ -257,9 +277,8 @@ export default function AdminProductsPage() {
         } successfully`
       );
 
-      // Refresh the products list and analytics
+      // Refresh the products list
       fetchProducts();
-      fetchAnalytics();
     } catch (error: any) {
       console.error('Error updating product status:', error);
       toast.error(error.message || 'Failed to update product status');
@@ -344,19 +363,6 @@ export default function AdminProductsPage() {
                 <p className="text-xs text-muted-foreground">
                   Items with ≤5 stock
                 </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Inventory Value
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${analytics.totalValue.toFixed(2)}
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -486,21 +492,7 @@ export default function AdminProductsPage() {
                                 ))}
                             </Button>
                           </TableHead>
-                          <TableHead>
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('stockQuantity')}
-                              className="h-auto p-0 font-semibold hover:bg-transparent"
-                            >
-                              Stock
-                              {sortField === 'stockQuantity' &&
-                                (sortDirection === 'asc' ? (
-                                  <ArrowUp className="ml-2 h-4 w-4" />
-                                ) : (
-                                  <ArrowDown className="ml-2 h-4 w-4" />
-                                ))}
-                            </Button>
-                          </TableHead>
+
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -508,7 +500,7 @@ export default function AdminProductsPage() {
                       <TableBody>
                         {products.length === 0 ? (
                           <TableRow key="no-products">
-                            <TableCell colSpan={7} className="h-24 text-center">
+                            <TableCell colSpan={6} className="h-24 text-center">
                               No products found matching your search.
                             </TableCell>
                           </TableRow>
@@ -554,38 +546,7 @@ export default function AdminProductsPage() {
                               <TableCell>
                                 {formatPrice(product.price ?? 0)}
                               </TableCell>
-                              <TableCell>
-                                {(() => {
-                                  let totalStock = 0;
-                                  if (
-                                    product.productType === 'glasses' ||
-                                    product.productType === 'sunglasses'
-                                  ) {
-                                    // For glasses/sunglasses, sum all frameColorVariants stock
-                                    totalStock = (
-                                      product.frameColorVariants || []
-                                    ).reduce(
-                                      (sum, variant) =>
-                                        sum + (variant.stockQuantity ?? 0),
-                                      0
-                                    );
-                                  } else {
-                                    // For contacts/accessories, use direct stockQuantity
-                                    totalStock = product.stockQuantity ?? 0;
-                                  }
-                                  return (
-                                    <span
-                                      className={`text-sm ${
-                                        totalStock <= 5
-                                          ? 'text-orange-600 font-medium'
-                                          : ''
-                                      }`}
-                                    >
-                                      {totalStock}
-                                    </span>
-                                  );
-                                })()}
-                              </TableCell>
+
                               <TableCell>
                                 <Badge
                                   variant={
