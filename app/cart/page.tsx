@@ -51,15 +51,19 @@ export default function CartPage() {
 
   // Function to get available stock for a cart item
   const getAvailableStock = (item: any) => {
+    if (!item || !item.product) {
+      return 0;
+    }
+
     if (
       item.product.productType === 'glasses' ||
       item.product.productType === 'sunglasses'
     ) {
       // For glasses/sunglasses, check frame color variants
+      const colorName =
+        typeof item.color === 'string' ? item.color : item.color?.name;
       const variant = item.product.frameColorVariants?.find(
-        (v: any) =>
-          v.color.name ===
-          (typeof item.color === 'string' ? item.color : item.color?.name)
+        (v: any) => v.color && v.color.name === colorName
       );
       return variant?.stockQuantity || 0;
     } else {
@@ -292,43 +296,44 @@ export default function CartPage() {
                         </p>
                         <div className="text-sm text-gray-500">
                           {(() => {
-                            // Check for current promotional pricing from database first
-                            const itemProductCategory = item.product
-                              .category as 'signature' | 'essentials';
-                            const itemHookCategory =
-                              itemProductCategory === 'essentials'
-                                ? 'essential'
-                                : itemProductCategory;
-                            const {
-                              categoryPricing: itemCategoryPricing,
-                              hasPromotions: itemHasPromotions,
-                            } = useCategoryPromotionalPricing(itemHookCategory);
+                            // Use the promotional pricing from the hook that was called at the component level
+                            if (hasPromotions && categoryPricing) {
+                              const itemProductCategory = item.product
+                                .category as 'signature' | 'essentials';
+                              const itemHookCategory =
+                                itemProductCategory === 'essentials'
+                                  ? 'essential'
+                                  : itemProductCategory;
 
-                            if (itemHasPromotions && itemCategoryPricing) {
-                              const promotionalPrice =
-                                itemCategoryPricing.promotionalPrice;
-                              const originalPrice =
-                                itemCategoryPricing.originalPrice;
-                              const savingsAmount =
-                                originalPrice - promotionalPrice;
-                              const savingsPercentage = Math.round(
-                                (savingsAmount / originalPrice) * 100
-                              );
+                              // Only show promotional pricing if it matches the current item's category
+                              if (itemHookCategory === hookCategory) {
+                                const promotionalPrice =
+                                  categoryPricing.promotionalPrice;
+                                const originalPrice =
+                                  categoryPricing.originalPrice;
+                                const savingsAmount =
+                                  originalPrice - promotionalPrice;
+                                const savingsPercentage = Math.round(
+                                  (savingsAmount / originalPrice) * 100
+                                );
 
-                              return (
-                                <div>
-                                  <span className="text-purple-600 font-medium">
-                                    {formatPrice(promotionalPrice)}
-                                  </span>
-                                  <span className="line-through ml-2">
-                                    {formatPrice(originalPrice)}
-                                  </span>
-                                  <span className="text-purple-600 text-xs ml-2">
-                                    Current Offer - Save{' '}
-                                    {formatSavingsPercentage(savingsPercentage)}
-                                  </span>
-                                </div>
-                              );
+                                return (
+                                  <div>
+                                    <span className="text-purple-600 font-medium">
+                                      {formatPrice(promotionalPrice)}
+                                    </span>
+                                    <span className="line-through ml-2">
+                                      {formatPrice(originalPrice)}
+                                    </span>
+                                    <span className="text-purple-600 text-xs ml-2">
+                                      Current Offer - Save{' '}
+                                      {formatSavingsPercentage(
+                                        savingsPercentage
+                                      )}
+                                    </span>
+                                  </div>
+                                );
+                              }
                             }
 
                             // Fall back to regular discount logic

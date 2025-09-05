@@ -84,6 +84,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const getEffectivePrice = (product: IProduct & { _id: string }) => {
     // Use the current discounted price from the database
     // This should match the promotional pricing we set in the script
+    if (!product || typeof product.price !== 'number') {
+      return 0;
+    }
     return product.discountedPrice && product.discountedPrice > 0
       ? product.discountedPrice
       : product.price;

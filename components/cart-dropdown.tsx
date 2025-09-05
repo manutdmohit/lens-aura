@@ -142,13 +142,21 @@ export default function CartDropdown() {
                   {items.map((item: CartItem) => {
                     // Calculate available stock based on product type
                     const getAvailableStock = () => {
+                      if (!item || !item.product) {
+                        return 0;
+                      }
+
                       if (
                         item.product.productType === 'glasses' ||
                         item.product.productType === 'sunglasses'
                       ) {
                         // For glasses/sunglasses, check frame color variants
+                        const colorName =
+                          typeof item.color === 'string'
+                            ? item.color
+                            : item.color?.name;
                         const variant = item.product.frameColorVariants?.find(
-                          (v) => v.color.name === item.color
+                          (v) => v.color && v.color.name === colorName
                         );
                         return variant?.stockQuantity || 0;
                       } else {
