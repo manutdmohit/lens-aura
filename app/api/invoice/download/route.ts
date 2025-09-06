@@ -1,12 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import { Product } from '@/models';
 import {
   calculateSeptember2025Pricing,
   calculatePromotionalPricing,
 } from '@/lib/utils/discount';
+
+// Import the appropriate puppeteer package based on environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+let puppeteer: any;
+let chromium: any;
+
+if (isProduction) {
+  // Use puppeteer-core with @sparticuz/chromium for Vercel
+  puppeteer = require('puppeteer-core');
+  chromium = require('@sparticuz/chromium');
+} else {
+  // Use regular puppeteer for local development
+  puppeteer = require('puppeteer');
+}
 
 interface OrderItem {
   productId: string;
@@ -92,6 +106,10 @@ export async function POST(req: NextRequest) {
         await connectToDatabase();
         console.log('Database connected successfully');
 
+        // Test database connection by checking if we can query the Order collection
+        const orderCount = await Order.countDocuments();
+        console.log('Total orders in database:', orderCount);
+
         // Try to find the order by orderNumber or orderId
         let order = null;
         console.log('Searching for order with:', {
@@ -103,7 +121,7 @@ export async function POST(req: NextRequest) {
           console.log('Searching by orderNumber:', orderDetails.orderNumber);
           order = await Order.findOne({
             orderNumber: orderDetails.orderNumber,
-          }).populate('items.product');
+          });
           console.log('Order found by orderNumber:', order ? 'Yes' : 'No');
 
           // If not found, try case-insensitive search
@@ -113,7 +131,7 @@ export async function POST(req: NextRequest) {
               orderNumber: {
                 $regex: new RegExp(`^${orderDetails.orderNumber}$`, 'i'),
               },
-            }).populate('items.product');
+            });
             console.log(
               'Order found by case-insensitive search:',
               order ? 'Yes' : 'No'
@@ -121,9 +139,7 @@ export async function POST(req: NextRequest) {
           }
         } else if (orderDetails.id) {
           console.log('Searching by id:', orderDetails.id);
-          order = await Order.findById(orderDetails.id).populate(
-            'items.product'
-          );
+          order = await Order.findById(orderDetails.id);
           console.log('Order found by id:', order ? 'Yes' : 'No');
         }
 
@@ -206,9 +222,39 @@ export async function POST(req: NextRequest) {
         console.error('Error details:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
+          name: error instanceof Error ? error.name : undefined,
         });
+
+        // Check if it's a database connection error
+        if (error instanceof Error && error.message.includes('connection')) {
+          return NextResponse.json(
+            {
+              error: 'Database connection failed',
+              details: error.message,
+            },
+            { status: 500 }
+          );
+        }
+
+        // Check if it's a model/query error
+        if (
+          error instanceof Error &&
+          (error.message.includes('model') || error.message.includes('query'))
+        ) {
+          return NextResponse.json(
+            {
+              error: 'Database query failed',
+              details: error.message,
+            },
+            { status: 500 }
+          );
+        }
+
         return NextResponse.json(
-          { error: 'Failed to fetch order data from database' },
+          {
+            error: 'Failed to fetch order data from database',
+            details: error instanceof Error ? error.message : 'Unknown error',
+          },
           { status: 500 }
         );
       }
@@ -326,39 +372,52 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
     throw new Error('Customer details are required for invoice generation');
   }
 
+  let browser;
+  let page;
+
   try {
     // Generate HTML content
     const htmlContent = generateInvoiceHTML(orderDetails);
+    console.log('HTML content generated, length:', htmlContent.length);
 
-    // Launch browser with Vercel-compatible configuration
-    const isProduction = process.env.NODE_ENV === 'production';
+    // Launch browser with environment-specific configuration
+    console.log('Launching browser...');
 
-    const browser = await puppeteer.launch({
-      args: isProduction
-        ? chromium.args
-        : [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu',
-          ],
-      defaultViewport: { width: 1920, height: 1080 },
-      executablePath: isProduction
-        ? await chromium.executablePath()
-        : undefined,
-      headless: true,
-    });
+    if (isProduction) {
+      // Vercel production configuration
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: { width: 1920, height: 1080 },
+        executablePath: await chromium.executablePath(),
+        headless: true,
+      });
+    } else {
+      // Local development configuration
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+    }
 
-    const page = await browser.newPage();
+    console.log('Browser launched successfully');
+
+    // Create new page
+    page = await browser.newPage();
+    console.log('New page created');
 
     // Set content and wait for it to load
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    console.log('Setting page content...');
+    await page.setContent(htmlContent, {
+      waitUntil: 'networkidle0',
+      timeout: 30000, // 30 second timeout
+    });
+    console.log('Page content set successfully');
+
+    // Wait a bit more to ensure everything is rendered
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Generate PDF
+    console.log('Generating PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       margin: {
@@ -368,18 +427,58 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
         left: '20mm',
       },
       printBackground: true,
+      timeout: 30000, // 30 second timeout
     });
-
-    await browser.close();
+    console.log('PDF generated successfully, size:', pdfBuffer.length);
 
     return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('Error generating PDF with Puppeteer:', error);
+
+    // Handle specific Puppeteer errors
+    if (error instanceof Error) {
+      if (error.message.includes('Target closed')) {
+        throw new Error(
+          'PDF generation failed: Browser target was closed unexpectedly. This may be due to memory constraints or timeout issues.'
+        );
+      } else if (error.message.includes('Protocol error')) {
+        throw new Error(
+          'PDF generation failed: Protocol error occurred during PDF generation. This may be due to browser communication issues.'
+        );
+      } else if (error.message.includes('Navigation timeout')) {
+        throw new Error(
+          'PDF generation failed: Page navigation timed out. The HTML content may be too complex or contain errors.'
+        );
+      } else if (error.message.includes('executablePath')) {
+        throw new Error(
+          'PDF generation failed: Chrome executable not found. Please ensure Chrome is installed or the executable path is correct.'
+        );
+      } else if (error.message.includes('waitForTimeout is not a function')) {
+        throw new Error(
+          'PDF generation failed: Puppeteer API compatibility issue. The waitForTimeout method is not available in this version of Puppeteer.'
+        );
+      }
+    }
+
     throw new Error(
       `PDF generation failed: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
+  } finally {
+    // Ensure browser is closed even if there's an error
+    try {
+      if (page) {
+        await page.close();
+        console.log('Page closed');
+      }
+      if (browser) {
+        await browser.close();
+        console.log('Browser closed');
+      }
+    } catch (closeError) {
+      console.error('Error closing browser:', closeError);
+    }
   }
 }
 
