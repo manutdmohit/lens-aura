@@ -94,7 +94,7 @@ export class MailService {
         `[${emailId}] [${timestamp}] [MailService] Starting invoice email send to: ${to} for order: ${orderId}`
       );
 
-      const logoUrl = 'https://lens-aura.vercel.app/images/logo.png';
+      const logoUrl = 'https://lens-aura.vercel.app/images/lens-aura-logo.jpg';
 
       const itemRows = items
         .map((item) => {

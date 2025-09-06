@@ -15,6 +15,9 @@ export async function POST(req: NextRequest) {
       subject: 'Thank you for contacting Lens Aura',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <img src="https://lens-aura.vercel.app/images/lens-aura-logo.jpg" alt="Lens Aura Logo" style="max-width: 120px; margin-bottom: 15px;" />
+          </div>
           <h2 style="color: #333;">Thank you for contacting Lens Aura!</h2>
           <p>Dear ${name},</p>
           <p>We have received your message and will get back to you as soon as possible.</p>
@@ -35,6 +38,9 @@ export async function POST(req: NextRequest) {
       subject: `New Contact Form Submission: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <img src="https://lens-aura.vercel.app/images/lens-aura-logo.jpg" alt="Lens Aura Logo" style="max-width: 120px; margin-bottom: 15px;" />
+          </div>
           <h2 style="color: #333;">New Contact Form Submission</h2>
           <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
             <p><strong>From:</strong> ${name} (${email})</p>
