@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/api/db';
 import Order from '@/models/Order';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import {
   calculateSeptember2025Pricing,
   calculatePromotionalPricing,
@@ -271,10 +272,27 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
     // Generate HTML content
     const htmlContent = generateInvoiceHTML(orderDetails);
 
-    // Launch browser
+    // Launch browser with Vercel-compatible configuration
+    const isProduction = process.env.NODE_ENV === 'production';
+
     const browser = await puppeteer.launch({
+      args: isProduction
+        ? chromium.args
+        : [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu',
+          ],
+      defaultViewport: { width: 1920, height: 1080 },
+      executablePath: isProduction
+        ? await chromium.executablePath()
+        : undefined,
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();
