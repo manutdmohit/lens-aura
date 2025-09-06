@@ -173,11 +173,11 @@ export default function AdminLogin() {
             <Link href="/" className="inline-block group">
               <div className="relative">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/lens-aura-logo.jpg"
                   alt="Lens Aura Logo"
                   width={100}
                   height={100}
-                  className="mx-auto mb-4 transition-transform duration-300 group-hover:scale-110"
+                  className="mx-auto mb-4 transition-transform duration-300 group-hover:scale-110 object-contain"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl"></div>

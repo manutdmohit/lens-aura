@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, AlertCircle, Download } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -499,6 +500,17 @@ export default function CheckoutSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
+          {/* Logo */}
+          <div className="mb-4">
+            <Image
+              src="/images/lens-aura-logo.jpg"
+              alt="Lens Aura Logo"
+              width={120}
+              height={60}
+              className="object-contain"
+            />
+          </div>
+
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
           <h1 className="text-2xl font-semibold">Loading order details...</h1>
           <p className="text-gray-600">
@@ -513,6 +525,17 @@ export default function CheckoutSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
+          {/* Logo */}
+          <div className="mb-4">
+            <Image
+              src="/images/lens-aura-logo.jpg"
+              alt="Lens Aura Logo"
+              width={120}
+              height={60}
+              className="object-contain"
+            />
+          </div>
+
           <div className="h-12 w-12 text-red-500">
             <AlertCircle className="h-full w-full" />
           </div>
@@ -533,6 +556,17 @@ export default function CheckoutSuccessPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <div className="flex flex-col items-center space-y-6 mb-8">
+            {/* Logo */}
+            <div className="mb-4">
+              <Image
+                src="/images/lens-aura-logo.jpg"
+                alt="Lens Aura Logo"
+                width={120}
+                height={60}
+                className="object-contain"
+              />
+            </div>
+
             <div className="h-16 w-16 text-green-500">
               <CheckCircle className="h-full w-full" />
             </div>

@@ -212,11 +212,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {/* Left: Welcome message with logo */}
             <div className="flex items-center space-x-3 min-w-0">
               <Image
-                src="/images/logo.png"
+                src="/images/lens-aura-logo.jpg"
                 alt="Lens Aura Logo"
                 width={36}
                 height={36}
-                className="rounded-full"
+                className="object-contain"
                 priority
               />
               <span className="font-semibold text-lg text-gray-800 truncate">
@@ -230,11 +230,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <Image
-                      src="/images/logo.png"
+                      src="/images/lens-aura-logo.jpg"
                       alt="Lens Aura Logo"
                       width={32}
                       height={32}
-                      className="rounded-full"
+                      className="object-contain"
                       priority
                     />
                   </Button>
