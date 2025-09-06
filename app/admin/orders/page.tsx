@@ -212,48 +212,10 @@ export default function AdminOrdersPage() {
     try {
       console.log('Starting invoice download for order:', orderId);
 
-      // First, fetch the order details to get the complete order data
-      const orderResponse = await fetch(`/api/admin/orders/${orderId}`);
-      const orderData = await orderResponse.json();
-
-      if (!orderResponse.ok) {
-        throw new Error(orderData.error || 'Failed to fetch order details');
-      }
-
-      const order = orderData.order;
-
-      // Prepare order details for invoice download
+      // The invoice API will fetch complete order data from database using orderNumber
+      // We just need to provide the orderNumber and let the API handle the rest
       const orderDetails = {
-        id: order.id,
-        orderNumber: order.id,
-        customerEmail: order.customer.email,
-        items: order.items.map((item: any) => ({
-          productId: item.name, // Using name as productId since we don't have separate product object
-          name: item.name,
-          price: item.price * 100, // Convert to cents
-          quantity: item.quantity,
-          color: item.color || 'N/A',
-          // Add default values for promotional pricing fields
-          productType: 'sunglasses', // Default assumption
-          category: 'essentials', // Default assumption
-          originalPrice: item.price * 100, // Use current price as original price
-        })),
-        totalAmount: order.totals.total * 100, // Convert to cents
-        paymentStatus: order.payment.status,
-        createdAt: order.dates.created,
-        amount_total: order.totals.total * 100, // Convert to cents
-        customer_details: {
-          name: `${order.customer.firstName} ${order.customer.lastName}`,
-          email: order.customer.email,
-          address: {
-            line1: order.shipping.street || '',
-            line2: '',
-            city: order.shipping.city || '',
-            state: order.shipping.state || '',
-            postal_code: order.shipping.postalCode || '',
-            country: order.shipping.country || '',
-          },
-        },
+        orderNumber: orderId, // This is the key field the API uses to fetch from database
       };
 
       const requestBody = {

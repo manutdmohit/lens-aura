@@ -1,244 +1,472 @@
-// Function to send payment notification to Telegram
-export async function sendPaymentNotification(order: any, paymentDetails?: any) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_GROUP_ID;
+// Enhanced Telegram Service Class
+export class TelegramService {
+  private static botToken = process.env.TELEGRAM_BOT_TOKEN;
+  private static chatId = process.env.TELEGRAM_GROUP_ID;
 
-  if (!botToken || !chatId) {
-    console.error('Telegram bot token or chat ID not configured');
-    return false;
+  /**
+   * Verify Telegram configuration
+   */
+  static verifyConfiguration(): { valid: boolean; error?: string } {
+    if (!this.botToken) {
+      return { valid: false, error: 'TELEGRAM_BOT_TOKEN is not set' };
+    }
+    if (!this.chatId) {
+      return { valid: false, error: 'TELEGRAM_GROUP_ID is not set' };
+    }
+    return { valid: true };
   }
 
-  try {
-    // Format items for display
-    const itemsList = order.items
-      .map((item: any) => 
-        `• ${item.name} (${item.color}) - Qty: ${item.quantity} - $${item.price.toFixed(2)}`
-      )
-      .join('\n');
+  /**
+   * Send a message to Telegram
+   */
+  private static async sendMessage(
+    message: string,
+    parseMode: 'HTML' | 'Markdown' = 'HTML'
+  ): Promise<boolean> {
+    if (!this.botToken || !this.chatId) {
+      console.error('Telegram bot token or chat ID not configured');
+      return false;
+    }
 
-    // Format shipping address
-    const address = order.shippingAddress;
-    const addressText = address 
-      ? `${address.street || ''}\n${address.city || ''}, ${address.state || ''} ${address.postalCode || ''}\n${address.country || 'Australia'}`
-      : 'Not provided';
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${this.botToken}/sendMessage`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: this.chatId,
+            text: message,
+            parse_mode: parseMode,
+          }),
+        }
+      );
 
-    // Format customer details
-    const customerName = address 
-      ? `${address.firstName || ''} ${address.lastName || ''}`.trim() || 'Not provided'
-      : 'Not provided';
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Telegram API error: ${response.status} - ${JSON.stringify(
+            errorData
+          )}`
+        );
+      }
 
-    // Create the message
-    const message = `
-<b>💳 New Payment Received!</b>
+      console.log('Message sent to Telegram successfully');
+      return true;
+    } catch (error) {
+      console.error('Error sending message to Telegram:', error);
+      return false;
+    }
+  }
 
-🛒 <b>Order Details:</b>
-• Order #: ${order.orderNumber}
-• Amount: $${order.totalAmount.toFixed(2)}
-• Status: ${order.paymentStatus.toUpperCase()}
-• Payment Method: ${order.paymentMethod || 'Stripe'}
+  /**
+   * Send payment notification to Telegram
+   */
+  static async sendPaymentNotification(
+    order: any,
+    paymentDetails?: any
+  ): Promise<boolean> {
+    const configCheck = this.verifyConfiguration();
+    if (!configCheck.valid) {
+      console.error('Telegram configuration error:', configCheck.error);
+      return false;
+    }
 
-👤 <b>Customer Details:</b>
-• Name: ${customerName}
-• Email: ${order.customerEmail || 'Not provided'}
-• Phone: ${order.customerPhone || 'Not provided'}
+    try {
+      // Format items for display with enhanced styling
+      const itemsList = order.items
+        .map((item: any, index: number) => {
+          const itemTotal = item.price * item.quantity;
+          return `${index + 1}. <b>${item.name}</b>
+   🎨 Color: ${item.color || 'N/A'}
+   📦 Qty: ${item.quantity}
+   💰 Price: $${item.price.toFixed(2)} each
+   💵 Total: $${itemTotal.toFixed(2)}`;
+        })
+        .join('\n\n');
 
-📍 <b>Shipping Address:</b>
+      // Format shipping address
+      const address = order.shippingAddress;
+      const addressText = address
+        ? `🏠 ${address.street || ''}
+🏙️ ${address.city || ''}, ${address.state || ''} ${address.postalCode || ''}
+🌏 ${address.country || 'Australia'}`
+        : '❌ Not provided';
+
+      // Format customer details
+      const customerName = address
+        ? `${address.firstName || ''} ${address.lastName || ''}`.trim() ||
+          'Not provided'
+        : 'Not provided';
+
+      // Calculate savings if promotional pricing is applied
+      const totalSavings =
+        order.items?.reduce((savings: number, item: any) => {
+          if (item.originalPrice && item.originalPrice > item.price) {
+            return savings + (item.originalPrice - item.price) * item.quantity;
+          }
+          return savings;
+        }, 0) || 0;
+
+      // Create enhanced message
+      const message = `
+🎉 <b>NEW ORDER RECEIVED!</b>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛒 <b>ORDER DETAILS</b>
+📋 Order #: <code>${order.orderNumber}</code>
+💰 Total Amount: <b>$${order.totalAmount.toFixed(2)}</b>
+${totalSavings > 0 ? `💸 Savings: <b>$${totalSavings.toFixed(2)}</b>` : ''}
+✅ Status: <b>${order.paymentStatus.toUpperCase()}</b>
+💳 Payment: ${order.paymentMethod || 'Stripe'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 <b>CUSTOMER INFORMATION</b>
+👨‍💼 Name: <b>${customerName}</b>
+📧 Email: <code>${order.customerEmail || 'Not provided'}</code>
+📱 Phone: <code>${order.customerPhone || 'Not provided'}</code>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 <b>SHIPPING ADDRESS</b>
 ${addressText}
 
-📦 <b>Items Ordered:</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 <b>ITEMS ORDERED</b>
 ${itemsList}
 
-💳 <b>Payment Information:</b>
-• Stripe Session ID: ${order.stripeSessionId}
-• Payment Intent: ${order.paymentIntent || 'Not available'}
-• Created: ${new Date(order.createdAt).toLocaleString('en-AU', {
-    timeZone: 'Australia/Sydney',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🔗 <b>Quick Actions:</b>
-• View order: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'}/admin/orders
-• Contact customer: ${order.customerEmail ? `mailto:${order.customerEmail}` : 'Email not available'}
-• Call customer: ${order.customerPhone ? `tel:${order.customerPhone}` : 'Phone not available'}
-    `.trim();
+💳 <b>PAYMENT INFORMATION</b>
+🔑 Session ID: <code>${order.stripeSessionId}</code>
+🎯 Payment Intent: <code>${order.paymentIntent || 'Not available'}</code>
+⏰ Created: ${new Date(order.createdAt).toLocaleString('en-AU', {
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-        }),
-      }
-    );
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    if (!response.ok) {
-      throw new Error(`Telegram API error: ${response.status}`);
+🔗 <b>QUICK ACTIONS</b>
+👁️ <a href="${
+        process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+      }/admin/orders">View Order Details</a>
+📧 <a href="mailto:${order.customerEmail || ''}">Email Customer</a>
+📞 <a href="tel:${order.customerPhone || ''}">Call Customer</a>
+      `.trim();
+
+      return await this.sendMessage(message);
+    } catch (error) {
+      console.error('Error sending payment notification to Telegram:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Send payment status update to Telegram
+   */
+  static async sendPaymentStatusUpdate(
+    order: any,
+    status: string,
+    additionalInfo?: string
+  ): Promise<boolean> {
+    const configCheck = this.verifyConfiguration();
+    if (!configCheck.valid) {
+      console.error('Telegram configuration error:', configCheck.error);
+      return false;
     }
 
-    console.log('Payment notification sent to Telegram successfully');
-    return true;
-  } catch (error) {
-    console.error('Error sending payment notification to Telegram:', error);
-    return false;
-  }
+    try {
+      const statusEmoji =
+        status === 'paid' ? '✅' : status === 'failed' ? '❌' : '⏳';
+      const statusColor =
+        status === 'paid' ? '🟢' : status === 'failed' ? '🔴' : '🟡';
+
+      const message = `
+${statusEmoji} <b>PAYMENT STATUS UPDATE</b>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛒 <b>ORDER INFORMATION</b>
+📋 Order #: <code>${order.orderNumber}</code>
+💰 Amount: <b>$${order.totalAmount.toFixed(2)}</b>
+${statusColor} Status: <b>${status.toUpperCase()}</b>
+👤 Customer: <code>${order.customerEmail || 'Not provided'}</code>
+
+${
+  additionalInfo
+    ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ℹ️ <b>ADDITIONAL INFORMATION</b>
+${additionalInfo}`
+    : ''
 }
 
-// Function to send payment status update to Telegram
-export async function sendPaymentStatusUpdate(order: any, status: string, additionalInfo?: string) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_GROUP_ID;
-
-  if (!botToken || !chatId) {
-    console.error('Telegram bot token or chat ID not configured');
-    return false;
-  }
-
-  try {
-    const statusEmoji = status === 'paid' ? '✅' : status === 'failed' ? '❌' : '⏳';
-    
-    const message = `
-<b>${statusEmoji} Payment Status Update</b>
-
-🛒 <b>Order:</b> ${order.orderNumber}
-💰 <b>Amount:</b> $${order.totalAmount.toFixed(2)}
-📊 <b>Status:</b> ${status.toUpperCase()}
-👤 <b>Customer:</b> ${order.customerEmail || 'Not provided'}
-
-${additionalInfo ? `ℹ️ <b>Additional Info:</b>\n${additionalInfo}\n` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ⏰ <b>Updated:</b> ${new Date().toLocaleString('en-AU', {
-    timeZone: 'Australia/Sydney',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
 
-🔗 <b>View Order:</b> ${process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'}/admin/orders
-    `.trim();
+🔗 <a href="${
+        process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+      }/admin/orders">View Order Details</a>
+      `.trim();
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-        }),
-      }
-    );
+      return await this.sendMessage(message);
+    } catch (error) {
+      console.error('Error sending payment status update to Telegram:', error);
+      return false;
+    }
+  }
 
-    if (!response.ok) {
-      throw new Error(`Telegram API error: ${response.status}`);
+  /**
+   * Send payment failure notification to Telegram
+   */
+  static async sendPaymentFailureNotification(
+    order: any,
+    errorDetails?: string
+  ): Promise<boolean> {
+    const configCheck = this.verifyConfiguration();
+    if (!configCheck.valid) {
+      console.error('Telegram configuration error:', configCheck.error);
+      return false;
     }
 
-    console.log('Payment status update sent to Telegram successfully');
-    return true;
-  } catch (error) {
-    console.error('Error sending payment status update to Telegram:', error);
-    return false;
-  }
-}
+    try {
+      // Format items for display
+      const itemsList = order.items
+        .map((item: any, index: number) => {
+          const itemTotal = item.price * item.quantity;
+          return `${index + 1}. <b>${item.name}</b>
+   🎨 Color: ${item.color || 'N/A'}
+   📦 Qty: ${item.quantity}
+   💰 Price: $${item.price.toFixed(2)} each
+   💵 Total: $${itemTotal.toFixed(2)}`;
+        })
+        .join('\n\n');
 
-// Function to send payment failure notification to Telegram
-export async function sendPaymentFailureNotification(order: any, errorDetails?: string) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_GROUP_ID;
+      const message = `
+🚨 <b>PAYMENT FAILED!</b>
 
-  if (!botToken || !chatId) {
-    console.error('Telegram bot token or chat ID not configured');
-    return false;
-  }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  try {
-    // Format items for display
-    const itemsList = order.items
-      .map((item: any) => 
-        `• ${item.name} (${item.color}) - Qty: ${item.quantity} - $${item.price.toFixed(2)}`
-      )
-      .join('\n');
+🛒 <b>ORDER DETAILS</b>
+📋 Order #: <code>${order.orderNumber}</code>
+💰 Amount: <b>$${order.totalAmount.toFixed(2)}</b>
+❌ Status: <b>${order.paymentStatus.toUpperCase()}</b>
+💳 Payment: ${order.paymentMethod || 'Stripe'}
 
-    const message = `
-<b>❌ Payment Failed!</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🛒 <b>Order Details:</b>
-• Order #: ${order.orderNumber}
-• Amount: $${order.totalAmount.toFixed(2)}
-• Status: ${order.paymentStatus.toUpperCase()}
-• Payment Method: ${order.paymentMethod || 'Stripe'}
+👤 <b>CUSTOMER INFORMATION</b>
+📧 Email: <code>${order.customerEmail || 'Not provided'}</code>
+📱 Phone: <code>${order.customerPhone || 'Not provided'}</code>
 
-👤 <b>Customer Details:</b>
-• Email: ${order.customerEmail || 'Not provided'}
-• Phone: ${order.customerPhone || 'Not provided'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📦 <b>Items Ordered:</b>
+📦 <b>ITEMS ORDERED</b>
 ${itemsList}
 
-💳 <b>Payment Information:</b>
-• Stripe Session ID: ${order.stripeSessionId}
-• Payment Intent: ${order.paymentIntent || 'Not available'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-${errorDetails ? `⚠️ <b>Error Details:</b>\n${errorDetails}\n` : ''}
+💳 <b>PAYMENT INFORMATION</b>
+🔑 Session ID: <code>${order.stripeSessionId}</code>
+🎯 Payment Intent: <code>${order.paymentIntent || 'Not available'}</code>
+
+${
+  errorDetails
+    ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ <b>ERROR DETAILS</b>
+${errorDetails}`
+    : ''
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ⏰ <b>Failed:</b> ${new Date().toLocaleString('en-AU', {
-    timeZone: 'Australia/Sydney',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
 
-🔗 <b>Quick Actions:</b>
-• View order: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'}/admin/orders
-• Contact customer: ${order.customerEmail ? `mailto:${order.customerEmail}` : 'Email not available'}
-• Call customer: ${order.customerPhone ? `tel:${order.customerPhone}` : 'Phone not available'}
-    `.trim();
+🔗 <b>QUICK ACTIONS</b>
+👁️ <a href="${
+        process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+      }/admin/orders">View Order Details</a>
+📧 <a href="mailto:${order.customerEmail || ''}">Email Customer</a>
+📞 <a href="tel:${order.customerPhone || ''}">Call Customer</a>
+      `.trim();
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-        }),
-      }
-    );
+      return await this.sendMessage(message);
+    } catch (error) {
+      console.error(
+        'Error sending payment failure notification to Telegram:',
+        error
+      );
+      return false;
+    }
+  }
 
-    if (!response.ok) {
-      throw new Error(`Telegram API error: ${response.status}`);
+  /**
+   * Send contact form notification to Telegram
+   */
+  static async sendContactFormNotification(contactData: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<boolean> {
+    const configCheck = this.verifyConfiguration();
+    if (!configCheck.valid) {
+      console.error('Telegram configuration error:', configCheck.error);
+      return false;
     }
 
-    console.log('Payment failure notification sent to Telegram successfully');
-    return true;
-  } catch (error) {
-    console.error('Error sending payment failure notification to Telegram:', error);
-    return false;
+    try {
+      // Get subject display name
+      const getSubjectDisplay = (subject: string) => {
+        const subjectMap: { [key: string]: string } = {
+          'signature-sunglasses': 'Signature Sunglasses Inquiry',
+          'standard-sunglasses': 'Essentials Sunglasses Inquiry',
+          'product-recommendation': 'Product Recommendation',
+          'order-status': 'Order Status',
+          'warranty-support': 'Warranty & Support',
+          'size-fitting': 'Size & Fitting',
+          other: 'Other',
+        };
+        return subjectMap[subject] || subject;
+      };
+
+      const message = `
+📧 <b>NEW CONTACT FORM SUBMISSION</b>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 <b>CUSTOMER INFORMATION</b>
+👨‍💼 Name: <b>${contactData.name}</b>
+📧 Email: <code>${contactData.email}</code>
+📝 Subject: <b>${getSubjectDisplay(contactData.subject)}</b>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💬 <b>MESSAGE</b>
+${contactData.message}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏰ <b>Received:</b> ${new Date().toLocaleString('en-AU', {
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
+
+🔗 <b>QUICK ACTIONS</b>
+📧 <a href="mailto:${contactData.email}">Reply to Customer</a>
+🌐 <a href="${
+        process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+      }/contact">View Contact Form</a>
+      `.trim();
+
+      return await this.sendMessage(message);
+    } catch (error) {
+      console.error(
+        'Error sending contact form notification to Telegram:',
+        error
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Send test message to Telegram
+   */
+  static async sendTestMessage(testMessage?: string): Promise<boolean> {
+    const configCheck = this.verifyConfiguration();
+    if (!configCheck.valid) {
+      console.error('Telegram configuration error:', configCheck.error);
+      return false;
+    }
+
+    try {
+      const message = `
+🧪 <b>TELEGRAM INTEGRATION TEST</b>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${testMessage || 'This is a test message from the Lens Aura Telegram service.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏰ <b>Test Time:</b> ${new Date().toLocaleString('en-AU', {
+        timeZone: 'Australia/Sydney',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })}
+
+✅ <b>Status:</b> Telegram integration is working correctly!
+      `.trim();
+
+      return await this.sendMessage(message);
+    } catch (error) {
+      console.error('Error sending test message to Telegram:', error);
+      return false;
+    }
   }
 }
 
-// Function to send order cancellation notification to Telegram
-export async function sendOrderCancellationNotification(order: any, reason?: string) {
+// Legacy function exports for backward compatibility
+export async function sendPaymentNotification(
+  order: any,
+  paymentDetails?: any
+) {
+  return TelegramService.sendPaymentNotification(order, paymentDetails);
+}
+
+export async function sendPaymentStatusUpdate(
+  order: any,
+  status: string,
+  additionalInfo?: string
+) {
+  return TelegramService.sendPaymentStatusUpdate(order, status, additionalInfo);
+}
+
+export async function sendPaymentFailureNotification(
+  order: any,
+  errorDetails?: string
+) {
+  return TelegramService.sendPaymentFailureNotification(order, errorDetails);
+}
+
+export async function sendOrderCancellationNotification(
+  order: any,
+  reason?: string
+) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_GROUP_ID;
 
@@ -264,15 +492,17 @@ export async function sendOrderCancellationNotification(order: any, reason?: str
 ${reason ? `📝 <b>Reason:</b> ${reason}\n` : ''}
 
 ⏰ <b>Cancelled:</b> ${new Date().toLocaleString('en-AU', {
-    timeZone: 'Australia/Sydney',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}
+      timeZone: 'Australia/Sydney',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })}
 
-🔗 <b>View Order:</b> ${process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'}/admin/orders
+🔗 <b>View Order:</b> ${
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+    }/admin/orders
     `.trim();
 
     const response = await fetch(
@@ -294,16 +524,25 @@ ${reason ? `📝 <b>Reason:</b> ${reason}\n` : ''}
       throw new Error(`Telegram API error: ${response.status}`);
     }
 
-    console.log('Order cancellation notification sent to Telegram successfully');
+    console.log(
+      'Order cancellation notification sent to Telegram successfully'
+    );
     return true;
   } catch (error) {
-    console.error('Error sending order cancellation notification to Telegram:', error);
+    console.error(
+      'Error sending order cancellation notification to Telegram:',
+      error
+    );
     return false;
   }
 }
 
 // Function to send refund notification to Telegram
-export async function sendRefundNotification(order: any, refundAmount: number, reason?: string) {
+export async function sendRefundNotification(
+  order: any,
+  refundAmount: number,
+  reason?: string
+) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_GROUP_ID;
 
@@ -329,18 +568,26 @@ export async function sendRefundNotification(order: any, refundAmount: number, r
 ${reason ? `📝 <b>Refund Reason:</b> ${reason}\n` : ''}
 
 ⏰ <b>Refunded:</b> ${new Date().toLocaleString('en-AU', {
-    timeZone: 'Australia/Sydney',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}
+      timeZone: 'Australia/Sydney',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })}
 
 🔗 <b>Quick Actions:</b>
-• View order: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'}/admin/orders
-• Contact customer: ${order.customerEmail ? `mailto:${order.customerEmail}` : 'Email not available'}
-• Call customer: ${order.customerPhone ? `tel:${order.customerPhone}` : 'Phone not available'}
+• View order: ${
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://lensaura.com.au'
+    }/admin/orders
+• Contact customer: ${
+      order.customerEmail
+        ? `mailto:${order.customerEmail}`
+        : 'Email not available'
+    }
+• Call customer: ${
+      order.customerPhone ? `tel:${order.customerPhone}` : 'Phone not available'
+    }
     `.trim();
 
     const response = await fetch(
