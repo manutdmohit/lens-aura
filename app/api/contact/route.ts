@@ -27,6 +27,10 @@ export async function POST(req: NextRequest) {
             <p>${message}</p>
           </div>
           <p>Best regards,<br>Lens Aura Team</p>
+          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 14px;">
+            <p style="margin: 0 0 5px 0;">Phone: 02 9051 0054</p>
+            <p style="margin: 0;">www.lensaura.com.au</p>
+          </div>
         </div>
       `,
     };

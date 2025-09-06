@@ -244,7 +244,7 @@ export default function ContactPage() {
                         <h3 className="font-semibold text-slate-900 mb-1">
                           Phone
                         </h3>
-                        <p className="text-slate-600">+61 402 564 501</p>
+                        <p className="text-slate-600">02 9051 0054</p>
                         <p className="text-sm text-slate-500">
                           Available during business hours
                         </p>

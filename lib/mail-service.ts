@@ -198,7 +198,8 @@ export class MailService {
               
               <div style="background: #f6f8fb; padding: 18px 24px; border-radius: 8px; color: #444; font-size: 15px;">
                 <p style="margin: 0 0 8px 0;">If you have any questions about your order, simply reply to this email or contact our support team.</p>
-                <p style="margin: 0;">www.lensaura.com.au</p>
+                <p style="margin: 0 0 4px 0;">Phone: 02 9051 0054</p>
+                <p style="margin: 0 0 4px 0;">www.lensaura.com.au</p>
                 <p style="margin: 0;">We appreciate your business!</p>
               </div>
             </td>

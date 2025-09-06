@@ -797,7 +797,8 @@ export default function CheckoutSuccessPage() {
               </p>
               <p className="text-sm  text-gray-600">
                 Please check your spam folder if you don't see the email in your
-                inbox. Feel free to contact us at if you have any questions.
+                inbox. Feel free to contact us at 02 9051 0054 or
+                info@lensaura.com.au if you have any questions.
               </p>
 
               <div className="flex justify-center">

@@ -731,7 +731,7 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
         <div class="company-name">LENS AURA</div>
         <div class="company-tagline">Where Vision Meets Aura</div>
         <div class="company-info">
-          Phone: +61 402 564 501 | Email: info@lensaura.com.au
+          Phone: 02 9051 0054 | Email: info@lensaura.com.au
         </div>
       </div>
       
