@@ -6,6 +6,8 @@ import {
   calculateSeptember2025Pricing,
   calculatePromotionalPricing,
 } from '@/lib/utils/discount';
+import fs from 'fs';
+import path from 'path';
 
 // Import the appropriate puppeteer package based on environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -482,6 +484,23 @@ async function generateInvoicePDF(orderDetails: OrderDetails): Promise<Buffer> {
   }
 }
 
+function getLogoBase64(): string {
+  try {
+    const logoPath = path.join(
+      process.cwd(),
+      'public',
+      'images',
+      'lens-aura-logo.jpg'
+    );
+    const logoBuffer = fs.readFileSync(logoPath);
+    return logoBuffer.toString('base64');
+  } catch (error) {
+    console.error('Error reading logo file:', error);
+    // Return empty string if logo can't be loaded
+    return '';
+  }
+}
+
 function generateInvoiceHTML(orderDetails: OrderDetails): string {
   const { customer_details, items, orderNumber, createdAt, amount_total } =
     orderDetails;
@@ -632,6 +651,11 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
           text-align: center;
           margin-bottom: 30px;
         }
+        .logo {
+          max-width: 120px;
+          height: auto;
+          margin-bottom: 10px;
+        }
         .company-name {
           font-size: 24px;
           font-weight: bold;
@@ -699,6 +723,11 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
     </head>
     <body>
       <div class="header">
+        ${
+          getLogoBase64()
+            ? `<img src="data:image/jpeg;base64,${getLogoBase64()}" alt="Lens Aura Logo" class="logo">`
+            : ''
+        }
         <div class="company-name">LENS AURA</div>
         <div class="company-tagline">Where Vision Meets Aura</div>
         <div class="company-info">
