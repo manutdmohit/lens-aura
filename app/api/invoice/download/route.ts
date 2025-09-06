@@ -72,6 +72,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('Order details received:', {
+      hasOrderNumber: !!orderDetails.orderNumber,
+      hasId: !!orderDetails.id,
+      hasItems: !!orderDetails.items,
+      orderNumber: orderDetails.orderNumber,
+      id: orderDetails.id,
+    });
+
     // Validate order details structure
     let completeOrderDetails = orderDetails;
     if (!orderDetails.items || !Array.isArray(orderDetails.items)) {
@@ -80,18 +88,43 @@ export async function POST(req: NextRequest) {
       );
 
       try {
+        console.log('Connecting to database...');
         await connectToDatabase();
+        console.log('Database connected successfully');
 
         // Try to find the order by orderNumber or orderId
         let order = null;
+        console.log('Searching for order with:', {
+          orderNumber: orderDetails.orderNumber,
+          id: orderDetails.id,
+        });
+
         if (orderDetails.orderNumber) {
+          console.log('Searching by orderNumber:', orderDetails.orderNumber);
           order = await Order.findOne({
             orderNumber: orderDetails.orderNumber,
           }).populate('items.product');
+          console.log('Order found by orderNumber:', order ? 'Yes' : 'No');
+
+          // If not found, try case-insensitive search
+          if (!order) {
+            console.log('Trying case-insensitive search...');
+            order = await Order.findOne({
+              orderNumber: {
+                $regex: new RegExp(`^${orderDetails.orderNumber}$`, 'i'),
+              },
+            }).populate('items.product');
+            console.log(
+              'Order found by case-insensitive search:',
+              order ? 'Yes' : 'No'
+            );
+          }
         } else if (orderDetails.id) {
+          console.log('Searching by id:', orderDetails.id);
           order = await Order.findById(orderDetails.id).populate(
             'items.product'
           );
+          console.log('Order found by id:', order ? 'Yes' : 'No');
         }
 
         if (!order) {
@@ -99,8 +132,23 @@ export async function POST(req: NextRequest) {
             orderNumber: orderDetails.orderNumber,
             id: orderDetails.id,
           });
+
+          // Let's also try to see what orders exist
+          const allOrders = await Order.find(
+            {},
+            { orderNumber: 1, _id: 1 }
+          ).limit(5);
+          console.log('Sample orders in database:', allOrders);
+
           return NextResponse.json(
-            { error: 'Order not found in database' },
+            {
+              error: 'Order not found in database',
+              details: {
+                searchedOrderNumber: orderDetails.orderNumber,
+                searchedId: orderDetails.id,
+                sampleOrders: allOrders,
+              },
+            },
             { status: 404 }
           );
         }
@@ -131,6 +179,12 @@ export async function POST(req: NextRequest) {
         };
 
         console.log('Successfully fetched complete order data from database');
+        console.log('Order details:', {
+          id: completeOrderDetails.id,
+          orderNumber: completeOrderDetails.orderNumber,
+          itemsCount: completeOrderDetails.items.length,
+          totalAmount: completeOrderDetails.totalAmount,
+        });
         console.log(
           'Sample item category data:',
           completeOrderDetails.items[0]?.category
@@ -149,6 +203,10 @@ export async function POST(req: NextRequest) {
         );
       } catch (error) {
         console.error('Error fetching order from database:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+        });
         return NextResponse.json(
           { error: 'Failed to fetch order data from database' },
           { status: 500 }
