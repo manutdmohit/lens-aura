@@ -199,28 +199,42 @@ export default function ProductCard({
   const renderProductFeatures = (product: Product) => {
     if (!showFeatures || variant === 'compact') return null;
 
+    // Only show features for sunglasses and glasses that have these properties
+    const hasUVProtection = product.uvProtection !== undefined;
+    const hasPolarized = product.polarized !== undefined;
+    const hasUVBlocking = product.uvBlocking !== undefined; // For contact lenses
+
+    if (!hasUVProtection && !hasPolarized && !hasUVBlocking) return null;
+
     return (
       <div className="flex items-center justify-between text-xs text-gray-500 mt-3 min-h-[20px]">
-        <span className="flex items-center gap-1">
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          UV Protection
-        </span>
-        <span className="flex items-center gap-1">
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Polarized
-        </span>
+        {(hasUVProtection || hasUVBlocking) &&
+          (product.uvProtection || product.uvBlocking) && (
+            <span className="flex items-center gap-1 text-green-600">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {product.productType === 'contacts'
+                ? 'UV Blocking'
+                : 'UV Protection'}
+            </span>
+          )}
+        {hasPolarized && product.polarized && (
+          <span className="flex items-center gap-1 text-green-600">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Polarized
+          </span>
+        )}
       </div>
     );
   };
@@ -339,7 +353,9 @@ export default function ProductCard({
                   // Fall back to regular discount logic from product database
                   const discountInfo = calculateDiscount(
                     product.price,
-                    product.discountedPrice
+                    product.discountedPrice === ''
+                      ? undefined
+                      : product.discountedPrice
                   );
 
                   if (discountInfo.hasDiscount) {
