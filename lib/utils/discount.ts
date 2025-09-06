@@ -115,16 +115,16 @@ export function calculatePromotionalPricing(
   let basePrice: number;
 
   if (productType === 'essentials') {
-    // Two essentials for $59 (current promotional pricing)
+    // Two essentials for $59 (50% savings from original $59 each)
     twoForPrice = 59;
-    basePrice = 39; // Current discounted price for essentials
+    basePrice = 59; // Original price for essentials
   } else {
-    // Two signature for $139 (current promotional pricing)
+    // Two signature for $139 (29.8% savings from original $99 each)
     twoForPrice = 139;
-    basePrice = 79; // Current discounted price for signature
+    basePrice = 99; // Original price for signature
   }
 
-  // Calculate savings based on current discounted price
+  // Calculate savings based on ORIGINAL price (not discounted price)
   const regularTwoPrice = basePrice * 2;
   const savings = regularTwoPrice - twoForPrice;
   const savingsPercentage = Math.round((savings / regularTwoPrice) * 100);
@@ -140,6 +140,10 @@ export function calculatePromotionalPricing(
  * Calculate current promotional pricing
  * Signature: $79 (was $99), Essentials: $39 (was $59)
  * Two Signature: $139, Two Essentials: $59
+ *
+ * Buy Two Savings Calculation:
+ * - Signature: 2 × $99 = $198, Pay $139, Save $59 (29.8%)
+ * - Essentials: 2 × $59 = $118, Pay $59, Save $59 (50%)
  *
  * Note: This function now defaults to inactive to prevent showing promotions
  * when they are not active in the database. Use the proper promotional pricing
