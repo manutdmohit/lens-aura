@@ -11,16 +11,31 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '8'); // Default to 8 featured products
 
     // Find all products where isFeatured is true
-    const products = await Product.find({
+    let products = await Product.find({
       status: 'active',
       productType: 'sunglasses',
       isFeatured: true,
     })
       .sort({ createdAt: -1 })
       .select(
-        'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants'
+        'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized'
       )
       .limit(limit);
+
+    // If no featured products are found, show products with UV protection and polarized features
+    if (products.length === 0) {
+      products = await Product.find({
+        status: 'active',
+        productType: 'sunglasses',
+        uvProtection: true,
+        polarized: true,
+      })
+        .sort({ createdAt: -1 })
+        .select(
+          'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized'
+        )
+        .limit(limit);
+    }
 
     return NextResponse.json({ products }, { status: 200 });
   } catch (error) {

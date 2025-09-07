@@ -206,35 +206,57 @@ export default function ProductCard({
 
     if (!hasUVProtection && !hasPolarized && !hasUVBlocking) return null;
 
+    const features = [];
+
+    if (
+      (hasUVProtection || hasUVBlocking) &&
+      (product.uvProtection || product.uvBlocking)
+    ) {
+      features.push({
+        icon: (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15V9h4v6H8z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ),
+        text:
+          product.productType === 'contacts' ? 'UV Blocking' : 'UV Protection',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+      });
+    }
+
+    if (hasPolarized && product.polarized) {
+      features.push({
+        icon: (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ),
+        text: 'Polarized',
+        color: 'text-green-600',
+        bgColor: 'bg-green-50',
+      });
+    }
+
     return (
-      <div className="flex items-center justify-between text-xs text-gray-500 mt-3 min-h-[20px]">
-        {(hasUVProtection || hasUVBlocking) &&
-          (product.uvProtection || product.uvBlocking) && (
-            <span className="flex items-center gap-1 text-green-600">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {product.productType === 'contacts'
-                ? 'UV Blocking'
-                : 'UV Protection'}
-            </span>
-          )}
-        {hasPolarized && product.polarized && (
-          <span className="flex items-center gap-1 text-green-600">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Polarized
+      <div className="flex flex-wrap gap-2 mt-3">
+        {features.map((feature, index) => (
+          <span
+            key={index}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium ${feature.color} ${feature.bgColor} border border-current/20`}
+          >
+            {feature.icon}
+            {feature.text}
           </span>
-        )}
+        ))}
       </div>
     );
   };

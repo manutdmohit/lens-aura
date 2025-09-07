@@ -62,8 +62,16 @@ export default function Home() {
               Extraordinary Design, Surprising Prices
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-16 leading-relaxed">
-              Our sunglasses feature signature materials, polarized lenses, and
-              UV protection at surprising prices.
+              Our sunglasses feature signature materials,{' '}
+              <span className="font-semibold text-green-600">
+                polarized lenses
+              </span>
+              , and
+              <span className="font-semibold text-blue-600">
+                {' '}
+                UV protection
+              </span>{' '}
+              at surprising prices.
             </p>
             <FeaturedProducts />
           </AnimatedSection>
@@ -117,8 +125,14 @@ export default function Home() {
                           </h3>
                         </div>
                         <p className="text-white/80 mb-4 text-sm leading-relaxed">
-                          Luxury designer frames with signature polarized lenses
-                          and UV protection
+                          Luxury designer frames with signature{' '}
+                          <span className="font-semibold text-green-300">
+                            polarized lenses
+                          </span>
+                          and{' '}
+                          <span className="font-semibold text-blue-300">
+                            UV protection
+                          </span>
                         </p>
                         <Link
                           href="/sunglasses"
@@ -161,8 +175,15 @@ export default function Home() {
                           </h3>
                         </div>
                         <p className="text-white/80 mb-4 text-sm leading-relaxed">
-                          Quality everyday sunglasses with excellent UV
-                          protection at affordable prices
+                          Quality everyday sunglasses with excellent{' '}
+                          <span className="font-semibold text-blue-300">
+                            UV protection
+                          </span>{' '}
+                          and{' '}
+                          <span className="font-semibold text-green-300">
+                            polarized lenses
+                          </span>{' '}
+                          at affordable prices
                         </p>
                         <Link
                           href="/sunglasses"
