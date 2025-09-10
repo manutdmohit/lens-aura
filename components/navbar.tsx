@@ -310,33 +310,58 @@ export default function Navbar() {
     </motion.div>
   );
 
-  // Function to render mobile menu item with submenu
-  const renderMobileMenuItem = (
+  // Modern mobile menu item with beautiful design
+  const renderModernMobileMenuItem = (
     menuData: typeof signatureSunglassesMenuData & { id: string }
   ) => {
     const isExpanded = expandedMobileMenus.includes(menuData.id);
 
     return (
-      <div
-        key={menuData.id}
-        className="border-b border-gray-700 last:border-b-0"
-      >
-        <div className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Main menu item */}
+        <div className="flex items-center justify-between p-4">
           <Link
             href={menuData.mainLink}
-            className="flex-grow px-3 py-3 text-base font-medium text-white hover:text-indigo-300"
+            className="flex-grow flex items-center space-x-3"
             onClick={(e) => {
-              // Prevent navigation if submenu toggle is clicked
               if (isExpanded) {
                 e.preventDefault();
+              } else {
+                toggleMobileMenu();
               }
             }}
           >
-            {menuData.title}
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center">
+              <svg
+                className="w-5 h-5 text-amber-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-base">
+                {menuData.title}
+              </h3>
+              <p className="text-sm text-gray-500">Explore our collection</p>
+            </div>
           </Link>
           <button
             type="button"
-            className="p-3 text-gray-300 hover:text-[#F2D399] focus:outline-none"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => toggleMobileSubmenu(menuData.id)}
             aria-expanded={isExpanded}
             aria-label={`Toggle ${menuData.title} submenu`}
@@ -345,11 +370,12 @@ export default function Navbar() {
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDown className="h-5 w-5" aria-hidden="true" />
+              <ChevronDown className="h-5 w-5 text-gray-600" />
             </motion.div>
           </button>
         </div>
 
+        {/* Submenu */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -358,7 +384,7 @@ export default function Navbar() {
                 opacity: 1,
                 height: 'auto',
                 transition: {
-                  height: { duration: 0.4 },
+                  height: { duration: 0.4, ease: 'easeOut' },
                   opacity: { duration: 0.3, delay: 0.1 },
                 },
               }}
@@ -370,21 +396,52 @@ export default function Navbar() {
                   opacity: { duration: 0.2 },
                 },
               }}
-              className="bg-gray-800 overflow-hidden"
+              className="bg-gray-50 border-t border-gray-100 overflow-hidden"
             >
-              <div className="px-4 py-3 space-y-4">
+              <div className="p-4 space-y-4">
                 {/* Featured Categories */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                >
-                  <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mr-2"></div>
                     Featured Categories
                   </h4>
-                  <ul className="space-y-2">
+                  <div className="grid grid-cols-1 gap-2">
                     {menuData.featuredLinks.map((link, index) => (
-                      <motion.li
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          delay: 0.1 + index * 0.05,
+                          duration: 0.3,
+                        }}
+                      >
+                        <Link
+                          href={link.href}
+                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 group"
+                          onClick={toggleMobileMenu}
+                        >
+                          <div className="w-8 h-8 bg-gradient-to-br from-amber-200 to-orange-200 rounded-lg flex items-center justify-center group-hover:from-amber-300 group-hover:to-orange-300 transition-all">
+                            <ChevronRight className="h-4 w-4 text-amber-700" />
+                          </div>
+                          <span className="font-medium text-gray-700 group-hover:text-gray-900">
+                            {link.title}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Links */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+                    More Options
+                  </h4>
+                  <div className="space-y-1">
+                    {menuData.additionalLinks.map((link, index) => (
+                      <motion.div
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -395,49 +452,20 @@ export default function Navbar() {
                       >
                         <Link
                           href={link.href}
-                          className="flex items-center py-2 text-base text-gray-300 hover:text-[#F2D399]"
+                          className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 group"
                           onClick={toggleMobileMenu}
                         >
-                          <ChevronRight className="h-4 w-4 mr-2 text-gray-500" />
-                          {link.title}
+                          <div className="w-6 h-6 bg-gray-200 rounded-md flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                            <ChevronRight className="h-3 w-3 text-gray-600" />
+                          </div>
+                          <span className="text-sm text-gray-600 group-hover:text-gray-800">
+                            {link.title}
+                          </span>
                         </Link>
-                      </motion.li>
+                      </motion.div>
                     ))}
-                  </ul>
-                </motion.div>
-
-                {/* Additional Links */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                >
-                  <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    More Options
-                  </h4>
-                  <ul className="space-y-2">
-                    {menuData.additionalLinks.map((link, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          delay: 0.3 + index * 0.05,
-                          duration: 0.3,
-                        }}
-                      >
-                        <Link
-                          href={link.href}
-                          className="flex items-center py-2 text-base text-gray-300 hover:text-[#F2D399]"
-                          onClick={toggleMobileMenu}
-                        >
-                          <ChevronRight className="h-4 w-4 mr-2 text-gray-500" />
-                          {link.title}
-                        </Link>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </motion.div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -534,14 +562,16 @@ export default function Navbar() {
               </div>
               <div className="w-2/4 flex justify-center">
                 <span className="text-lg font-extrabold text-[#592F25] font-['Playfair_Display']">
-                  {/* Lens Aura */}
+                  Lens Aura
                 </span>
               </div>
-              <div className="w-1/4 flex justify-end items-center space-x-4">
-                <CartDropdown />
+              <div className="w-1/4 flex justify-end items-center space-x-3">
+                <div className="relative">
+                  <CartDropdown />
+                </div>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center p-2 rounded-lg text-[#592F25] hover:bg-gray-100 hover:text-[#8B4513] transition-colors font-['Poppins']"
+                  className="inline-flex items-center justify-center p-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={toggleMobileMenu}
                   aria-expanded={mobileMenuOpen}
                   aria-label="Toggle menu"
@@ -549,9 +579,9 @@ export default function Navbar() {
                   <motion.div
                     initial={{ rotate: 0 }}
                     animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
                   >
-                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                   </motion.div>
                 </button>
               </div>
@@ -643,32 +673,113 @@ export default function Navbar() {
         </AnimatePresence>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            className="md:hidden overflow-hidden"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={mobileMenuVariants}
-          >
-            <div className="bg-[#2A2829] divide-y divide-gray-700">
-              {allMenuData.map((menuData) => renderMobileMenuItem(menuData))}
-              <motion.div
-                variants={itemVariants}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <Link
-                  href="/contact"
-                  className="block px-4 py-3 text-base font-medium text-white hover:text-[#F2D399] hover:bg-gray-800 transition-colors"
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+              onClick={toggleMobileMenu}
+            />
+
+            {/* Mobile menu */}
+            <motion.div
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 md:hidden"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{
+                type: 'spring',
+                damping: 25,
+                stiffness: 200,
+              }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+                <div className="flex items-center space-x-3">
+                  <Image
+                    src="/images/lens-aura-updated- logo.jpg"
+                    alt="Lens Aura Logo"
+                    width={120}
+                    height={40}
+                    className="h-10 w-auto object-contain"
+                    priority
+                  />
+                  <span className="text-lg font-bold text-gray-900">
+                    Lens Aura
+                  </span>
+                </div>
+                <button
                   onClick={toggleMobileMenu}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  Contact Us
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
+                  <X size={24} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex-1 overflow-y-auto">
+                <nav className="p-6 space-y-2">
+                  {allMenuData.map((menuData, index) => (
+                    <motion.div
+                      key={menuData.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="mb-4"
+                    >
+                      {renderModernMobileMenuItem(menuData)}
+                    </motion.div>
+                  ))}
+
+                  {/* Contact Us */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: allMenuData.length * 0.1 }}
+                    className="mt-8 pt-6 border-t border-gray-100"
+                  >
+                    <Link
+                      href="/contact"
+                      className="flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      onClick={toggleMobileMenu}
+                    >
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <span>Contact Us</span>
+                    </Link>
+                  </motion.div>
+                </nav>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-gray-100 bg-gray-50">
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">
+                    Free shipping on orders over $60
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
