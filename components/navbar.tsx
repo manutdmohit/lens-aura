@@ -468,7 +468,7 @@ export default function Navbar() {
                     d="M5 13l4 4L19 7"
                   ></path>
                 </svg>
-                Free shipping on orders over $50
+                Free shipping on orders over $60
               </span>
               <span className="hidden sm:inline">|</span>
               <span className="hidden sm:flex items-center">

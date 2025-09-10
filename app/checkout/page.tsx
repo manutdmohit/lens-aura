@@ -10,6 +10,8 @@ import { createCheckoutSession } from '@/actions/checkout';
 import PageTransition from '@/components/page-transition';
 import AnimatedSection from '@/components/animated-section';
 import { formatPrice } from '@/lib/utils/discount';
+import { getProductImage } from '@/lib/utils/product-image';
+import Image from 'next/image';
 import { useCategoryPromotionalPricing } from '@/hooks/usePromotionalPricing';
 
 export default function CheckoutPage() {
@@ -17,9 +19,13 @@ export default function CheckoutPage() {
   const {
     items,
     subtotal,
+    shipping,
+    total,
     promotionalSavings,
     regularSubtotal,
     itemCount,
+    isFreeShipping,
+    shippingMessage,
     getItemPrice,
   } = useCart();
   const [isLoading, setIsLoading] = useState(false);
@@ -132,13 +138,14 @@ export default function CheckoutPage() {
                             }`}
                             className="py-4 flex items-center"
                           >
-                            <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                              <img
-                                src={
-                                  item.product.thumbnail || '/placeholder.svg'
-                                }
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 relative">
+                              <Image
+                                src={getProductImage(item.product, item.color)}
                                 alt={item.product.name}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain transition-transform duration-200 hover:scale-105"
+                                fill
+                                sizes="(max-width: 640px) 64px, 80px"
+                                priority
                               />
                             </div>
                             <div className="ml-4 flex-grow">
@@ -232,13 +239,24 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex justify-between">
                           <span>Shipping</span>
-                          <span>Free</span>
+                          <span
+                            className={
+                              isFreeShipping ? 'text-green-600 font-medium' : ''
+                            }
+                          >
+                            {isFreeShipping ? 'Free' : formatPrice(shipping)}
+                          </span>
                         </div>
+                        {!isFreeShipping && (
+                          <div className="text-sm text-gray-600 text-center">
+                            {shippingMessage}
+                          </div>
+                        )}
                       </div>
                       <div className="border-t pt-4 mb-6">
                         <div className="flex justify-between font-medium">
                           <span>Total</span>
-                          <span>{formatPrice(subtotal)}</span>
+                          <span>{formatPrice(total)}</span>
                         </div>
                       </div>
 

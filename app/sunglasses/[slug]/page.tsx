@@ -757,7 +757,7 @@ export default function SunGlassesProductPage() {
               <div className="mt-4 flex justify-center">
                 <div className="flex items-center text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-full">
                   <Truck className="h-4 w-4 mr-1 text-green-600" />
-                  <span>Free shipping on orders over $50</span>
+                  <span>Free shipping on orders over $60</span>
                 </div>
               </div>
             </motion.div>
@@ -775,7 +775,7 @@ export default function SunGlassesProductPage() {
                   Free Shipping
                 </h3>
                 <p className="text-xs text-gray-500 text-center">
-                  On orders over $50
+                  On orders over $60
                 </p>
               </div>
               <div className="flex flex-col items-center p-4 rounded-xl border border-gray-200 bg-gray-50">

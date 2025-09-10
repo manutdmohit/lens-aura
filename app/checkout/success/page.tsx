@@ -33,6 +33,8 @@ interface OrderDetails {
   orderNumber: string;
   customerEmail: string;
   items: OrderItem[];
+  subtotal: number;
+  shipping: number;
   totalAmount: number;
   paymentStatus: string;
   createdAt: string;
@@ -155,8 +157,8 @@ export default function CheckoutSuccessPage() {
         }
       }
     }
-    // Fallback: convert from cents to dollars
-    const fallbackPrice = (item.price || 0) / 100;
+    // Fallback: price is already in dollars
+    const fallbackPrice = item.price || 0;
     console.log('[DEBUG] getPromotionalPrice fallback result:', fallbackPrice);
     return fallbackPrice;
   };
@@ -223,8 +225,8 @@ export default function CheckoutSuccessPage() {
         }
       }
     }
-    // Fallback: convert from cents to dollars and multiply by quantity
-    return ((item.price || 0) / 100) * item.quantity;
+    // Fallback: price is already in dollars, multiply by quantity
+    return (item.price || 0) * item.quantity;
   };
 
   // Function to get promotional pricing information
@@ -755,11 +757,16 @@ export default function CheckoutSuccessPage() {
 
                         {item.imageUrl && (
                           <div className="mt-2">
-                            <img
-                              src={item.imageUrl}
-                              alt={item.name}
-                              className="w-16 h-16 object-cover rounded-md border border-gray-200"
-                            />
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 relative rounded-md border border-gray-200 overflow-hidden">
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-full h-full object-contain"
+                                fill
+                                sizes="(max-width: 640px) 64px, 80px"
+                                priority
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
@@ -780,10 +787,30 @@ export default function CheckoutSuccessPage() {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span>{formatPrice(orderDetails.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Shipping</span>
+                      <span
+                        className={
+                          orderDetails.shipping === 0
+                            ? 'text-green-600 font-medium'
+                            : ''
+                        }
+                      >
+                        {orderDetails.shipping === 0
+                          ? 'Free'
+                          : formatPrice(orderDetails.shipping)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center border-t pt-2">
                     <span className="text-lg font-semibold">Order Total:</span>
                     <span className="text-2xl font-bold text-green-600">
-                      {formatPrice(orderDetails.amount_total / 100)}
+                      {formatPrice(orderDetails.totalAmount)}
                     </span>
                   </div>
                 </div>

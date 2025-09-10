@@ -7,6 +7,10 @@ import {
   calculateSeptember2025Pricing,
   calculatePromotionalPricing,
 } from '@/lib/utils/discount';
+import {
+  calculateShipping,
+  calculateTotalWithShipping,
+} from '@/lib/shipping-utils';
 import type { IProduct } from '@/models/Product';
 import Product from '@/models/Product';
 
@@ -161,8 +165,8 @@ export async function createPendingOrder(
       })
       .flat(); // Flatten the array of arrays
 
-    // Calculate total amount using promotional pricing logic (same as cart)
-    const totalAmount = items.reduce((total, item) => {
+    // Calculate subtotal using promotional pricing logic (same as cart)
+    const subtotal = items.reduce((total, item) => {
       const quantity = item.quantity;
 
       // Check if this product qualifies for promotional pricing
@@ -237,16 +241,22 @@ export async function createPendingOrder(
       }
     }, 0);
 
+    // Calculate shipping and total amount
+    const shipping = calculateShipping(subtotal);
+    const totalAmount = calculateTotalWithShipping(subtotal);
+
     // Generate a unique order number
     const orderNumber = generateOrderNumber();
 
     console.log(
-      `[DEBUG] Creating order with ${orderItems.length} items, total: $${totalAmount}`
+      `[DEBUG] Creating order with ${orderItems.length} items, subtotal: $${subtotal}, shipping: $${shipping}, total: $${totalAmount}`
     );
 
     // Create a new order with pending status
     const order = new Order({
       items: orderItems,
+      subtotal,
+      shipping,
       totalAmount,
       paymentStatus: 'pending',
       stripeSessionId,

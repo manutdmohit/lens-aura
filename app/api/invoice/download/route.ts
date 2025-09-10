@@ -42,6 +42,8 @@ interface OrderDetails {
   orderNumber: string;
   customerEmail: string;
   items: OrderItem[];
+  subtotal?: number;
+  shipping?: number;
   totalAmount: number;
   paymentStatus: string;
   createdAt: string;
@@ -179,20 +181,20 @@ export async function POST(req: NextRequest) {
           items: order.items.map((item: any) => ({
             productId: item.productId || '',
             name: item.name,
-            price: item.price * 100, // Convert to cents
+            price: item.price, // Keep price as is from database (in dollars)
             quantity: item.quantity,
             color: item.color,
             imageUrl: item.imageUrl,
             productType: item.productType,
-            category: item.product?.category || item.category || 'N/A',
-            originalPrice: item.originalPrice
-              ? item.originalPrice * 100
-              : undefined, // Convert to cents
+            category: item.category || item.product?.category || 'N/A',
+            originalPrice: item.originalPrice, // Keep original price as is from database (in dollars)
           })),
-          totalAmount: order.totalAmount * 100, // Convert to cents
+          subtotal: order.subtotal, // Keep subtotal as is from database (in dollars)
+          shipping: order.shipping, // Keep shipping as is from database (in dollars)
+          totalAmount: order.totalAmount, // Keep total as is from database (in dollars)
           paymentStatus: order.paymentStatus,
           createdAt: order.createdAt.toISOString(),
-          amount_total: order.totalAmount * 100, // Convert to cents
+          amount_total: order.totalAmount, // Keep total as is from database (in dollars)
           shippingAddress: order.shippingAddress,
         };
 
@@ -502,8 +504,15 @@ function getLogoBase64(): string {
 }
 
 function generateInvoiceHTML(orderDetails: OrderDetails): string {
-  const { customer_details, items, orderNumber, createdAt, amount_total } =
-    orderDetails;
+  const {
+    customer_details,
+    items,
+    orderNumber,
+    createdAt,
+    amount_total,
+    subtotal,
+    shipping,
+  } = orderDetails;
 
   // Ensure customer_details exists for the HTML generation
   if (!customer_details) {
@@ -513,7 +522,8 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
   // Calculate line items with proper promotional pricing
   const processedItems = items.map((item, index) => {
     const itemQuantity = item.quantity || 0;
-    let effectivePrice = (item.price || 0) / 100;
+    // Price is already in dollars from the database
+    let effectivePrice = item.price || 0;
     let actualTotal = effectivePrice * itemQuantity;
     let promotionalNote = '';
 
@@ -528,7 +538,7 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
       // Get the current discounted price from the database
       let currentDiscountedPrice = effectivePrice;
       if (item.originalPrice && item.originalPrice > 0) {
-        currentDiscountedPrice = (item.originalPrice || 0) / 100;
+        currentDiscountedPrice = item.originalPrice || 0;
       }
 
       // Calculate promotional pricing
@@ -602,7 +612,7 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
     0
   );
   console.log('Calculated total from line items:', calculatedTotal);
-  console.log('Actual amount total:', amount_total / 100);
+  console.log('Actual amount total:', amount_total);
 
   const itemsHTML = processedItems
     .map((item, index) => {
@@ -781,10 +791,25 @@ function generateInvoiceHTML(orderDetails: OrderDetails): string {
       
       <div style="text-align: right; margin-top: 20px;">
         <div style="margin-bottom: 10px;">
-          <strong>Subtotal:</strong> $${calculatedTotal.toFixed(2)}
+          <strong>Subtotal:</strong> $${
+            subtotal ? subtotal.toFixed(2) : calculatedTotal.toFixed(2)
+          }
         </div>
+        ${
+          shipping !== undefined
+            ? `
         <div style="margin-bottom: 10px;">
-          <strong>Total:</strong> $${(amount_total / 100).toFixed(2)}
+          <strong>Shipping:</strong> $${
+            shipping === 0 ? '0.00 (Free)' : shipping.toFixed(2)
+          }
+        </div>
+        `
+            : ''
+        }
+        <div style="margin-bottom: 10px;">
+          <strong>Total:</strong> $${(
+            calculatedTotal + (shipping || 0)
+          ).toFixed(2)}
         </div>
       </div>
       

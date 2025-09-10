@@ -19,7 +19,7 @@ const faqs: FAQItem[] = [
   {
     question: 'What is your shipping policy?',
     answer:
-      'We offer free standard shipping on all orders over $100. Orders are typically processed within 1-2 business days and delivered within 3-5 business days. Express shipping options are also available.',
+      'We offer free standard shipping on all orders over $60. Orders are typically processed within 1-2 business days and delivered within 3-5 business days. Express shipping options are also available.',
   },
   {
     question: 'How do I care for my glasses?',

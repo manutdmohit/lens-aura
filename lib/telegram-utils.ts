@@ -118,6 +118,18 @@ export class TelegramService {
 
 🛒 <b>ORDER DETAILS</b>
 📋 Order #: <code>${order.orderNumber}</code>
+${
+  order.subtotal !== undefined
+    ? `🛍️ Subtotal: <b>$${order.subtotal.toFixed(2)}</b>`
+    : ''
+}
+${
+  order.shipping !== undefined
+    ? `🚚 Shipping: <b>$${
+        order.shipping === 0 ? '0.00 (Free)' : order.shipping.toFixed(2)
+      }</b>`
+    : ''
+}
 💰 Total Amount: <b>$${order.totalAmount.toFixed(2)}</b>
 ${totalSavings > 0 ? `💸 Savings: <b>$${totalSavings.toFixed(2)}</b>` : ''}
 ✅ Status: <b>${order.paymentStatus.toUpperCase()}</b>

@@ -42,6 +42,8 @@ export interface IOrder extends Document {
   customerEmail?: string;
   customerPhone?: string;
   items: IOrderItem[];
+  subtotal: number;
+  shipping: number;
   totalAmount: number;
   shippingAddress?: IShippingAddress;
   paymentStatus: 'pending' | 'paid' | 'failed';
@@ -78,6 +80,8 @@ const OrderSchema = new Schema(
         product: { type: Schema.Types.ObjectId, ref: 'Product' },
       },
     ],
+    subtotal: { type: Number, required: true },
+    shipping: { type: Number, required: true, default: 0 },
     totalAmount: { type: Number, required: true },
     shippingAddress: {
       firstName: { type: String },

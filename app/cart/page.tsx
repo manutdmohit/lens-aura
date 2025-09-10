@@ -21,6 +21,7 @@ import {
   formatPrice,
   formatSavingsPercentage,
 } from '@/lib/utils/discount';
+import { getProductImage } from '@/lib/utils/product-image';
 import { useCategoryPromotionalPricing } from '@/hooks/usePromotionalPricing';
 
 export default function CartPage() {
@@ -30,8 +31,12 @@ export default function CartPage() {
     removeItem,
     updateQuantity,
     subtotal,
+    shipping,
+    total,
     promotionalSavings,
     regularSubtotal,
+    isFreeShipping,
+    shippingMessage,
     getItemPrice,
   } = useCart();
   const [isClient, setIsClient] = useState(false);
@@ -229,13 +234,13 @@ export default function CartPage() {
                         isOutOfStock || exceedsStockLimit ? 'bg-red-50' : ''
                       }`}
                     >
-                      <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                      <div className="w-full sm:w-24 h-24 md:w-28 md:h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 relative">
                         <Image
-                          src={item.product.thumbnail || '/placeholder.svg'}
+                          src={getProductImage(item.product, item.color)}
                           alt={item.product.name}
-                          className="w-full h-full object-cover"
-                          width={100}
-                          height={100}
+                          className="w-full h-full object-contain transition-transform duration-200 hover:scale-105"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 96px, 112px"
                           priority
                         />
                       </div>
@@ -463,13 +468,24 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>Free</span>
+                  <span
+                    className={
+                      isFreeShipping ? 'text-green-600 font-medium' : ''
+                    }
+                  >
+                    {isFreeShipping ? 'Free' : formatPrice(shipping)}
+                  </span>
                 </div>
+                {!isFreeShipping && (
+                  <div className="text-sm text-gray-600 text-center">
+                    {shippingMessage}
+                  </div>
+                )}
               </div>
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
 

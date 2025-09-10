@@ -3,6 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { IProduct } from '@/models';
 import { calculatePromotionalPricing } from '@/lib/utils/discount';
+import {
+  calculateShipping,
+  calculateTotalWithShipping,
+  isFreeShipping,
+  getShippingMessage,
+} from '@/lib/shipping-utils';
 
 export interface CartItem {
   product: IProduct & { _id: string };
@@ -29,8 +35,12 @@ interface CartContextType {
   ) => void;
   clearCart: () => void;
   subtotal: number;
+  shipping: number;
+  total: number;
   promotionalSavings: number;
   regularSubtotal: number;
+  isFreeShipping: boolean;
+  shippingMessage: string;
   getItemPrice: (item: CartItem) => {
     totalPrice: number;
     promotionalPrice: number;
@@ -132,6 +142,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate promotional savings
   const promotionalSavings = regularSubtotal - subtotal;
+
+  // Calculate shipping and total
+  const shipping = calculateShipping(subtotal);
+  const total = calculateTotalWithShipping(subtotal);
+  const freeShipping = isFreeShipping(subtotal);
+  const shippingMessage = getShippingMessage(subtotal);
 
   // Helper function to calculate item pricing with promotions
   const getItemPrice = (item: CartItem) => {
@@ -295,8 +311,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         clearCart,
         subtotal,
+        shipping,
+        total,
         promotionalSavings,
         regularSubtotal,
+        isFreeShipping: freeShipping,
+        shippingMessage,
         getItemPrice,
       }}
     >

@@ -239,6 +239,8 @@ export async function POST(request: NextRequest) {
             category: item.product?.category || item.category,
             originalPrice: item.originalPrice,
           })),
+          subtotal: foundOrder.subtotal,
+          shipping: foundOrder.shipping,
           total: foundOrder.totalAmount,
           customerName:
             foundOrder.shippingAddress?.firstName &&

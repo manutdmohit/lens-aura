@@ -22,6 +22,7 @@ import {
   formatSavingsPercentage,
   calculateSeptember2025Pricing,
 } from '@/lib/utils/discount';
+import { getProductImage } from '@/lib/utils/product-image';
 
 export default function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,8 +30,12 @@ export default function CartDropdown() {
     items,
     itemCount,
     subtotal,
+    shipping,
+    total,
     promotionalSavings,
     regularSubtotal,
+    isFreeShipping,
+    shippingMessage,
     removeItem,
     updateQuantity,
     getItemPrice,
@@ -173,13 +178,13 @@ export default function CartDropdown() {
                         key={`${item.product._id}-${item.color}`}
                         className="flex gap-4 py-2 border-b last:border-0"
                       >
-                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 relative">
                           <Image
-                            src={item.product.thumbnail || '/placeholder.svg'}
+                            src={getProductImage(item.product, item.color)}
                             alt={item.product.name}
-                            className="w-full h-full object-cover"
-                            width={100}
-                            height={100}
+                            className="w-full h-full object-contain transition-transform duration-200 hover:scale-105"
+                            fill
+                            sizes="(max-width: 640px) 64px, 80px"
                             priority
                           />
                         </div>
@@ -338,9 +343,32 @@ export default function CartDropdown() {
                 </div>
 
                 <div className="p-4 border-t">
-                  <div className="flex justify-between mb-4">
-                    <span className="font-medium">Subtotal</span>
-                    <span className="font-medium">{formatPrice(subtotal)}</span>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span>{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Shipping</span>
+                      <span
+                        className={
+                          isFreeShipping ? 'text-green-600 font-medium' : ''
+                        }
+                      >
+                        {isFreeShipping ? 'Free' : formatPrice(shipping)}
+                      </span>
+                    </div>
+                    {!isFreeShipping && (
+                      <div className="text-xs text-gray-600 text-center">
+                        {shippingMessage}
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t pt-2 mb-4">
+                    <div className="flex justify-between font-medium">
+                      <span>Total</span>
+                      <span>{formatPrice(total)}</span>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Button

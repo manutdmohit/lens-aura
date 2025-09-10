@@ -34,6 +34,8 @@ export interface InvoiceEmailOptions {
   to: string;
   orderId: string;
   items: InvoiceItem[];
+  subtotal?: number;
+  shipping?: number;
   total: number;
   customerName?: string;
   customerEmail?: string;
@@ -82,6 +84,8 @@ export class MailService {
         to,
         orderId,
         items,
+        subtotal,
+        shipping,
         total,
         customerName = 'Valued Customer',
         customerEmail,
@@ -191,9 +195,33 @@ export class MailService {
               </table>
               
               <div style="text-align: right; margin-bottom: 32px;">
-                <span style="font-size: 18px; color: #222; font-weight: 600;">Total: $${total.toFixed(
-                  2
-                )}</span>
+                ${
+                  subtotal !== undefined
+                    ? `
+                  <div style="margin-bottom: 8px;">
+                    <span style="font-size: 16px; color: #666;">Subtotal: $${subtotal.toFixed(
+                      2
+                    )}</span>
+                  </div>
+                `
+                    : ''
+                }
+                ${
+                  shipping !== undefined
+                    ? `
+                  <div style="margin-bottom: 8px;">
+                    <span style="font-size: 16px; color: #666;">Shipping: $${
+                      shipping === 0 ? '0.00 (Free)' : shipping.toFixed(2)
+                    }</span>
+                  </div>
+                `
+                    : ''
+                }
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                  <span style="font-size: 18px; color: #222; font-weight: 600;">Total: $${total.toFixed(
+                    2
+                  )}</span>
+                </div>
               </div>
               
               <div style="background: #f6f8fb; padding: 18px 24px; border-radius: 8px; color: #444; font-size: 15px;">

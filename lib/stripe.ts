@@ -5,6 +5,10 @@ import Order from '@/models/Order';
 import { updateOrderFromStripeSession } from './order-service';
 import { calculatePromotionalPricing } from '@/lib/utils/discount';
 import { getCategoryPromotionalPricing } from '@/lib/services/promotional-pricing';
+import {
+  calculateShipping,
+  calculateTotalWithShipping,
+} from '@/lib/shipping-utils';
 
 // Initialize Stripe with the secret key
 const getStripeSecretKey = () => {
@@ -80,6 +84,43 @@ export async function createCheckoutSession(
   }
 
   try {
+    // Calculate subtotal first to determine shipping
+    let subtotal = 0;
+
+    // Calculate subtotal using the same logic as cart context
+    for (const item of items) {
+      // Get effective price (discounted or original)
+      let effectivePrice = item.product.price;
+      if (item.product.discountedPrice && item.product.discountedPrice > 0) {
+        effectivePrice = item.product.discountedPrice;
+      }
+
+      // Check if this product qualifies for promotional pricing
+      if (
+        (item.product.category === 'signature' ||
+          item.product.category === 'essentials') &&
+        item.quantity >= 2
+      ) {
+        const promo = calculatePromotionalPricing(
+          effectivePrice,
+          item.product.category as 'essentials' | 'signature'
+        );
+
+        // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
+        const promotionalPairs = Math.min(1, Math.floor(item.quantity / 2));
+        const remainingItems = item.quantity - promotionalPairs * 2;
+
+        const promotionalPrice = promotionalPairs * promo.twoForPrice;
+        const regularPrice = remainingItems * effectivePrice;
+        subtotal += promotionalPrice + regularPrice;
+      } else {
+        subtotal += effectivePrice * item.quantity;
+      }
+    }
+
+    // Calculate shipping
+    const shipping = calculateShipping(subtotal);
+
     // Format line items for Stripe with promotional pricing logic
     const lineItems = [];
 
@@ -254,11 +295,17 @@ export async function createCheckoutSession(
       }
     }
 
+    // Don't add shipping as a line item - let Stripe handle it via shipping_options
+    // This prevents duplicate shipping charges from appearing
+
     // Also store product IDs and details in the session metadata for redundancy
     const sessionMetadata = {
       orderId: `order_${Date.now()}`,
       itemCount: items.length.toString(),
       productIds: items.map((item) => item.product._id?.toString()).join(','),
+      subtotal: subtotal.toString(),
+      shipping: shipping.toString(),
+      total: calculateTotalWithShipping(subtotal).toString(),
     };
 
     console.log(
@@ -286,28 +333,52 @@ export async function createCheckoutSession(
       phone_number_collection: {
         enabled: true,
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 0,
-              currency: 'aud',
-            },
-            display_name: 'Free shipping',
-            delivery_estimate: {
-              minimum: {
-                unit: 'business_day',
-                value: 5,
+      shipping_options:
+        shipping > 0
+          ? [
+              {
+                shipping_rate_data: {
+                  type: 'fixed_amount',
+                  fixed_amount: {
+                    amount: Math.round(shipping * 100),
+                    currency: 'aud',
+                  },
+                  display_name: 'Standard shipping',
+                  delivery_estimate: {
+                    minimum: {
+                      unit: 'business_day',
+                      value: 5,
+                    },
+                    maximum: {
+                      unit: 'business_day',
+                      value: 7,
+                    },
+                  },
+                },
               },
-              maximum: {
-                unit: 'business_day',
-                value: 7,
+            ]
+          : [
+              {
+                shipping_rate_data: {
+                  type: 'fixed_amount',
+                  fixed_amount: {
+                    amount: 0,
+                    currency: 'aud',
+                  },
+                  display_name: 'Free shipping',
+                  delivery_estimate: {
+                    minimum: {
+                      unit: 'business_day',
+                      value: 5,
+                    },
+                    maximum: {
+                      unit: 'business_day',
+                      value: 7,
+                    },
+                  },
+                },
               },
-            },
-          },
-        },
-      ],
+            ],
     });
 
     console.log(`Stripe checkout session created: ${session.id}`);
