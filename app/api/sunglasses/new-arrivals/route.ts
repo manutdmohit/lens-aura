@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .select('name slug productType price discountedPrice thumbnail gender')
+      .select(
+        'name slug productType price discountedPrice thumbnail gender category priceForTwo'
+      )
       .limit(limit);
 
     return NextResponse.json({ products });

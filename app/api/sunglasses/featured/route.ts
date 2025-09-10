@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     })
       .sort({ createdAt: -1 })
       .select(
-        'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized'
+        'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized priceForTwo'
       )
       .limit(limit);
 
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       })
         .sort({ createdAt: -1 })
         .select(
-          'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized'
+          'name slug thumbnail productType price discountedPrice gender category isFeatured inStock stockQuantity frameColorVariants uvProtection polarized priceForTwo'
         )
         .limit(limit);
     }
