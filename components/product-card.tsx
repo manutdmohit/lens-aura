@@ -108,27 +108,21 @@ export default function ProductCard({
 
     if (isInStock && totalStock > 5) {
       return (
-        <div className="absolute top-3 left-3 z-10">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 shadow-sm">
-            In Stock
-          </span>
-        </div>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 border border-green-200">
+          In Stock
+        </span>
       );
     } else if (isInStock && totalStock > 0 && totalStock <= 5) {
       return (
-        <div className="absolute top-3 left-3 z-10">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
-            Limited Stock
-          </span>
-        </div>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+          Limited Stock
+        </span>
       );
     } else {
       return (
-        <div className="absolute top-3 left-3 z-10">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200 shadow-sm">
-            Out of Stock
-          </span>
-        </div>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-800 border border-red-200">
+          Out of Stock
+        </span>
       );
     }
   };
@@ -138,17 +132,15 @@ export default function ProductCard({
 
     const isSignature = product.category === 'signature';
     return (
-      <div className="absolute top-3 right-3 z-10">
-        <span
-          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${
-            isSignature
-              ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white'
-              : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
-          }`}
-        >
-          {isSignature ? 'Signature' : 'Essentials'}
-        </span>
-      </div>
+      <span
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+          isSignature
+            ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white'
+            : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
+        }`}
+      >
+        {isSignature ? 'Signature' : 'Essentials'}
+      </span>
     );
   };
 
@@ -264,6 +256,7 @@ export default function ProductCard({
   return (
     <Link href={getProductUrl()}>
       <Card className="group overflow-hidden rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border-0 bg-white">
+        {/* Product Image - Clean without badges */}
         <div
           className={`${getCardHeight()} relative overflow-hidden bg-gradient-to-br from-gray-50 to-white`}
         >
@@ -296,27 +289,25 @@ export default function ProductCard({
             </motion.div>
           </motion.div>
 
-          {/* Stock Status Badge */}
-          {renderStockStatus(product)}
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
+        </div>
 
-          {/* Category Badge */}
-          {renderCategoryBadge(product)}
-
-          {/* Gender Badge */}
-          {showGenderBadge && product.gender && variant !== 'compact' && (
-            <div className="absolute bottom-3 right-3 z-10">
-              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 border border-gray-200">
+        {/* Product Badges Section */}
+        <div className="px-4 py-2 bg-gray-50/50 border-t border-gray-100">
+          <div className="flex flex-wrap gap-1.5 justify-center">
+            {renderStockStatus(product)}
+            {renderCategoryBadge(product)}
+            {showGenderBadge && product.gender && variant !== 'compact' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200">
                 {product.gender === 'men'
                   ? 'Men'
                   : product.gender === 'women'
                   ? 'Women'
                   : 'Unisex'}
               </span>
-            </div>
-          )}
-
-          {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
+            )}
+          </div>
         </div>
 
         <CardContent className={getCardPadding()}>
@@ -326,8 +317,8 @@ export default function ProductCard({
 
             {/* Product Name */}
             <h3
-              className={`font-semibold text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-2 ${
-                variant === 'compact' ? 'text-sm' : 'text-lg'
+              className={`font-bold text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-2 ${
+                variant === 'compact' ? 'text-base' : 'text-xl'
               }`}
             >
               {product.name}
