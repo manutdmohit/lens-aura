@@ -58,6 +58,7 @@
     "cmdk": "1.0.4",
     "color-hash": "^2.0.2",
     "date-fns": "3.6.0",
+    "dotenv": "^17.2.2",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
     "input-otp": "1.4.1",

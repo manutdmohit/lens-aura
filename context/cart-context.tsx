@@ -116,7 +116,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Use current discounted price for "buy two" calculations
       const promo = calculatePromotionalPricing(
         effectivePrice,
-        item.product.category as 'essentials' | 'signature'
+        item.product.category as 'essentials' | 'signature',
+        item.product.priceForTwo
       );
 
       // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
@@ -163,7 +164,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Use current discounted price for "buy two" calculations
       const promo = calculatePromotionalPricing(
         effectivePrice,
-        item.product.category as 'essentials' | 'signature'
+        item.product.category as 'essentials' | 'signature',
+        item.product.priceForTwo
       );
 
       // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price

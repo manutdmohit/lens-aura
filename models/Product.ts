@@ -23,6 +23,7 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   discountedPrice?: number;
+  priceForTwo?: number;
   isFeatured?: boolean;
   thumbnail: string;
 
@@ -132,6 +133,7 @@ const ProductSchema = new Schema<IProduct>(
     description: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     discountedPrice: { type: Number, min: 0.01, default: undefined },
+    priceForTwo: { type: Number, min: 0.01, default: undefined },
     isFeatured: { type: Boolean, default: false },
     thumbnail: { type: String, required: true },
 

@@ -174,8 +174,13 @@ export default function ProductCardWithPromotions({
         </div>
 
         {/* Price for Two */}
-        {pricing.isPromotional && categoryPricing ? (
-          // Promotional "Buy 2" pricing
+        {product.priceForTwo && product.priceForTwo > 0 ? (
+          // Use the actual priceForTwo from the database
+          <div className="text-sm text-blue-600 font-medium mb-3">
+            Buy 2: {formatPrice(product.priceForTwo)}
+          </div>
+        ) : pricing.isPromotional && categoryPricing ? (
+          // Promotional "Buy 2" pricing fallback
           <div className="text-sm text-blue-600 font-medium mb-3">
             Buy 2: {formatPrice(categoryPricing.priceForTwo)}
           </div>

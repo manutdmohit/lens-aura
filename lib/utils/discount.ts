@@ -102,15 +102,31 @@ export function getDisplayPrice(
 
 /**
  * Calculate promotional pricing for "buy two" offers
+ * Now uses dynamic priceForTwo values from the database
  */
 export function calculatePromotionalPricing(
   originalPrice: number,
-  productType: 'essentials' | 'signature'
+  productType: 'essentials' | 'signature',
+  priceForTwo?: number
 ): {
   twoForPrice: number;
   savings: number;
   savingsPercentage: number;
 } {
+  // Use the actual priceForTwo from the database if provided
+  if (priceForTwo && priceForTwo > 0) {
+    const regularTwoPrice = originalPrice * 2;
+    const savings = regularTwoPrice - priceForTwo;
+    const savingsPercentage = Math.round((savings / regularTwoPrice) * 100);
+
+    return {
+      twoForPrice: priceForTwo,
+      savings,
+      savingsPercentage,
+    };
+  }
+
+  // Fallback to hardcoded values if priceForTwo is not provided
   let twoForPrice: number;
   let basePrice: number;
 

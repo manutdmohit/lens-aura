@@ -103,7 +103,8 @@ export async function createCheckoutSession(
       ) {
         const promo = calculatePromotionalPricing(
           effectivePrice,
-          item.product.category as 'essentials' | 'signature'
+          item.product.category as 'essentials' | 'signature',
+          item.product.priceForTwo
         );
 
         // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
@@ -164,7 +165,8 @@ export async function createCheckoutSession(
 
         const promo = calculatePromotionalPricing(
           promoPrice,
-          item.product.category as 'essentials' | 'signature'
+          item.product.category as 'essentials' | 'signature',
+          item.product.priceForTwo
         );
 
         // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price

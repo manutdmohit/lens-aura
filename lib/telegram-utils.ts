@@ -79,10 +79,17 @@ export class TelegramService {
       const itemsList = order.items
         .map((item: any, index: number) => {
           const itemTotal = item.price * item.quantity;
+
+          // Check if this is a promotional item
+          const isPromotional = item.name && item.name.includes('Buy 2 for');
+          const displayPrice = isPromotional
+            ? `$${(item.price * 2).toFixed(2)} for 2`
+            : `$${item.price.toFixed(2)} each`;
+
           return `${index + 1}. <b>${item.name}</b>
    🎨 Color: ${item.color || 'N/A'}
    📦 Qty: ${item.quantity}
-   💰 Price: $${item.price.toFixed(2)} each
+   💰 Price: ${displayPrice}
    💵 Total: $${itemTotal.toFixed(2)}`;
         })
         .join('\n\n');
@@ -104,7 +111,15 @@ export class TelegramService {
       // Calculate savings if promotional pricing is applied
       const totalSavings =
         order.items?.reduce((savings: number, item: any) => {
-          if (item.originalPrice && item.originalPrice > item.price) {
+          // Check if this is a promotional "buy two" item
+          if (item.name && item.name.includes('Buy 2 for')) {
+            // For promotional items, calculate savings based on original price vs promotional price
+            const originalPrice = item.originalPrice || 0;
+            const promotionalPrice = item.price * 2; // Price for 2 items
+            const regularPrice = originalPrice * 2; // Regular price for 2 items
+            return savings + (regularPrice - promotionalPrice);
+          } else if (item.originalPrice && item.originalPrice > item.price) {
+            // Regular discount savings
             return savings + (item.originalPrice - item.price) * item.quantity;
           }
           return savings;

@@ -13,14 +13,29 @@ export interface ProductPricing {
   essential: PromotionalPricing;
 }
 
+// Simple cache to avoid repeated API calls when no promotions exist
+let lastPromotionCheck = 0;
+let cachedResult: ProductPricing | null = null;
+const CACHE_DURATION = 60000; // 1 minute cache
+
 /**
  * Get promotional pricing for products based on active promotions
  */
 export async function getPromotionalPricing(): Promise<ProductPricing | null> {
   try {
+    const now = Date.now();
+
+    // Return cached result if it's recent and there are no promotions
+    if (cachedResult === null && now - lastPromotionCheck < CACHE_DURATION) {
+      console.log('🔍 Using cached result: no active promotions');
+      return null;
+    }
+
     console.log('🔍 Fetching promotional pricing...');
     const result = await getActivePromotions(1);
     console.log('🔍 getActivePromotions result:', result);
+
+    lastPromotionCheck = now;
 
     if (
       !result.success ||
@@ -31,6 +46,7 @@ export async function getPromotionalPricing(): Promise<ProductPricing | null> {
       console.log(
         '🔍 This should trigger fallback to product database pricing'
       );
+      cachedResult = null;
       return null;
     }
 
@@ -38,7 +54,7 @@ export async function getPromotionalPricing(): Promise<ProductPricing | null> {
     console.log('🔍 Active promotion found:', activePromotion);
     console.log('🔍 Promotion isActive value:', activePromotion.isActive);
 
-    return {
+    const pricing = {
       signature: {
         originalPrice: activePromotion.signatureOriginalPrice,
         promotionalPrice: activePromotion.signatureDiscountedPrice,
@@ -54,6 +70,9 @@ export async function getPromotionalPricing(): Promise<ProductPricing | null> {
         promotionName: activePromotion.offerName,
       },
     };
+
+    cachedResult = pricing;
+    return pricing;
   } catch (error) {
     console.error('Failed to get promotional pricing:', error);
     return null;

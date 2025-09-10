@@ -188,6 +188,7 @@ export async function POST(req: NextRequest) {
             productType: item.productType,
             category: item.category || item.product?.category || 'N/A',
             originalPrice: item.originalPrice, // Keep original price as is from database (in dollars)
+            priceForTwo: item.priceForTwo, // Include priceForTwo from database
           })),
           subtotal: order.subtotal, // Keep subtotal as is from database (in dollars)
           shipping: order.shipping, // Keep shipping as is from database (in dollars)

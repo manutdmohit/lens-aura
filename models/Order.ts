@@ -10,6 +10,7 @@ export interface IOrderItem {
   productType?: string;
   category?: string;
   originalPrice?: number;
+  priceForTwo?: number;
   isPromotional?: boolean;
 }
 
@@ -76,6 +77,7 @@ const OrderSchema = new Schema(
         productType: { type: String },
         category: { type: String },
         originalPrice: { type: Number },
+        priceForTwo: { type: Number },
         isPromotional: { type: Boolean },
         product: { type: Schema.Types.ObjectId, ref: 'Product' },
       },

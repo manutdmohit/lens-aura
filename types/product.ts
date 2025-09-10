@@ -19,6 +19,7 @@ export interface Product {
   description: string;
   price: number;
   discountedPrice?: number;
+  priceForTwo?: number;
   imageUrl: string;
   stockQuantity: number;
   inStock: boolean;

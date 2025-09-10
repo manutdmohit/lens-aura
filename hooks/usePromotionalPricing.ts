@@ -41,10 +41,13 @@ export function usePromotionalPricing() {
       }
     }
 
-    fetchPromotionalPricing();
+    // Only fetch if we haven't fetched yet or if manually refreshed
+    if (refreshKey === 0) {
+      fetchPromotionalPricing();
+    }
 
-    // Set up interval to refresh promotional pricing every 30 seconds
-    const interval = setInterval(fetchPromotionalPricing, 30000);
+    // Set up interval to refresh promotional pricing every 5 minutes (instead of 30 seconds)
+    const interval = setInterval(fetchPromotionalPricing, 300000);
 
     // Register with global refresh system
     const unregister = registerRefreshCallback(fetchPromotionalPricing);
@@ -119,10 +122,13 @@ export function useCategoryPromotionalPricing(
     ? promotionalPricing[category]
     : null;
 
+  // If no promotions are active, return immediately without loading
+  const hasPromotions = categoryPricing !== null;
+
   return {
     categoryPricing,
-    loading,
+    loading: hasPromotions ? loading : false, // Don't show loading if no promotions
     error,
-    hasPromotions: categoryPricing !== null,
+    hasPromotions,
   };
 }

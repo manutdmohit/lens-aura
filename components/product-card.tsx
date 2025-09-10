@@ -468,7 +468,17 @@ export default function ProductCard({
                         <div className="text-center">
                           <span className="text-amber-900 font-bold text-sm">
                             {(() => {
-                              // Use promotional price from database if available, otherwise use regular price
+                              // Use the actual priceForTwo from the database if available
+                              if (
+                                product.priceForTwo &&
+                                product.priceForTwo > 0
+                              ) {
+                                return `Two for ${formatPrice(
+                                  product.priceForTwo
+                                )}`;
+                              }
+
+                              // Fallback to promotional pricing calculation
                               const basePriceForTwo =
                                 hasPromotions && categoryPricing
                                   ? categoryPricing.promotionalPrice
@@ -477,7 +487,12 @@ export default function ProductCard({
                               const promotionalTwoForPricing =
                                 calculatePromotionalPricing(
                                   basePriceForTwo,
-                                  product.category as 'essentials' | 'signature'
+                                  product.category as
+                                    | 'essentials'
+                                    | 'signature',
+                                  typeof product.priceForTwo === 'number'
+                                    ? product.priceForTwo
+                                    : undefined
                                 );
                               return `Two for ${formatPrice(
                                 promotionalTwoForPricing.twoForPrice
@@ -488,6 +503,26 @@ export default function ProductCard({
                             <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold rounded-full shadow-sm">
                               Save{' '}
                               {(() => {
+                                // Use the actual priceForTwo from the database if available
+                                if (
+                                  product.priceForTwo &&
+                                  product.priceForTwo > 0
+                                ) {
+                                  const basePrice =
+                                    hasPromotions && categoryPricing
+                                      ? categoryPricing.promotionalPrice
+                                      : product.price;
+                                  const savings =
+                                    basePrice * 2 - product.priceForTwo;
+                                  const savingsPercentage = Math.round(
+                                    (savings / (basePrice * 2)) * 100
+                                  );
+                                  return formatSavingsPercentage(
+                                    savingsPercentage
+                                  );
+                                }
+
+                                // Fallback to promotional pricing calculation
                                 const basePriceForTwo =
                                   hasPromotions && categoryPricing
                                     ? categoryPricing.promotionalPrice
@@ -498,7 +533,10 @@ export default function ProductCard({
                                     basePriceForTwo,
                                     product.category as
                                       | 'essentials'
-                                      | 'signature'
+                                      | 'signature',
+                                    typeof product.priceForTwo === 'number'
+                                      ? product.priceForTwo
+                                      : undefined
                                   );
                                 return formatSavingsPercentage(
                                   promotionalTwoForPricing.savingsPercentage

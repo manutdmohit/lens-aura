@@ -209,6 +209,16 @@ export const productSchema = z
         z.undefined(),
       ])
       .optional(),
+    priceForTwo: z
+      .union([
+        z.coerce
+          .number({ invalid_type_error: 'Price for two must be a number' })
+          .positive({ message: 'Price for two must be positive' })
+          .min(0.01, { message: 'Price for two must be greater than 0' }),
+        z.literal(''),
+        z.undefined(),
+      ])
+      .optional(),
     isFeatured: z.boolean().optional(),
     thumbnail: z.string().min(1, { message: 'Please provide an image URL' }),
 
@@ -624,6 +634,25 @@ export const productSchema = z
       message:
         'Discounted price must be less than or equal to the regular price',
       path: ['discountedPrice'],
+    }
+  )
+
+  .refine(
+    (data) => {
+      // If priceForTwo is provided and is a valid number, it must be less than or equal to the regular price
+      if (
+        data.priceForTwo !== undefined &&
+        data.priceForTwo !== null &&
+        data.priceForTwo !== '' &&
+        typeof data.priceForTwo === 'number'
+      ) {
+        return data.priceForTwo <= data.price;
+      }
+      return true;
+    },
+    {
+      message: 'Price for two must be less than or equal to the regular price',
+      path: ['priceForTwo'],
     }
   );
 

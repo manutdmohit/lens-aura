@@ -104,7 +104,8 @@ export async function createPendingOrder(
         ) {
           const promo = calculatePromotionalPricing(
             effectivePrice,
-            item.product.category as 'essentials' | 'signature'
+            item.product.category as 'essentials' | 'signature',
+            item.product.priceForTwo
           );
 
           const promotionalPairs = Math.min(1, Math.floor(item.quantity / 2));
@@ -119,6 +120,7 @@ export async function createPendingOrder(
               name: `${item.product.name} (Buy 2 for $${promo.twoForPrice})`,
               price: promo.twoForPrice / 2, // Price per item in the pair
               originalPrice: item.product.price, // Use the original product price
+              priceForTwo: item.product.priceForTwo, // Store the priceForTwo from database
               quantity: 2,
               color: colorName,
               imageUrl: item.product.thumbnail,
@@ -135,6 +137,7 @@ export async function createPendingOrder(
               name: item.product.name,
               price: effectivePrice,
               originalPrice: item.product.price,
+              priceForTwo: item.product.priceForTwo, // Store the priceForTwo from database
               quantity: remainingItems,
               color: colorName,
               imageUrl: item.product.thumbnail,
@@ -157,6 +160,8 @@ export async function createPendingOrder(
               color: colorName,
               imageUrl: item.product.thumbnail,
               productType: item.product.productType,
+              category: item.product.category,
+              priceForTwo: item.product.priceForTwo,
               product: item.product._id,
               isPromotional: false,
             },
@@ -189,7 +194,8 @@ export async function createPendingOrder(
 
         const promo = calculatePromotionalPricing(
           promoPrice,
-          item.product.category as 'essentials' | 'signature'
+          item.product.category as 'essentials' | 'signature',
+          item.product.priceForTwo
         );
 
         // Calculate pricing: 1 pair gets promotional pricing, rest pay current discounted price
