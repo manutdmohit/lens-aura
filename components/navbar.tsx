@@ -317,9 +317,9 @@ export default function Navbar() {
     const isExpanded = expandedMobileMenus.includes(menuData.id);
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Main menu item */}
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-3">
           <Link
             href={menuData.mainLink}
             className="flex-grow flex items-center space-x-3"
@@ -331,9 +331,9 @@ export default function Navbar() {
               }
             }}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg flex items-center justify-center">
               <svg
-                className="w-5 h-5 text-amber-600"
+                className="w-4 h-4 text-amber-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -353,10 +353,10 @@ export default function Navbar() {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 text-base">
+              <h3 className="font-semibold text-gray-900 text-sm">
                 {menuData.title}
               </h3>
-              <p className="text-sm text-gray-500">Explore our collection</p>
+              <p className="text-xs text-gray-500">Explore our collection</p>
             </div>
           </Link>
           <button
@@ -398,14 +398,14 @@ export default function Navbar() {
               }}
               className="bg-gray-50 border-t border-gray-100 overflow-hidden"
             >
-              <div className="p-4 space-y-4">
+              <div className="p-3 space-y-3">
                 {/* Featured Categories */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                    <div className="w-2 h-2 bg-amber-400 rounded-full mr-2"></div>
+                  <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                    <div className="w-1.5 h-1.5 bg-amber-400 rounded-full mr-2"></div>
                     Featured Categories
                   </h4>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-1 gap-1.5">
                     {menuData.featuredLinks.map((link, index) => (
                       <motion.div
                         key={index}
@@ -418,13 +418,13 @@ export default function Navbar() {
                       >
                         <Link
                           href={link.href}
-                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 group"
+                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 group"
                           onClick={toggleMobileMenu}
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-amber-200 to-orange-200 rounded-lg flex items-center justify-center group-hover:from-amber-300 group-hover:to-orange-300 transition-all">
-                            <ChevronRight className="h-4 w-4 text-amber-700" />
+                          <div className="w-6 h-6 bg-gradient-to-br from-amber-200 to-orange-200 rounded-md flex items-center justify-center group-hover:from-amber-300 group-hover:to-orange-300 transition-all">
+                            <ChevronRight className="h-3 w-3 text-amber-700" />
                           </div>
-                          <span className="font-medium text-gray-700 group-hover:text-gray-900">
+                          <span className="font-medium text-sm text-gray-700 group-hover:text-gray-900">
                             {link.title}
                           </span>
                         </Link>
@@ -435,8 +435,8 @@ export default function Navbar() {
 
                 {/* Additional Links */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+                  <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                    <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></div>
                     More Options
                   </h4>
                   <div className="space-y-1">
@@ -452,13 +452,13 @@ export default function Navbar() {
                       >
                         <Link
                           href={link.href}
-                          className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 group"
+                          className="flex items-center space-x-2 p-1.5 rounded-md hover:bg-white hover:shadow-sm transition-all duration-200 group"
                           onClick={toggleMobileMenu}
                         >
-                          <div className="w-6 h-6 bg-gray-200 rounded-md flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                            <ChevronRight className="h-3 w-3 text-gray-600" />
+                          <div className="w-5 h-5 bg-gray-200 rounded-sm flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                            <ChevronRight className="h-2.5 w-2.5 text-gray-600" />
                           </div>
-                          <span className="text-sm text-gray-600 group-hover:text-gray-800">
+                          <span className="text-xs text-gray-600 group-hover:text-gray-800">
                             {link.title}
                           </span>
                         </Link>
@@ -689,7 +689,7 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             <motion.div
-              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 md:hidden"
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 md:hidden flex flex-col"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -700,7 +700,7 @@ export default function Navbar() {
               }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 flex-shrink-0">
                 <div className="flex items-center space-x-3">
                   <Image
                     src="/images/lens-aura-updated- logo.jpg"
@@ -723,7 +723,7 @@ export default function Navbar() {
               </div>
 
               {/* Navigation */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 <nav className="p-6 space-y-2">
                   {allMenuData.map((menuData, index) => (
                     <motion.div
@@ -742,16 +742,16 @@ export default function Navbar() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: allMenuData.length * 0.1 }}
-                    className="mt-8 pt-6 border-t border-gray-100"
+                    className="mt-6 pt-4 border-t border-gray-100"
                   >
                     <Link
                       href="/contact"
-                      className="flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="flex items-center space-x-2 p-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                       onClick={toggleMobileMenu}
                     >
-                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
                         <svg
-                          className="w-5 h-5"
+                          className="w-4 h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -764,14 +764,14 @@ export default function Navbar() {
                           />
                         </svg>
                       </div>
-                      <span>Contact Us</span>
+                      <span className="text-sm">Contact Us</span>
                     </Link>
                   </motion.div>
                 </nav>
               </div>
 
               {/* Footer */}
-              <div className="p-6 border-t border-gray-100 bg-gray-50">
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex-shrink-0">
                 <div className="text-center">
                   <p className="text-sm text-gray-500">
                     Free shipping on orders over $60
