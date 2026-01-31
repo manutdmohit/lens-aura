@@ -157,7 +157,7 @@ function NewArrivalsSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    New Arrivals ({pagination.total} Products)
+                    New Arrivals Collection
                   </h2>
                 </div>
 
