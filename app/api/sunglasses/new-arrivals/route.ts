@@ -6,13 +6,13 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    const query = { productType: 'sunglasses' };
+    const query = { productType: 'sunglasses', status: 'active' };
     const limit = 8;
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
       .select(
-        'name slug productType price discountedPrice thumbnail gender category priceForTwo'
+        'name slug thumbnail inStock stockQuantity productType price discountedPrice colors gender category frameColorVariants status uvProtection polarized priceForTwo',
       )
       .limit(limit);
 
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     console.error('Error fetching new arrivals:', error);
     return NextResponse.json(
       { error: 'Failed to fetch new arrivals' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
