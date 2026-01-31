@@ -90,59 +90,46 @@ function NewArrivalsSunglassesContent() {
 
   return (
     <main className="flex flex-col min-h-screen">
-      <div className="flex-grow">
+      <div className="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 py-20 px-4">
-          <div className="max-w-7xl mx-auto">
-            <AnimatedSection direction="up">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h1
-                  className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
-                >
-                  Men's Essentials Sunglasses
-                </h1>
+        <div className="text-center mb-16">
+          <AnimatedSection direction="up">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full">
+                <Shield className="w-8 h-8 text-white" />
               </div>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
-                Quality everyday sunglasses designed for the active man.
-                Durable, comfortable, and affordable without compromising on
-                style.
-              </p>
-              <div className="flex flex-wrap justify-center gap-2 mb-8">
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-800 border-blue-200"
-                >
-                  Durable Frames
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-800 border-blue-200"
-                >
-                  UV Protection
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-800 border-blue-200"
-                >
-                  Men's Collection
-                </Badge>
-              </div>
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => router.push('/sunglasses/essentials')}
-                  variant="outline"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                >
-                  <ArrowLeft className="mr-2 w-4 h-4" />
-                  Back to Essentials Collection
-                </Button>
-              </div>
-            </AnimatedSection>
-          </div>
-        </section>
+              <h1
+                className={`${playfair.className} text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600`}
+              >
+                New Arrivals - Sunglasses
+              </h1>
+            </div>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
+              Discover our latest collection of sunglasses, featuring the latest
+              styles and trends.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-8">
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 border-blue-200"
+              >
+                Durable Frames
+              </Badge>
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 border-blue-200"
+              >
+                UV Protection
+              </Badge>
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 border-blue-200"
+              >
+                Men's, Women's & Unisex Styles
+              </Badge>
+            </div>
+          </AnimatedSection>
+        </div>
 
         {/* Products Section */}
         <section className="py-16 px-4">
@@ -152,14 +139,14 @@ function NewArrivalsSunglassesContent() {
             {!loading && !hasProducts && (
               <div className="text-center py-16">
                 <p className="text-lg text-gray-600 mb-6">
-                  No men's essentials sunglasses found. Check back soon for our
-                  latest collection!
+                  No sunglasses found. Check back soon for our latest
+                  collection!
                 </p>
                 <Button
-                  onClick={() => router.push('/sunglasses/essentials')}
+                  onClick={() => router.push('/sunglasses')}
                   className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                 >
-                  Browse Essentials Collection
+                  Browse All Sunglasses
                 </Button>
               </div>
             )}
@@ -170,7 +157,7 @@ function NewArrivalsSunglassesContent() {
                   <h2
                     className={`${playfair.className} text-3xl font-bold mb-4 text-center`}
                   >
-                    Men's Essentials Collection ({pagination.total} Products)
+                    New Arrivals ({pagination.total} Products)
                   </h2>
                 </div>
 
@@ -187,8 +174,8 @@ function NewArrivalsSunglassesContent() {
                 )}
 
                 <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} men's
-                  essentials sunglasses
+                  Showing {products.length} of {pagination.total} new arrivals
+                  sunglasses
                 </div>
               </AnimatedSection>
             )}
@@ -199,7 +186,7 @@ function NewArrivalsSunglassesContent() {
   );
 }
 
-export default function MensEssentialsSunglassesPage() {
+export default function NewArrivalsSunglassesPage() {
   return (
     <Suspense fallback={<LoadingPage loading={true} />}>
       <NewArrivalsSunglassesContent />
