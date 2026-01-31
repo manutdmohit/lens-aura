@@ -172,11 +172,6 @@ function NewArrivalsSunglassesContent() {
                     />
                   </div>
                 )}
-
-                <div className="text-center text-sm text-gray-500 mt-4">
-                  Showing {products.length} of {pagination.total} new arrivals
-                  sunglasses
-                </div>
               </AnimatedSection>
             )}
           </div>
