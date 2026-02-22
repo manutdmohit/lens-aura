@@ -400,6 +400,17 @@ export default function Footer() {
             </AnimatedSection>
           </div>
         </div>
+
+        {/* Additional Footer Text */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Designed for the Australian sun.
+            <br />
+            Australian registered brand.
+            <br />
+            Made in China.
+          </p>
+        </div>
       </div>
     </footer>
   );
