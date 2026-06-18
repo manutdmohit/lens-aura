@@ -44,7 +44,14 @@ export default function RootLayout({
         <SessionProvider>
           <CartProvider>
             {!isAdminRoute && <Navbar />}
-            <main className="min-h-screen pt-20 md:pt-20">{children}</main>
+            <main
+              className={cn(
+                'min-h-screen',
+                !isAdminRoute && 'pt-20 md:pt-20'
+              )}
+            >
+              {children}
+            </main>
             {!isAdminRoute && <Footer />}
             {!isAdminRoute && <WhatsAppButton phoneNumber="+61 451 533 354" />}
             <Toaster />

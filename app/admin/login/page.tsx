@@ -99,9 +99,9 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-y-auto">
       {/* Enhanced Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Animated gradient orbs */}
         <motion.div
           animate={{
@@ -153,13 +153,14 @@ export default function AdminLogin() {
       </div>
 
       {/* Main Login Container */}
+      <div className="relative z-10 flex min-h-full items-center justify-center p-4 py-6">
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md"
       >
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 relative overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 border border-white/20 relative overflow-hidden">
           {/* Subtle inner glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl"></div>
 
@@ -168,16 +169,16 @@ export default function AdminLogin() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-center mb-8 relative z-10"
+            className="text-center mb-6 sm:mb-8 relative z-10"
           >
             <Link href="/" className="inline-block group">
               <div className="relative">
                 <Image
                   src="/images/lens-aura-logo.jpg"
                   alt="Lens Aura Logo"
-                  width={100}
-                  height={100}
-                  className="mx-auto mb-4 transition-transform duration-300 group-hover:scale-110 object-contain"
+                  width={80}
+                  height={80}
+                  className="mx-auto mb-3 transition-transform duration-300 group-hover:scale-110 object-contain"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl"></div>
@@ -207,7 +208,7 @@ export default function AdminLogin() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
             onSubmit={handleSubmit}
-            className="space-y-6 relative z-10"
+            className="space-y-5 relative z-10"
           >
             {error && (
               <motion.div
@@ -225,7 +226,7 @@ export default function AdminLogin() {
             <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold text-purple-200 mb-2 flex items-center"
+                className="flex items-center text-sm font-semibold text-purple-200 mb-2"
               >
                 <User className="w-4 h-4 mr-2" />
                 Email Address
@@ -236,7 +237,7 @@ export default function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 group-hover:border-purple-400/30"
+                  className="w-full px-4 py-3 sm:py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 group-hover:border-purple-400/30"
                   placeholder="admin@lensaura.com"
                   required
                   disabled={isLoading}
@@ -248,7 +249,7 @@ export default function AdminLogin() {
             <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-purple-200 mb-2 flex items-center"
+                className="flex items-center text-sm font-semibold text-purple-200 mb-2"
               >
                 <Lock className="w-4 h-4 mr-2" />
                 Password
@@ -259,7 +260,7 @@ export default function AdminLogin() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 group-hover:border-purple-400/30 pr-12"
+                  className="w-full px-4 py-3 sm:py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 group-hover:border-purple-400/30 pr-12"
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
@@ -298,7 +299,7 @@ export default function AdminLogin() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-purple-500 hover:via-purple-400 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 text-white py-3 sm:py-4 px-6 rounded-xl font-semibold hover:from-purple-500 hover:via-purple-400 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
             >
               {/* Button background animation */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -322,7 +323,7 @@ export default function AdminLogin() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="mt-8 text-center relative z-10"
+            className="mt-6 text-center relative z-10"
           >
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
               <div className="flex items-center justify-center mb-2">
@@ -338,6 +339,7 @@ export default function AdminLogin() {
           </motion.div>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }
