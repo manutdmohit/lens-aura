@@ -112,7 +112,7 @@ function SignatureSunglassesContent() {
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 text-center leading-relaxed">
-                Luxury designer frames crafted with signature materials,
+                Luxury frames crafted with signature materials,
                 featuring polarized lenses and exceptional UV protection.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">

@@ -125,7 +125,7 @@ export default function Home() {
                           </h3>
                         </div>
                         <p className="text-white/80 mb-4 text-sm leading-relaxed">
-                          Luxury designer frames with signature{' '}
+                          Luxury frames with signature{' '}
                           <span className="font-semibold text-green-300">
                             polarized lenses
                           </span>

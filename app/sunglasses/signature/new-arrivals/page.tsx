@@ -175,7 +175,7 @@ function SignatureNewArrivalsContent() {
                     Latest Signature Arrivals ({pagination.total} Products)
                   </h2>
                   <p className="text-center text-gray-600 mb-6">
-                    Fresh from our designers - the newest additions to our
+                    Fresh arrivals - the newest additions to our
                     signature collection
                   </p>
                 </div>

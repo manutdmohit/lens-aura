@@ -98,7 +98,7 @@ function SunglassesContent() {
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
                 Discover our signature and essentials sunglasses collections.
-                From luxury designer frames to everyday essentials, we have the
+                From luxury frames to everyday essentials, we have the
                 perfect pair for every style and budget.
               </p>
             </AnimatedSection>
@@ -164,7 +164,7 @@ function SunglassesContent() {
                 </h2>
               </div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-                Luxury designer frames with signature polarized lenses, superior
+                Luxury frames with signature polarized lenses, superior
                 UV protection, and exceptional craftsmanship.
               </p>
               <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -312,7 +312,7 @@ function SunglassesContent() {
                       Signature Collection
                     </CardTitle>
                     <CardDescription className="text-lg">
-                      Luxury designer frames for the discerning customer
+                      Luxury frames for the discerning customer
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -323,7 +323,7 @@ function SunglassesContent() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span>Designer materials (Titanium, Acetate)</span>
+                        <span>Premium materials (Titanium, Acetate)</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
